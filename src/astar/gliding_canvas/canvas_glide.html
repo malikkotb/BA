@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Glide Canvas</title>
+    <link rel="stylesheet" type="text/css" href="glide.css" />
+  </head>
+  <body>
+    <div id="gallery">
+      <canvas id="grid"></canvas>
+    </div>
+
+    <button id="popupBtn" class="float">
+      Config
+    </button>
+
+    <div id="popup" class="popup">
+      <div class="popup-content">
+        <span class="close" id="closeBtn">&times;</span>
+        <div id="config">
+          <!-- grid canvas and script -->
+          <p>x,y coordinates represent the top left corner of the drawn node.</p>
+          <textarea id="nodeInput" placeholder="Enter nodes as id,x,y,width,height; ...">
+    200,100,100,100; 300,100,100,100; 200,200,100,100; 300,200,100,100; 400,200,100,100;  500,200,100,100; 600,200,100,100; 600,400,100,100</textarea
+          >
+          <p>
+            Two coordinate pairs represent two connected nodes. Enter edges (x1, y1) (x2, y2); (x3, y3) (x4, y4); ..
+          </p>
+          <!-- Input Format: the user can specify connections using the coordinates of the nodes they want to connect. 
+        e.g. userInput = "(0, 0) (100, 0); (100, 0) (0, 100)"
+      -->
+          <!-- <textarea id="edgeInput" placeholder="Enter edges (x1, y1) (x2, y2); (x3, y3) (x4, y4); ...  ">(600, 400) (300,100)</textarea> -->
+          <textarea id="edgeInput" placeholder="Enter edges (x1, y1) (x2, y2); (x3, y3) (x4, y4); ...  ">
+    (600, 200) (200,100); (600, 200) (200,200)</textarea
+          >
+          <div style="display: flex; gap: 4px">
+            <button id="updateButton" style="padding: 5px">Update Graph</button>
+            <button id="cellButton" style="padding: 5px">Get Cell</button>
+            <button id="findPathBtn" style="padding: 5px">Find Path</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="scroll.js"></script>
+    <script type="module" src="../main.js"></script>
+  </body>
+</html>
