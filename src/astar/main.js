@@ -40,7 +40,7 @@ window.addEventListener("load", () => {
   document.getElementById("updateButton").addEventListener("click", updateGraph);
 
   // call path finding meethod
-  document.getElementById("findPathBtn").addEventListener("click", findPath);
+  document.getElementById("findPathBtn").addEventListener("click", findPathDual);
 
   ///// popup button config
   const popupBtn = document.getElementById("popupBtn");
@@ -96,14 +96,12 @@ window.addEventListener("load", () => {
       ctx.fillStyle = getRandomColor();
       ctx.fill();
 
-      //TODO: calculate centroids and draw them inside the triangle
       const centroid = calculateCentroid(t[0][0], t[0][1], t[1][0], t[1][1], t[2][0], t[2][1]);
       const radius = 5;
       ctx.beginPath();
       ctx.arc(centroid.x, centroid.y, radius, 0, Math.PI * 2); // Arc centered at (x, y) with radius
-      ctx.fillStyle = 'red'; // Fill color
+      ctx.fillStyle = "red"; // Fill color
       ctx.fill(); // Fill the circle
-
     });
 
     // convex hull of the points
@@ -124,11 +122,44 @@ window.addEventListener("load", () => {
     ctx.stroke();
   }
 
+  function findPathDual() {
+    // New plan:
+    // perform a* on the dual grid
+    // so on the control points and edges
+    //
+    // start with the simple connections between 2 nodes, where only a quadratic bezier curve is needed
+    // and where the path only goes through one control-point/centroid
+    //
+    // and then after that works use a series of either quadratic or bezier curves (for obstacles aka other nodes in the path of the edge)
+    // to find the path going through multiple control-points/centroid
+
+    // edgeConnections.map((edge))
+    let startNode = edgeConnections[0].startNode;
+    let targetNode = edgeConnections[0].targetNode;
+
+    console.log(startNode, targetNode);
+
+    // TODO: determine starting coordinates of the edge for the startingNode and determine end coordinates for the endNode
+    // need to set standards, like on corners or in the middle of one side of the node
+
+    
+
+
+    // TODO: get the delauney triangles that are between startNode and targetNode and get their respective centroids
+    // so you can model the edge (bezier curve) through that
+    
+    ctx2.beginPath();
+    ctx2.moveTo(startNode.x, startNode.y); // Move to the starting point
+    ctx2.lineTo(targetNode.x, targetNode.y); // Draw a line to the ending point
+    ctx2.strokeStyle = "red"; // Set the color of the edge
+    ctx2.lineWidth = 1; // Set the width of the edge
+    ctx2.stroke();
+
+  }
+
   function findPath() {
     a_star = new PathFinder(ctx, grid, cellDim);
     edgeConnections.map((edge) => {
-      // TODO: make applicable for nodes covering multiple cells, right now this is for 1 node corresponding to 1 cell
-
       // array of cells covered by starting and target node
       let startingCells = [];
       let targetingCells = [];
@@ -162,9 +193,6 @@ window.addEventListener("load", () => {
         return grid.getCell(obj.x / cellDim, obj.y / cellDim);
       });
 
-      // TODO: specify the starting Cell -> function
-      // TODO: start Coordinates of starting cell -> function
-
       // specify start and target cells of the start and target Nodes
       const { startCell, targetCell } = specifyCell(resultStartCells, resultTargetCells);
 
@@ -188,12 +216,17 @@ window.addEventListener("load", () => {
   }
 
   function specifyCell(startCells, targetCells) {
+    // TODO: specify the starting Cell (bzw. starting coordinates of starting cell) -> function
+
     // Calculate shortest distance in terms of h-cost (from all available start cells and all available target cells) and return
     // that combination of start and target cells
     // using a_star.getDistance() method.
     // This way, the user can specify which nodes should be connected,
     // by selecting the top-left-corner of a node and the rest will be handled
     // by the algorithm
+
+    // TODO: need to rethink the approch i've used so far, because taking the cell with shortest distance doesnt make the nicest bezier curve
+    // when rendering through the dual grid
 
     const distances = [];
 
@@ -275,13 +308,12 @@ window.addEventListener("load", () => {
   }
 
   function processNodeInputForTriangulation(nodeInput) {
-    
     return nodeInput.split(";").map((entry) => {
-      let [x, y,width,height] = entry.split(",").map(Number);
+      let [x, y, width, height] = entry.split(",").map(Number);
       if (isNaN(x) || isNaN(y)) {
         throw new Error("Invalid node input");
       }
-      return [x + (width/2), y + (height/2)]; // get center of the node (rectangle/square shape)
+      return [x + width / 2, y + height / 2]; // get center of the node (rectangle/square shape)
     });
   }
 
