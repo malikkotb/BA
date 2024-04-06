@@ -123,159 +123,67 @@ window.addEventListener("load", () => {
   }
 
   function findPathDual() {
-    // New plan:
-    // perform a* on the dual grid
-    // so on the control points and edges
+    a_star = new PathFinder(ctx, grid, cellDim);
+
+    // New approach OVERVIEW:
+    // Represent nodes and centroids as a connected graph data structure
     //
+    // Find shortest path on that graph (with Dijkstra or A* idk)
+    //
+    // Then perform Post processing
     // start with the simple connections between 2 nodes, where only a quadratic bezier curve is needed
     // and where the path only goes through one control-point/centroid
     //
     // and then after that works use a series of either quadratic or bezier curves (for obstacles aka other nodes in the path of the edge)
     // to find the path going through multiple control-points/centroid
 
+
+
+
+
+
+
+
+    // POST-PROCESSING
     // edgeConnections.map((edge))
     let startNode = edgeConnections[0].startNode;
     let targetNode = edgeConnections[0].targetNode;
 
-    console.log(startNode, targetNode);
+    edgeConnections.map((edge) => {
 
+      // ACTUALLY I DONT NEED TO CARE ABOUT THE CELLS AT ALL ANYMORE
+      // THEY'RE JUST THERE FOR THE PREVIOUS APPROACH
+
+      // TODO: Post-processing for rendering the edge:
+      // compute what Side I should render the starting-point of the bezier curve from
+      // and determine the position on that side by the set standards (and then calculate using dimensions of the node)
+
+      // ctx2.beginPath();
+      // ctx2.moveTo(startNode.x, startNode.y); // Move to the starting point
+      // ctx2.lineTo(targetNode.x, targetNode.y); // Draw a line to the ending point
+      // ctx2.strokeStyle = "red"; // Set the color of the edge
+      // ctx2.lineWidth = 1; // Set the width of the edge
+      // ctx2.stroke();
+
+      
+    });
+  }
+
+  function specifyDockingPoints(startNode, targetNode) {
     // TODO: determine starting coordinates of the edge for the startingNode and determine end coordinates for the endNode
     // need to set standards, like on corners or in the middle of one side of the node
 
-    
-
-
-    // TODO: get the delauney triangles that are between startNode and targetNode and get their respective centroids
-    // so you can model the edge (bezier curve) through that
-    
-    ctx2.beginPath();
-    ctx2.moveTo(startNode.x, startNode.y); // Move to the starting point
-    ctx2.lineTo(targetNode.x, targetNode.y); // Draw a line to the ending point
-    ctx2.strokeStyle = "red"; // Set the color of the edge
-    ctx2.lineWidth = 1; // Set the width of the edge
-    ctx2.stroke();
-
-  }
-
-  function findPath() {
-    a_star = new PathFinder(ctx, grid, cellDim);
-    edgeConnections.map((edge) => {
-      // array of cells covered by starting and target node
-      let startingCells = [];
-      let targetingCells = [];
-
-      for (let i = edge.startNode.x; i < edge.startNode.x + edge.startNode.width; i += cellDim) {
-        // loop for cells in x direction of startNode
-        startingCells.push({ x: i });
-      }
-      for (let i = edge.startNode.y; i < edge.startNode.y + edge.startNode.height; i += cellDim) {
-        // loop for cells in y direction of startNode
-        startingCells.push({ y: i });
-      }
-      for (let i = edge.targetNode.x; i < edge.targetNode.x + edge.targetNode.width; i += cellDim) {
-        // loop for cells in x direction of targetNode
-        targetingCells.push({ x: i });
-      }
-      for (let i = edge.targetNode.y; i < edge.targetNode.y + edge.targetNode.height; i += cellDim) {
-        // loop for cells in y direction of targetNode
-        targetingCells.push({ y: i });
-      }
-
-      let resultStartCells = combineCells(startingCells);
-      let resultTargetCells = combineCells(targetingCells);
-
-      // get all cells of starting node
-      resultStartCells = resultStartCells.map((obj) => {
-        return grid.getCell(obj.x / cellDim, obj.y / cellDim);
-      });
-      resultTargetCells = resultTargetCells.map((obj) => {
-        // console.log(grid.getCell(obj.x / 50, obj.y / 50)); // cellDim = 50;
-        return grid.getCell(obj.x / cellDim, obj.y / cellDim);
-      });
-
-      // specify start and target cells of the start and target Nodes
-      const { startCell, targetCell } = specifyCell(resultStartCells, resultTargetCells);
-
-      a_star.findPath(startCell, targetCell);
-
-      // set START and END cells back to "OBSTACLE" for next iteration of a*
-      startCell.state = "OBSTACLE";
-      targetCell.state = "OBSTACLE";
-      // draw nodes and obstacles again before executing net iteration (in main.js)
-      startCell.draw(ctx, cellDim, cellDim, startCell.state);
-      targetCell.draw(ctx, cellDim, cellDim, targetCell.state);
-
-      redrawGraph(nodeCoordinates); // re-draw the nodes on the graph for next iteration
-      console.log("");
-    });
-
-    // draw all the paths at once
-    console.log("drawing all paths");
-    console.log(a_star.paths);
-    a_star.drawAllPaths(ctx, a_star.paths, cellDim, cellDim);
-  }
-
-  function specifyCell(startCells, targetCells) {
-    // TODO: specify the starting Cell (bzw. starting coordinates of starting cell) -> function
-
-    // Calculate shortest distance in terms of h-cost (from all available start cells and all available target cells) and return
-    // that combination of start and target cells
-    // using a_star.getDistance() method.
-    // This way, the user can specify which nodes should be connected,
-    // by selecting the top-left-corner of a node and the rest will be handled
-    // by the algorithm
-
-    // TODO: need to rethink the approch i've used so far, because taking the cell with shortest distance doesnt make the nicest bezier curve
-    // when rendering through the dual grid
-
-    const distances = [];
-
-    for (let i = 0; i < startCells.length; i++) {
-      for (let j = 0; j < targetCells.length; j++) {
-        const distance = a_star.getDistance(startCells[i], targetCells[j]);
-        const distanceObject = {
-          distance: distance,
-          startCell: startCells[i],
-          targetCell: targetCells[j],
-        };
-        distances.push(distanceObject);
-      }
-    }
-
-    // Initialize variables to store the object with the smallest distance
-    let smallestDistanceObject = null;
-    let smallestDistance = Infinity; // Start with a very large value
-
-    // Iterate over each object in the distances array
-    for (const distanceObject of distances) {
-      // Check if the current distance is smaller than the smallest recorded distance
-      if (distanceObject.distance < smallestDistance) {
-        // If so, update the smallest distance and the corresponding object
-        smallestDistance = distanceObject.distance;
-        smallestDistanceObject = distanceObject;
-      }
-    }
-
-    console.log(smallestDistanceObject);
-
-    let startCell = smallestDistanceObject.startCell;
-    let targetCell = smallestDistanceObject.targetCell;
-
-    return { startCell, targetCell };
-
     // TODO:
-    // calculate how many edges are going out of this node
+    // get property of node to know: how many edges are going out of this node
     // then set standards for what cells of a node to choose depending
     // on the length of the side of the particular node
 
-    // Docking points:
-    // i.e. length of a side is 3 cells and the edge is incoming: possible cells are the outer ones
-    // and then the points on that cell are the inner corners
+    console.log(startNode, targetNode);
 
-    // if the edge is outgoing it should usually come from the middle of the middle cell
-    // - so with even length sides: on the corner of the cell that is next to the middle
-    // - for odd length sides: in the middle of the middle cell
+    // return { startPos, targetPos };
   }
+
+
 
   function combineCells(arrayOfObjects) {
     let resultCells = [];
