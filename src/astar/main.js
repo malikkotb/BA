@@ -1,6 +1,6 @@
 import Delaunator from "https://cdn.skypack.dev/delaunator@5.0.0";
 import { Grid } from "./grid.js";
-import { Graph } from "./graph_search.js";
+import { Graph } from "./graph.js";
 // import Delaunator from "delaunator";
 window.addEventListener("load", () => {
   const canvas = document.querySelector("#grid");
@@ -17,7 +17,7 @@ window.addEventListener("load", () => {
 
   const cellDim = canvas.height / gridHeight;
 
-  let graphRep = null; // graph data strucutre representation of node-midpoints and triangle-centroids
+  let graph = null; // graph data strucutre representation of node-midpoints and triangle-centroids
 
   let nodeCoordinates = [];
   let edgeConnections = [];
@@ -136,10 +136,11 @@ window.addEventListener("load", () => {
     // and then after that works use a series of either quadratic or bezier curves (for obstacles aka other nodes in the path of the edge)
     // to find the path going through multiple control-points/centroid
 
-    graphRep = new Graph(ctx, nodeMidoints, centroids, edges);
+    graph = new Graph(ctx, nodeMidoints, centroids, edges);
 
 
-
+    dijkstra = new Dijkstra();
+    dijkstra.findPath();
 
 
 
