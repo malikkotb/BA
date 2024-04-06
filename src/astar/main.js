@@ -1,6 +1,6 @@
 import Delaunator from "https://cdn.skypack.dev/delaunator@5.0.0";
 import { Grid } from "./grid.js";
-import { PathFinder } from "./pathfinding.js";
+import { Graph } from "./graph_search.js";
 // import Delaunator from "delaunator";
 window.addEventListener("load", () => {
   const canvas = document.querySelector("#grid");
@@ -17,6 +17,8 @@ window.addEventListener("load", () => {
 
   const cellDim = canvas.height / gridHeight;
 
+  let graphRep = null; // graph data strucutre representation of node-midpoints and triangle-centroids
+
   let nodeCoordinates = [];
   let edgeConnections = [];
 
@@ -24,9 +26,8 @@ window.addEventListener("load", () => {
   let edgeInput = document.getElementById("edgeInput").value;
 
   let grid = null;
-  let paths = [];
+  let paths = []; // shortest paths
 
-  let a_star = null;
 
   // Triangulation Canvas Layer
   const triangleCanvas = document.querySelector("#layer1");
@@ -123,10 +124,8 @@ window.addEventListener("load", () => {
   }
 
   function findPathDual() {
-    a_star = new PathFinder(ctx, grid, cellDim);
-
     // New approach OVERVIEW:
-    // Represent nodes and centroids as a connected graph data structure
+    // Represent nodes and centroids as a connected graph data structure, adjacency list
     //
     // Find shortest path on that graph (with Dijkstra or A* idk)
     //
@@ -137,6 +136,7 @@ window.addEventListener("load", () => {
     // and then after that works use a series of either quadratic or bezier curves (for obstacles aka other nodes in the path of the edge)
     // to find the path going through multiple control-points/centroid
 
+    graphRep = new Graph(ctx, nodeMidoints, centroids, edges);
 
 
 
@@ -184,26 +184,6 @@ window.addEventListener("load", () => {
   }
 
 
-
-  function combineCells(arrayOfObjects) {
-    let resultCells = [];
-
-    arrayOfObjects.forEach((objX) => {
-      arrayOfObjects.forEach((objY) => {
-        let newObj = { ...objX, ...objY };
-        if (newObj.x === undefined || newObj.y === undefined) return;
-        resultCells.push(newObj);
-      });
-    });
-
-    // remove duplicate objects
-    resultCells = resultCells.filter((obj, index) => {
-      return resultCells.findIndex((o) => o.x === obj.x && o.y === obj.y) === index;
-    });
-
-    return resultCells;
-  }
-
   function processNodeInput(nodeInput) {
     nodeCoordinates = nodeInput.split(";").map((entry) => {
       // x = x-axis coordinate of the rectangle's starting point, in pixels. (top left corner of node) // y = y-axis coordinate of the rectangle's starting point, in pixels. (top left corner of node) // width = rectangle's width. Positive values are to the right, and negative to the left. // height = rectangle's height. Positive values are down, and negative are up.
@@ -221,7 +201,7 @@ window.addEventListener("load", () => {
       if (isNaN(x) || isNaN(y)) {
         throw new Error("Invalid node input");
       }
-      return [x + width / 2, y + height / 2]; // get center of the node (rectangle/square shape)
+      return [x + width / 2, y + height / 2]; // get center/midpoint of the node (rectangle/square shape)
     });
   }
 
