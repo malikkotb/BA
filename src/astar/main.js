@@ -17,7 +17,7 @@ window.addEventListener("load", () => {
 
   const cellDim = canvas.height / gridHeight;
 
-  let graph = null; // graph data strucutre representation of node-midpoints and triangle-centroids
+  let graph = null; // Graph Representation of node-midpoints and triangle-centroids and the respective connections
 
   let nodeCoordinates = [];
   let edgeConnections = [];
@@ -25,9 +25,11 @@ window.addEventListener("load", () => {
   let nodeInput = document.getElementById("nodeInput").value;
   let edgeInput = document.getElementById("edgeInput").value;
 
+  let nodeMidoints = [];
+  let centroids = [];
+
   let grid = null;
   let paths = []; // shortest paths
-
 
   // Triangulation Canvas Layer
   const triangleCanvas = document.querySelector("#layer1");
@@ -98,6 +100,7 @@ window.addEventListener("load", () => {
       ctx.fill();
 
       const centroid = calculateCentroid(t[0][0], t[0][1], t[1][0], t[1][1], t[2][0], t[2][1]);
+      centroids.push(centroid);
       const radius = 5;
       ctx.beginPath();
       ctx.arc(centroid.x, centroid.y, radius, 0, Math.PI * 2); // Arc centered at (x, y) with radius
@@ -123,27 +126,33 @@ window.addEventListener("load", () => {
     ctx.stroke();
   }
 
+  // New approach OVERVIEW:
+  // Retrieve the data
+  //
+  // Represent nodes and centroids as a connected graph data structure, adjacency list
+  //
+  // Find shortest path on that graph (with Dijkstra or A* idk)
+  //
+  // Then perform Post processing
+  // start with the simple connections between 2 nodes, where only a quadratic bezier curve is needed
+  // and where the path only goes through one control-point/centroid
+  //
+  // and then after that works use a series of either quadratic or bezier curves (for obstacles aka other nodes in the path of the edge)
+  // to find the path going through multiple control-points/centroid
+
   function findPathDual() {
-    // New approach OVERVIEW:
-    // Represent nodes and centroids as a connected graph data structure, adjacency list
-    //
-    // Find shortest path on that graph (with Dijkstra or A* idk)
-    //
-    // Then perform Post processing
-    // start with the simple connections between 2 nodes, where only a quadratic bezier curve is needed
-    // and where the path only goes through one control-point/centroid
-    //
-    // and then after that works use a series of either quadratic or bezier curves (for obstacles aka other nodes in the path of the edge)
-    // to find the path going through multiple control-points/centroid
+    // retrieve data 
+
+    
+    console.log("centroids: ",centroids);
+    console.log("nodeMidpoints: ",nodeMidoints);
+
+    //TODO: determine how to set edges
 
     graph = new Graph(ctx, nodeMidoints, centroids, edges);
 
-
     dijkstra = new Dijkstra();
-    dijkstra.findPath();
-
-
-
+    paths = dijkstra.findPath();
 
     // POST-PROCESSING
     // edgeConnections.map((edge))
@@ -151,26 +160,22 @@ window.addEventListener("load", () => {
     let targetNode = edgeConnections[0].targetNode;
 
     edgeConnections.map((edge) => {
-
       // ACTUALLY I DONT NEED TO CARE ABOUT THE CELLS AT ALL ANYMORE
       // THEY'RE JUST THERE FOR THE PREVIOUS APPROACH
-
       // TODO: Post-processing for rendering the edge:
       // compute what Side I should render the starting-point of the bezier curve from
       // and determine the position on that side by the set standards (and then calculate using dimensions of the node)
-
       // ctx2.beginPath();
       // ctx2.moveTo(startNode.x, startNode.y); // Move to the starting point
       // ctx2.lineTo(targetNode.x, targetNode.y); // Draw a line to the ending point
       // ctx2.strokeStyle = "red"; // Set the color of the edge
       // ctx2.lineWidth = 1; // Set the width of the edge
       // ctx2.stroke();
-
-      
     });
   }
 
   function specifyDockingPoints(startNode, targetNode) {
+    // this is part of post-processing
     // TODO: determine starting coordinates of the edge for the startingNode and determine end coordinates for the endNode
     // need to set standards, like on corners or in the middle of one side of the node
 
@@ -184,7 +189,6 @@ window.addEventListener("load", () => {
     // return { startPos, targetPos };
   }
 
-
   function processNodeInput(nodeInput) {
     nodeCoordinates = nodeInput.split(";").map((entry) => {
       // x = x-axis coordinate of the rectangle's starting point, in pixels. (top left corner of node) // y = y-axis coordinate of the rectangle's starting point, in pixels. (top left corner of node) // width = rectangle's width. Positive values are to the right, and negative to the left. // height = rectangle's height. Positive values are down, and negative are up.
@@ -192,6 +196,8 @@ window.addEventListener("load", () => {
       if (isNaN(x) || isNaN(y) || isNaN(width) || isNaN(height)) {
         throw new Error("Invalid node input");
       }
+      const midpoint = { x: x + width / 2, y: y + height / 2}
+      nodeMidoints.push(midpoint)
       return { x, y, width, height };
     });
   }
