@@ -10,4 +10,7 @@ export class Graph {
 
     }
 
+    // TODO: make adjacency list from nodes and edges 
+
+
 }

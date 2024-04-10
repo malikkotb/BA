@@ -9,7 +9,7 @@ export class Dijkstra {
 
   constructor() {}
 
-  findPath() {
+  findPath(graph) {
 
   }
 

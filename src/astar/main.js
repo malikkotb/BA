@@ -25,6 +25,7 @@ window.addEventListener("load", () => {
   let nodeInput = document.getElementById("nodeInput").value;
   let edgeInput = document.getElementById("edgeInput").value;
 
+  let triangleMesh = []; // list of objects with all important triangle nodes for one triangle and their respective coordinates (includes: vertices (corner points) and centroids of a single triangle)
   let nodeMidoints = [];
   let centroids = [];
 
@@ -88,8 +89,8 @@ window.addEventListener("load", () => {
       triangleCoordinates.push([points[triangles[i]], points[triangles[i + 1]], points[triangles[i + 2]]]);
     }
 
-    ctx.globalAlpha = 0.5;
 
+    ctx.globalAlpha = 0.5;
     triangleCoordinates.forEach((t) => {
       ctx.beginPath();
       ctx.moveTo(t[0][0], t[0][1]);
@@ -101,11 +102,19 @@ window.addEventListener("load", () => {
 
       const centroid = calculateCentroid(t[0][0], t[0][1], t[1][0], t[1][1], t[2][0], t[2][1]);
       centroids.push(centroid);
+
+      const triangleVertices = [[t[0][0], t[0][1]], [t[1][0], t[1][1]], [t[2][0], t[2][1]]]
+
+      // add triangle vertices and triangle centroids to triangleMesh array
+      triangleMesh.push({ centroid: centroid, triangleVerties: triangleVertices })
+
       const radius = 5;
       ctx.beginPath();
       ctx.arc(centroid.x, centroid.y, radius, 0, Math.PI * 2); // Arc centered at (x, y) with radius
       ctx.fillStyle = "red"; // Fill color
       ctx.fill(); // Fill the circle
+    
+    
     });
 
     // convex hull of the points
@@ -129,7 +138,7 @@ window.addEventListener("load", () => {
   // New approach OVERVIEW:
   // Retrieve the data
   //
-  // Represent nodes and centroids as a connected graph data structure, adjacency list
+  // Represent data as nodes and centroids as a connected graph data structure, adjacency list (REPRESENT AS GRAPH)
   //
   // Find shortest path on that graph (with Dijkstra or A* idk)
   //
@@ -141,18 +150,30 @@ window.addEventListener("load", () => {
   // to find the path going through multiple control-points/centroid
 
   function findPathDual() {
-    // retrieve data 
+    // TODO: Retrieve data
+    // TODO: Define the connections between nodes (edges) based on rules:
+    // 1. nodeMidpoints are only connected to the nearest centroids (how maybe by checking the delauney triangles that go out of a nodeMidoint and determining them that way)
+    // 2. centroids are connected to nearest nodeMidpoints as well as other nearest centroids
+    // 3. edges between centroids cannot cross other edges
 
-    
-    console.log("centroids: ",centroids);
-    console.log("nodeMidpoints: ",nodeMidoints);
+    // triangle-Vertices are all node midpoints
 
-    //TODO: determine how to set edges
+    // => keep track of the delauney triangles, and which triangles are connected to which neighbouring triangles
+    // => edges between centroids can only be between centroids of exactly neighbouring dealuney triangles
+
+    // neighbouring triangles could be determined if they share an edge (the 2 vertices of that edge), because then they have to be neighbouring in that case
+
+    console.log("centroids: ", centroids);
+    console.log("nodeMidpoints: ", nodeMidoints);
+
+    console.log(triangleMesh);
+
+    // differentiate between centroids and nodeMidoints
 
     graph = new Graph(ctx, nodeMidoints, centroids, edges);
 
     dijkstra = new Dijkstra();
-    paths = dijkstra.findPath();
+    paths = dijkstra.findPath(graph);
 
     // POST-PROCESSING
     // edgeConnections.map((edge))
@@ -196,8 +217,8 @@ window.addEventListener("load", () => {
       if (isNaN(x) || isNaN(y) || isNaN(width) || isNaN(height)) {
         throw new Error("Invalid node input");
       }
-      const midpoint = { x: x + width / 2, y: y + height / 2}
-      nodeMidoints.push(midpoint)
+      const midpoint = { x: x + width / 2, y: y + height / 2 };
+      nodeMidoints.push(midpoint);
       return { x, y, width, height };
     });
   }
