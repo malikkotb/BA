@@ -1,6 +1,7 @@
 import Delaunator from "https://cdn.skypack.dev/delaunator@5.0.0";
 import { Grid } from "./grid.js";
 import { Graph } from "./graph.js";
+import { Dijkstra } from "./dijkstra.js";
 // import Delaunator from "delaunator";
 window.addEventListener("load", () => {
   const canvas = document.querySelector("#grid");
@@ -25,9 +26,11 @@ window.addEventListener("load", () => {
   let nodeInput = document.getElementById("nodeInput").value;
   let edgeInput = document.getElementById("edgeInput").value;
 
+  let graphEdges = []; // list of edges from which I will extract the adjacency list
   let triangleMesh = []; // list of objects with all important triangle nodes for one triangle and their respective coordinates (includes: vertices (corner points) and centroids of a single triangle)
   let nodeMidoints = [];
   let centroids = [];
+  let dijkstra = null;
 
   let grid = null;
   let paths = []; // shortest paths
@@ -89,7 +92,6 @@ window.addEventListener("load", () => {
       triangleCoordinates.push([points[triangles[i]], points[triangles[i + 1]], points[triangles[i + 2]]]);
     }
 
-
     ctx.globalAlpha = 0.5;
     triangleCoordinates.forEach((t) => {
       ctx.beginPath();
@@ -103,18 +105,20 @@ window.addEventListener("load", () => {
       const centroid = calculateCentroid(t[0][0], t[0][1], t[1][0], t[1][1], t[2][0], t[2][1]);
       centroids.push(centroid);
 
-      const triangleVertices = [[t[0][0], t[0][1]], [t[1][0], t[1][1]], [t[2][0], t[2][1]]]
+      const triangleVertices = [
+        { x: t[0][0], y: t[0][1] },
+        { x: t[1][0], y: t[1][1] },
+        { x: t[2][0], y: t[2][1] },
+      ];
 
       // add triangle vertices and triangle centroids to triangleMesh array
-      triangleMesh.push({ centroid: centroid, triangleVerties: triangleVertices })
+      triangleMesh.push({ centroid: centroid, triangleVertices: triangleVertices });
 
       const radius = 5;
       ctx.beginPath();
       ctx.arc(centroid.x, centroid.y, radius, 0, Math.PI * 2); // Arc centered at (x, y) with radius
       ctx.fillStyle = "red"; // Fill color
       ctx.fill(); // Fill the circle
-    
-    
     });
 
     // convex hull of the points
@@ -152,25 +156,28 @@ window.addEventListener("load", () => {
   function findPathDual() {
     // TODO: Retrieve data
     // TODO: Define the connections between nodes (edges) based on rules:
-    // 1. nodeMidpoints are only connected to the nearest centroids (how maybe by checking the delauney triangles that go out of a nodeMidoint and determining them that way)
-    // 2. centroids are connected to nearest nodeMidpoints as well as other nearest centroids
-    // 3. edges between centroids cannot cross other edges
-
-    // triangle-Vertices are all node midpoints
-
+    // #1 nodeMidpoints are only connected to the nearest centroids (how maybe by checking the delauney triangles that go out of a nodeMidoint and determining them that way)
+    // #2 centroids are connected to nearest nodeMidpoints as well as other nearest centroids
+    // #3 edges between centroids cannot cross other edges
     // => keep track of the delauney triangles, and which triangles are connected to which neighbouring triangles
     // => edges between centroids can only be between centroids of exactly neighbouring dealuney triangles
-
     // neighbouring triangles could be determined if they share an edge (the 2 vertices of that edge), because then they have to be neighbouring in that case
 
-    console.log("centroids: ", centroids);
-    console.log("nodeMidpoints: ", nodeMidoints);
+    // Procedure
+    // 1. triangle-Vertices are all node midpoints, so I can connect the triangle vertices of a single trianlge to the centroid of that trianlge
+    triangleMesh.forEach((triangle) => {
+      triangle.triangleVertices.forEach((vertex) => {
+        graphEdges.push([vertex, triangle.centroid]);
+      });
+    });
 
-    console.log(triangleMesh);
+    graphEdges.forEach((edge) => {
+      console.log(edge);
+    });
 
-    // differentiate between centroids and nodeMidoints
+    // 2.
 
-    graph = new Graph(ctx, nodeMidoints, centroids, edges);
+    graph = new Graph(ctx, nodeMidoints, centroids, graphEdges);
 
     dijkstra = new Dijkstra();
     paths = dijkstra.findPath(graph);
@@ -231,6 +238,13 @@ window.addEventListener("load", () => {
       }
       return [x + width / 2, y + height / 2]; // get center/midpoint of the node (rectangle/square shape)
     });
+  }
+
+  function drawLine(ctx, start, end) {
+    ctx.beginPath();
+    ctx.moveTo(start.x, start.y);
+    ctx.lineTo(end.x, end.y);
+    ctx.stroke();
   }
 
   // Function to parse user input and apply connections
