@@ -154,29 +154,43 @@ window.addEventListener("load", () => {
   // to find the path going through multiple control-points/centroid
 
   function findPathDual() {
-    // TODO: Retrieve data
-    // TODO: Define the connections between nodes (edges) based on rules:
+    // Retrieve data to Define the connections between nodes (edges) based on rules:
+    // Rules:
     // #1 nodeMidpoints are only connected to the nearest centroids (how maybe by checking the delauney triangles that go out of a nodeMidoint and determining them that way)
     // #2 centroids are connected to nearest nodeMidpoints as well as other nearest centroids
     // #3 edges between centroids cannot cross other edges
-    // => keep track of the delauney triangles, and which triangles are connected to which neighbouring triangles
-    // => edges between centroids can only be between centroids of exactly neighbouring dealuney triangles
-    // neighbouring triangles could be determined if they share an edge (the 2 vertices of that edge), because then they have to be neighbouring in that case
 
-    // Procedure
-    // 1. triangle-Vertices are all node midpoints, so I can connect the triangle vertices of a single trianlge to the centroid of that trianlge
+    // 1. Connect nodeMidpoints to centroids:
+    // triangle-Vertices are all nodeMidpoints, so I can connect the triangle vertices of a single trianlge to the centroid of that trianlge
     triangleMesh.forEach((triangle) => {
       triangle.triangleVertices.forEach((vertex) => {
         graphEdges.push([vertex, triangle.centroid]);
       });
     });
 
-    graphEdges.forEach((edge) => {
-      console.log(edge);
+    // 2. Connect centroids to neighbouring (& only neighbouring) centroids
+    // => edges between centroids can only be between centroids of exactly neighbouring dealuney triangles
+    // neighbouring triangles could be determined if they share an edge (the 2 vertices of that edge), because then they have to be neighbouring in that case
+
+    console.log(triangleMesh);
+
+    // areTrianglesNeighboring(triangleA, triangleB)
+
+    // Find neighbors for each triangle in the mesh
+    const triangleNeighbors = findNeighborsForMesh(triangleMesh);
+
+    // Example usage:
+    triangleNeighbors.forEach((neighbors, index) => {
+      console.log(`Neighbors of Triangle ${index}:`, neighbors);
+      //    graphEdges.push([vertex, triangle.centroid]);
     });
 
-    // 2.
+    // 2. Draw edges for visualization
+    graphEdges.forEach((edge) => {
+      drawLine(ctx2, edge[0], edge[1]);
+    });
 
+    ///////////////////////
     graph = new Graph(ctx, nodeMidoints, centroids, graphEdges);
 
     dijkstra = new Dijkstra();
@@ -217,6 +231,41 @@ window.addEventListener("load", () => {
     // return { startPos, targetPos };
   }
 
+  // Function to find neighboring triangles for each triangle
+  function findNeighborsForMesh(mesh) {
+    const neighbors = [];
+    const numTriangles = mesh.length;
+    // Iterate over each triangle
+    for (let i = 0; i < numTriangles; i++) {
+      const currentTriangle = mesh[i];
+      const currentTriangleNeighbors = [];
+      // Check against every other triangle
+      for (let j = 0; j < numTriangles; j++) {
+        if (i !== j && areTrianglesNeighboring(currentTriangle, mesh[j])) {
+          currentTriangleNeighbors.push(mesh[j]); // Add neighboring triangle object
+        }
+      }
+      neighbors.push(currentTriangleNeighbors); // Add neighbors of current triangle to the list
+    }
+    return neighbors;
+  }
+
+  // Function to check if two triangles are neighboring
+  function areTrianglesNeighboring(triangleA, triangleB) {
+    // Iterate over each edge of triangleA
+    for (let i = 0; i < 3; i++) {
+      const edge = [triangleA.triangleVertices[i], triangleA.triangleVertices[(i + 1) % 3]]; // Get current edge
+      // Check if triangleB shares the same edge
+      if (
+        triangleB.triangleVertices.some((vertex) => edge[0].x === vertex.x && edge[0].y === vertex.y) &&
+        triangleB.triangleVertices.some((vertex) => edge[1].x === vertex.x && edge[1].y === vertex.y)
+      ) {
+        return true; // Found a common edge, triangles are neighbors
+      }
+    }
+    return false; // No common edge found
+  }
+
   function processNodeInput(nodeInput) {
     nodeCoordinates = nodeInput.split(";").map((entry) => {
       // x = x-axis coordinate of the rectangle's starting point, in pixels. (top left corner of node) // y = y-axis coordinate of the rectangle's starting point, in pixels. (top left corner of node) // width = rectangle's width. Positive values are to the right, and negative to the left. // height = rectangle's height. Positive values are down, and negative are up.
@@ -244,6 +293,8 @@ window.addEventListener("load", () => {
     ctx.beginPath();
     ctx.moveTo(start.x, start.y);
     ctx.lineTo(end.x, end.y);
+    ctx.strokeStyle = "blue";
+    ctx.lineWidth = 2;
     ctx.stroke();
   }
 
