@@ -28,7 +28,7 @@ window.addEventListener("load", () => {
 
   let graphEdges = []; // list of edges from which I will extract the adjacency list
   let triangleMesh = []; // list of objects with all important triangle nodes for one triangle and their respective coordinates (includes: vertices (corner points) and centroids of a single triangle)
-  let nodeMidoints = [];
+  let nodeMidpoints = [];
   let centroids = [];
   let dijkstra = null;
 
@@ -91,6 +91,16 @@ window.addEventListener("load", () => {
     for (let i = 0; i < triangles.length; i += 3) {
       triangleCoordinates.push([points[triangles[i]], points[triangles[i + 1]], points[triangles[i + 2]]]);
     }
+
+    // draw points for nodeMidpoints
+    nodeMidpoints.forEach((node) => {
+      const radius = 5;
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, radius, 0, Math.PI * 2); // Arc centered at (x, y) with radius
+      ctx.fillStyle = "red"; // Fill color
+      ctx.fill(); // Fill the circle
+    })
+
 
     ctx.globalAlpha = 0.5;
     triangleCoordinates.forEach((t) => {
@@ -188,6 +198,7 @@ window.addEventListener("load", () => {
           });
         });
 
+        // don't add duplicate centroid edges
         if (!isAlreadyIncluded) {
           // push the centroid edges
           graphEdges.push(edge);
@@ -195,15 +206,17 @@ window.addEventListener("load", () => {
       });
     });
 
-    console.log(graphEdges.length);
-
-    // 2. Draw edges for visualization
+    // 3. Draw edges for visualization
     graphEdges.forEach((edge) => {
       drawLine(ctx2, edge[0], edge[1]);
     });
 
     ///////////////////////
-    graph = new Graph(ctx, nodeMidoints, centroids, graphEdges);
+    console.log("nodeMidoints", nodeMidpoints);
+    graph = new Graph(ctx, [...nodeMidpoints, ...centroids], graphEdges);
+
+
+    console.log(graph.adjacencyList)
 
     dijkstra = new Dijkstra();
     paths = dijkstra.findPath(graph);
@@ -286,7 +299,7 @@ window.addEventListener("load", () => {
         throw new Error("Invalid node input");
       }
       const midpoint = { x: x + width / 2, y: y + height / 2 };
-      nodeMidoints.push(midpoint);
+      nodeMidpoints.push(midpoint);
       return { x, y, width, height };
     });
   }
