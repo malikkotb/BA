@@ -172,20 +172,30 @@ window.addEventListener("load", () => {
     // => edges between centroids can only be between centroids of exactly neighbouring dealuney triangles
     // neighbouring triangles could be determined if they share an edge (the 2 vertices of that edge), because then they have to be neighbouring in that case
 
-
     // Find neighbors for each triangle in the mesh
     const triangleNeighbors = findNeighborsForMesh(triangleMesh);
-
     triangleNeighbors.forEach((neighbors, index) => {
       // console.log(`Neighbors of Triangle ${index}:`, neighbors);
       neighbors.slice(1).forEach((neighbor) => {
-        const edge = [neighbors[0].centroid, neighbor.centroid]
-        console.log(edge);
-        graphEdges.push(edge);
+        const edge = [neighbors[0].centroid, neighbor.centroid];
+        // this is the same as the edge-array but only objects swapped around, so it describes the same edge
+        const flippedEdge = [neighbor.centroid, neighbors[0].centroid];
+
+        const isAlreadyIncluded = graphEdges.some((subArray) => {
+          return subArray.every((val, index) => {
+            const objToCheck = flippedEdge[index];
+            return val.x === objToCheck.x && val.y === objToCheck.y;
+          });
+        });
+
+        if (!isAlreadyIncluded) {
+          // push the centroid edges
+          graphEdges.push(edge);
+        }
       });
-      console.log("");
- 
     });
+
+    console.log(graphEdges.length);
 
     // 2. Draw edges for visualization
     graphEdges.forEach((edge) => {

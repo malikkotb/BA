@@ -7,7 +7,9 @@ export class Dijkstra {
 
 
 
-  constructor() {}
+  constructor() {
+    // make adjacency list from edges and nodes
+  }
 
   findPath(graph) {
 
