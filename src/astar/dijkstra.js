@@ -7,7 +7,7 @@ export class Dijkstra {
 
 
 
-  constructor() {
+  constructor(adjacencyList) {
     // make adjacency list from edges and nodes
   }
 

@@ -1,6 +1,5 @@
 import Delaunator from "https://cdn.skypack.dev/delaunator@5.0.0";
 import { Grid } from "./grid.js";
-import { Graph } from "./graph.js";
 import { Dijkstra } from "./dijkstra.js";
 // import Delaunator from "delaunator";
 window.addEventListener("load", () => {
@@ -17,8 +16,6 @@ window.addEventListener("load", () => {
   const gridWidth = 20; // cells on x-axis
 
   const cellDim = canvas.height / gridHeight;
-
-  let graph = null; // Graph Representation of node-midpoints and triangle-centroids and the respective connections
 
   let nodeCoordinates = [];
   let edgeConnections = [];
@@ -210,13 +207,15 @@ window.addEventListener("load", () => {
       drawLine(ctx2, edge[0], edge[1]);
     });
 
-    ///////////////////////
-    console.log("nodeMidoints", nodeMidpoints);
-    graph = new Graph(ctx, [...nodeMidpoints, ...centroids], graphEdges);
-    // console.log(graph.adjacencyList)
+    // 4. Represent the graph (nodes & edges) as an adjacency list
 
-    // Represent the graph (nodes & edges) as an adjacency list
-    // define adjacency list directly here
+    // implement an adjacency list as a set of key-value pairs
+    // where the key is the node (base-node)
+    // and the value is an array represnting what other nodes the base-node is connected to
+
+    // we will use a Map() for this, because it has additional useful API methods
+    // and it behaves more like a dictionary or hashMap (found in other languages)
+
     const adjacencyList = new Map();
     [...nodeMidpoints, ...centroids].forEach((node) => {
       adjacencyList.set(node, []);
@@ -229,27 +228,16 @@ window.addEventListener("load", () => {
       const keyBaseNode = keysArray.find((key) => compareNodes(edge[0], key));
       const keyConnectedNode = keysArray.find((key) => compareNodes(edge[1], key));
       if (keyBaseNode) {
-        // console.log("Match found for key:", keyBaseNode);
-        // console.log("adjacencyList.get(edge[0]): ", adjacencyList.get(keyBaseNode));
-        // adjacencyList.get(edge[0]).push(edge[1]);
-        // adjacencyList.get(edge[1]).push(edge[0]);
+        // to add an edge (undirected), I need to update the entries for the baseNode and the connectedNode
         adjacencyList.get(keyBaseNode).push(keyConnectedNode);
         adjacencyList.get(keyConnectedNode).push(keyBaseNode); // do inverse of line above to update the connectedNode also
-
       }
     });
 
-    console.log(adjacencyList);
-    // console.log("adjacencyList.get(edge[0]): ", adjacencyList.get(edge[0]));
-
-    // graphEdges.forEach((edge) => {
-    //   console.log("node", edge[0], adjacencyList.get(edge[0]));
-    // adjacencyList.get(edge[0]).push(edge[1]);
-    // adjacencyList.get(edge[1]).push(edge[0]);
-    // });
+    printMap(adjacencyList);
 
     dijkstra = new Dijkstra();
-    paths = dijkstra.findPath(graph);
+    paths = dijkstra.findPath(adjacencyList);
 
     // POST-PROCESSING
     // edgeConnections.map((edge))
@@ -273,6 +261,16 @@ window.addEventListener("load", () => {
 
   function compareNodes(node1, node2) {
     return node1.x === node2.x && node1.y === node2.y;
+  }
+
+  function printMap(map) {
+    map.forEach((value, key) => {
+      // Convert float properties to integers
+      const intKey = { x: Math.floor(key.x), y: Math.floor(key.y) };
+      const intValue = value.map((obj) => ({ x: Math.floor(obj.x), y: Math.floor(obj.y) }));
+
+      console.log(`${JSON.stringify(intKey)} => ${JSON.stringify(intValue)}`);
+    });
   }
 
   function specifyDockingPoints(startNode, targetNode) {
