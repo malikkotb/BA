@@ -21,37 +21,12 @@ export class Graph {
   // add Node to the Map
   addNode(baseNode) {
     this.adjacencyList.set(baseNode, []); // baseNode + empty array for connections
-    // console.log("this.adjacencyList.get(baseNode) should be an array: ", this.adjacencyList.get(baseNode));
   }
 
-  // FOR SOME REASON THE ARRAY IS UNDEFINED FOR EXACTLY 27 EDGES (THIE FRIST 27)
-  // AND THEN IT IS CORRECTLY DEFINED FOR THE LAST 10
-  // WE JAVE 37 TOTAL EDGES IN TOTAL
 
   // to add an edge (undirected), I need to update the entries for the baseNode and the connectedNode
   addEdge(baseNode, connectedNode) {
-    // console.log("this.adjacencList.get(baseNode) should be an array: ", this.adjacencyList.get(baseNode).push(connectedNode));
-    const node = { x: baseNode.x, y: baseNode.y };
-    // console.log(
-    //   "baseNode",
-    //   baseNode,
-    //   "this.adjacencyList.get(baseNode) should be an array: ",
-    //   this.adjacencyList.get(node)
-    // );
-
-    if (!this.adjacencyList.has(baseNode)) {
-      this.addNode(baseNode);
-    }
-    if (!this.adjacencyList.has(connectedNode)) {
-      this.addNode(connectedNode);
-    }
-    this.adjacencyList.get(baseNode).push(connectedNode);
-    this.adjacencyList.get(connectedNode).push(baseNode);
-
-    // this.adjacencyList.get(baseNode).push(connectedNode);
-
-    // // do inverse of line above to update the connectedNode also
-    // this.adjacencyList.get(connectedNode).push(baseNode);
+    
   }
 
   compareNodes(node1, node2) {

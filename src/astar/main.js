@@ -215,52 +215,37 @@ window.addEventListener("load", () => {
     graph = new Graph(ctx, [...nodeMidpoints, ...centroids], graphEdges);
     // console.log(graph.adjacencyList)
 
+    // Represent the graph (nodes & edges) as an adjacency list
     // define adjacency list directly here
     const adjacencyList = new Map();
     [...nodeMidpoints, ...centroids].forEach((node) => {
       adjacencyList.set(node, []);
     });
 
-    console.log(adjacencyList);
-    // graphEdges.forEach((edge) => {
-    //   console.log("node", edge[0] ,adjacencyList.get(edge[0]));
-    //   // adjacencyList.get(edge[0]).push(edge[1]);
-    //   // adjacencyList.get(edge[1]).push(edge[0]);
-
-    // })
+    const keysArray = Array.from(adjacencyList.keys());
 
     graphEdges.forEach((edge) => {
-      console.log("edge[0] identity: ", edge[0]);
-      let nodeInAdjacnecyList = null;
-
       // Iterate over the keys of adjacencyList and compare properties
-      const keysArray = Array.from(adjacencyList.keys());
-      keysArray.forEach((key) => {
-        console.log(key);
-        const matchedKey = keysArray.find((node) => compareNodes(node, key));
-        if (matchedKey) {
-          console.log("Match found for key:", key);
-          nodeInAdjacnecyList = key;
-        }
-      });
+      const keyBaseNode = keysArray.find((key) => compareNodes(edge[0], key));
+      const keyConnectedNode = keysArray.find((key) => compareNodes(edge[1], key));
+      if (keyBaseNode) {
+        // console.log("Match found for key:", keyBaseNode);
+        // console.log("adjacencyList.get(edge[0]): ", adjacencyList.get(keyBaseNode));
+        // adjacencyList.get(edge[0]).push(edge[1]);
+        // adjacencyList.get(edge[1]).push(edge[0]);
+        adjacencyList.get(keyBaseNode).push(keyConnectedNode);
+        adjacencyList.get(keyConnectedNode).push(keyBaseNode); // do inverse of line above to update the connectedNode also
 
-      // adjacencyList.forEach((node) => {
-      //   console.log("node", node);
-      //   console.log("edge[0]", edge[0]);
-      //   if (compareNodes(node, edge[0])) {
-      //     console.log("true");
-      //     nodeInAdjacnecyList = node;
-      //   }
-      // });
-      console.log("node", nodeInAdjacnecyList);
+      }
     });
 
+    console.log(adjacencyList);
     // console.log("adjacencyList.get(edge[0]): ", adjacencyList.get(edge[0]));
 
     // graphEdges.forEach((edge) => {
     //   console.log("node", edge[0], adjacencyList.get(edge[0]));
-    //   // adjacencyList.get(edge[0]).push(edge[1]);
-    //   // adjacencyList.get(edge[1]).push(edge[0]);
+    // adjacencyList.get(edge[0]).push(edge[1]);
+    // adjacencyList.get(edge[1]).push(edge[0]);
     // });
 
     dijkstra = new Dijkstra();
