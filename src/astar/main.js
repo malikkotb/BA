@@ -99,8 +99,7 @@ window.addEventListener("load", () => {
       ctx.arc(node.x, node.y, radius, 0, Math.PI * 2); // Arc centered at (x, y) with radius
       ctx.fillStyle = "red"; // Fill color
       ctx.fill(); // Fill the circle
-    })
-
+    });
 
     ctx.globalAlpha = 0.5;
     triangleCoordinates.forEach((t) => {
@@ -214,9 +213,55 @@ window.addEventListener("load", () => {
     ///////////////////////
     console.log("nodeMidoints", nodeMidpoints);
     graph = new Graph(ctx, [...nodeMidpoints, ...centroids], graphEdges);
+    // console.log(graph.adjacencyList)
 
+    // define adjacency list directly here
+    const adjacencyList = new Map();
+    [...nodeMidpoints, ...centroids].forEach((node) => {
+      adjacencyList.set(node, []);
+    });
 
-    console.log(graph.adjacencyList)
+    console.log(adjacencyList);
+    // graphEdges.forEach((edge) => {
+    //   console.log("node", edge[0] ,adjacencyList.get(edge[0]));
+    //   // adjacencyList.get(edge[0]).push(edge[1]);
+    //   // adjacencyList.get(edge[1]).push(edge[0]);
+
+    // })
+
+    graphEdges.forEach((edge) => {
+      console.log("edge[0] identity: ", edge[0]);
+      let nodeInAdjacnecyList = null;
+
+      // Iterate over the keys of adjacencyList and compare properties
+      const keysArray = Array.from(adjacencyList.keys());
+      keysArray.forEach((key) => {
+        console.log(key);
+        const matchedKey = keysArray.find((node) => compareNodes(node, key));
+        if (matchedKey) {
+          console.log("Match found for key:", key);
+          nodeInAdjacnecyList = key;
+        }
+      });
+
+      // adjacencyList.forEach((node) => {
+      //   console.log("node", node);
+      //   console.log("edge[0]", edge[0]);
+      //   if (compareNodes(node, edge[0])) {
+      //     console.log("true");
+      //     nodeInAdjacnecyList = node;
+      //   }
+      // });
+      console.log("node", nodeInAdjacnecyList);
+    });
+
+    // console.log("adjacencyList.get(edge[0]): ", adjacencyList.get(edge[0]));
+
+    // graphEdges.forEach((edge) => {
+    //   console.log("node", edge[0], adjacencyList.get(edge[0]));
+    //   // adjacencyList.get(edge[0]).push(edge[1]);
+    //   // adjacencyList.get(edge[1]).push(edge[0]);
+    // });
 
     dijkstra = new Dijkstra();
     paths = dijkstra.findPath(graph);
@@ -239,6 +284,10 @@ window.addEventListener("load", () => {
       // ctx2.lineWidth = 1; // Set the width of the edge
       // ctx2.stroke();
     });
+  }
+
+  function compareNodes(node1, node2) {
+    return node1.x === node2.x && node1.y === node2.y;
   }
 
   function specifyDockingPoints(startNode, targetNode) {
