@@ -214,21 +214,44 @@ window.addEventListener("load", () => {
     let convexEdges = [];
     for (let i = 0; i < convexHull.length; i++) {
       if (i === convexHull.length - 1) {
-        convexEdges.push([{x: convexHull[i][0], y: convexHull[i][1]}, {x: convexHull[0][0], y: convexHull[0][1]}]);
+        convexEdges.push([
+          { x: convexHull[i][0], y: convexHull[i][1] },
+          { x: convexHull[0][0], y: convexHull[0][1] },
+        ]);
       } else {
-        convexEdges.push([{x: convexHull[i][0], y: convexHull[i][1]}, {x: convexHull[i+1][0], y: convexHull[i+1][1]}]);
+        convexEdges.push([
+          { x: convexHull[i][0], y: convexHull[i][1] },
+          { x: convexHull[i + 1][0], y: convexHull[i + 1][1] },
+        ]);
       }
     }
-    console.log(convexEdges);
 
     // get centroids that need to be reflected
     let pointsToReflect = []; // centroids of delauney triangles that need to be reflected
-    triangleMesh.forEach(triangle => {
-      console.log(triangle);
-    })
 
+    convexEdges.forEach((edge) => {
+      triangleMesh.forEach((triangle) => {
+        if (isEdgeOnTriangle(edge, triangle.triangleVertices)) {
+          pointsToReflect.push({ point: triangle.centroid, edge: edge})
+        }
+      });
+    })
+    console.log("pointsToReflect", pointsToReflect);
 
     // reflect centroids on convexEdges
+    //TODO: can add edges directly here as well, as I have the starting points
+    // p0 = edge[0]
+    // so 2 additional edges get added for each reflected point: from p0 to new rP, and from rP to p1
+    let reflectedPoints = []
+    pointsToReflect.forEach((point) => {
+      const p = point.point;
+      const p0 = point.edge[0];
+      const p1 = point.edge[1];
+      const rP = reflect(p, p0, p1)// new reflected Point
+      reflectedPoints.push(rP)
+    })
+
+    console.log("reflectedPoints",reflectedPoints);
 
     // 4. Draw edges for visualization
     graphEdges.forEach((edge) => {
@@ -291,6 +314,21 @@ window.addEventListener("load", () => {
     return node1.x === node2.x && node1.y === node2.y;
   }
 
+  function isEdgeOnTriangle(edge, triangle) {
+    for (let i = 0; i < 3; i++) {
+      const nextIndex = (i + 1) % 3;
+      const triangleEdge = [triangle[i], triangle[nextIndex]];
+      // Check if both nodes of the edge are equal to both nodes of the triangle edge
+      if (
+        (compareNodes(edge[0], triangleEdge[0]) && compareNodes(edge[1], triangleEdge[1])) ||
+        (compareNodes(edge[0], triangleEdge[1]) && compareNodes(edge[1], triangleEdge[0]))
+      ) {
+        return true; // Edge is also on the triangle
+      }
+    }
+    return false; // Edge is not on the triangle
+  }
+
   /**
    * @brief Reflect point p along line through points p0 and p1
    *
@@ -301,7 +339,7 @@ window.addEventListener("load", () => {
    * @param p1 second point for reflection line
    * @return object
    */
-  const reflect = function (p, p0, p1) {
+  function reflect (p, p0, p1) {
     let dx, dy, a, b, x, y;
 
     dx = p1.x - p0.x;
