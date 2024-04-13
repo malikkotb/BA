@@ -232,26 +232,32 @@ window.addEventListener("load", () => {
     convexEdges.forEach((edge) => {
       triangleMesh.forEach((triangle) => {
         if (isEdgeOnTriangle(edge, triangle.triangleVertices)) {
-          pointsToReflect.push({ point: triangle.centroid, edge: edge})
+          pointsToReflect.push({ point: triangle.centroid, edge: edge });
         }
       });
-    })
+    });
     console.log("pointsToReflect", pointsToReflect);
 
     // reflect centroids on convexEdges
-    //TODO: can add edges directly here as well, as I have the starting points
-    // p0 = edge[0]
-    // so 2 additional edges get added for each reflected point: from p0 to new rP, and from rP to p1
     let reflectedPoints = []
     pointsToReflect.forEach((point) => {
       const p = point.point;
       const p0 = point.edge[0];
       const p1 = point.edge[1];
-      const rP = reflect(p, p0, p1)// new reflected Point
-      reflectedPoints.push(rP)
-    })
+      const rP = reflect(p, p0, p1); // new reflected Point
 
-    console.log("reflectedPoints",reflectedPoints);
+      // add 2 new edges for each reflected point: from p0 to new rP, and from rP to p1
+      graphEdges.push([p0, rP]);
+      graphEdges.push([rP, p1]);
+      reflectedPoints.push(rP)
+
+      // draw reflected point on canvas
+      const radius = 5;
+      ctx2.beginPath();
+      ctx2.arc(rP.x, rP.y, radius, 0, Math.PI * 2); // Arc centered at (x, y) with radius
+      ctx2.fillStyle = "purple";
+      ctx2.fill();
+    });
 
     // 4. Draw edges for visualization
     graphEdges.forEach((edge) => {
@@ -268,7 +274,7 @@ window.addEventListener("load", () => {
     // and it behaves more like a dictionary or hashMap (found in other languages)
 
     const adjacencyList = new Map();
-    [...nodeMidpoints, ...centroids].forEach((node) => {
+    [...nodeMidpoints, ...centroids, ...reflectedPoints].forEach((node) => {
       adjacencyList.set(node, []);
     });
 
@@ -339,7 +345,7 @@ window.addEventListener("load", () => {
    * @param p1 second point for reflection line
    * @return object
    */
-  function reflect (p, p0, p1) {
+  function reflect(p, p0, p1) {
     let dx, dy, a, b, x, y;
 
     dx = p1.x - p0.x;
@@ -350,7 +356,7 @@ window.addEventListener("load", () => {
     y = Math.round(b * (p.x - p0.x) - a * (p.y - p0.y) + p0.y);
 
     return { x: x, y: y };
-  };
+  }
 
   function printMap(map) {
     map.forEach((value, key) => {
