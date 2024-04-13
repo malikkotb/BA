@@ -27,6 +27,7 @@ window.addEventListener("load", () => {
   let triangleMesh = []; // list of objects with all important triangle nodes for one triangle and their respective coordinates (includes: vertices (corner points) and centroids of a single triangle)
   let nodeMidpoints = [];
   let centroids = [];
+  let convexHull = []; // convexHull of nodes
   let dijkstra = null;
 
   let grid = null;
@@ -129,15 +130,14 @@ window.addEventListener("load", () => {
 
     // convex hull of the points
     let hull = delaunay.hull;
-    let hullCoordiantes = [];
 
     for (let i = 0; i < hull.length; i++) {
-      hullCoordiantes.push(points[hull[i]]);
+      convexHull.push(points[hull[i]]);
     }
     ctx.beginPath();
-    ctx.moveTo(hullCoordiantes[0][0], hullCoordiantes[0][1]);
+    ctx.moveTo(convexHull[0][0], convexHull[0][1]);
 
-    hullCoordiantes.forEach((h) => {
+    convexHull.forEach((h) => {
       ctx.lineTo(h[0], h[1]);
     });
     ctx.closePath();
@@ -202,12 +202,40 @@ window.addEventListener("load", () => {
       });
     });
 
-    // 3. Draw edges for visualization
+    // 3. Reflect centroids between nodes on convex hull on the line connecting two nodes on convex hull
+    // Reflect point along line: https://gist.github.com/balint42/b99934b2a6990a53e14b // method is from this source -> REFERENCE in Paper
+
+    // TODO: use reflect method
+    // go over convex hull maybe ? as those are the edges and vertices I need to respect
+    // adding a node for each of the outher edges of the convex hull should in principal take care of the scenarios for the outside nodes
+    // such that the scenario where you can go back and forth in between two close-by nodes is always possible
+
+    // get convex-hull edges
+    let convexEdges = [];
+    for (let i = 0; i < convexHull.length; i++) {
+      if (i === convexHull.length - 1) {
+        convexEdges.push([{x: convexHull[i][0], y: convexHull[i][1]}, {x: convexHull[0][0], y: convexHull[0][1]}]);
+      } else {
+        convexEdges.push([{x: convexHull[i][0], y: convexHull[i][1]}, {x: convexHull[i+1][0], y: convexHull[i+1][1]}]);
+      }
+    }
+    console.log(convexEdges);
+
+    // get centroids that need to be reflected
+    let pointsToReflect = []; // centroids of delauney triangles that need to be reflected
+    triangleMesh.forEach(triangle => {
+      console.log(triangle);
+    })
+
+
+    // reflect centroids on convexEdges
+
+    // 4. Draw edges for visualization
     graphEdges.forEach((edge) => {
       drawLine(ctx2, edge[0], edge[1]);
     });
 
-    // 4. Represent the graph (nodes & edges) as an adjacency list
+    // 5. Represent the graph (nodes & edges) as an adjacency list
 
     // implement an adjacency list as a set of key-value pairs
     // where the key is the node (base-node)
@@ -234,10 +262,10 @@ window.addEventListener("load", () => {
       }
     });
 
-    printMap(adjacencyList);
+    // printMap(adjacencyList);
 
-    dijkstra = new Dijkstra();
-    paths = dijkstra.findPath(adjacencyList);
+    dijkstra = new Dijkstra(adjacencyList);
+    paths = dijkstra.findPaths();
 
     // POST-PROCESSING
     // edgeConnections.map((edge))
@@ -262,6 +290,29 @@ window.addEventListener("load", () => {
   function compareNodes(node1, node2) {
     return node1.x === node2.x && node1.y === node2.y;
   }
+
+  /**
+   * @brief Reflect point p along line through points p0 and p1
+   *
+   * @author Balint Morvai <balint@morvai.de>
+   * @license http://en.wikipedia.org/wiki/MIT_License MIT License
+   * @param p point to reflect
+   * @param p0 first point for reflection line
+   * @param p1 second point for reflection line
+   * @return object
+   */
+  const reflect = function (p, p0, p1) {
+    let dx, dy, a, b, x, y;
+
+    dx = p1.x - p0.x;
+    dy = p1.y - p0.y;
+    a = (dx * dx - dy * dy) / (dx * dx + dy * dy);
+    b = (2 * dx * dy) / (dx * dx + dy * dy);
+    x = Math.round(a * (p.x - p0.x) + b * (p.y - p0.y) + p0.x);
+    y = Math.round(b * (p.x - p0.x) - a * (p.y - p0.y) + p0.y);
+
+    return { x: x, y: y };
+  };
 
   function printMap(map) {
     map.forEach((value, key) => {
