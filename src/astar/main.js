@@ -1,6 +1,6 @@
 import Delaunator from "https://cdn.skypack.dev/delaunator@5.0.0";
 import { Grid } from "./grid.js";
-import { Dijkstra } from "./dijkstra.js";
+import { Dijkstra } from "./graphSearch.js";
 // import Delaunator from "delaunator";
 window.addEventListener("load", () => {
   const canvas = document.querySelector("#grid");
@@ -239,7 +239,7 @@ window.addEventListener("load", () => {
     console.log("pointsToReflect", pointsToReflect);
 
     // reflect centroids on convexEdges
-    let reflectedPoints = []
+    let reflectedPoints = [];
     pointsToReflect.forEach((point) => {
       const p = point.point;
       const p0 = point.edge[0];
@@ -249,7 +249,7 @@ window.addEventListener("load", () => {
       // add 2 new edges for each reflected point: from p0 to new rP, and from rP to p1
       graphEdges.push([p0, rP]);
       graphEdges.push([rP, p1]);
-      reflectedPoints.push(rP)
+      reflectedPoints.push(rP);
 
       // draw reflected point on canvas
       const radius = 5;
@@ -264,13 +264,25 @@ window.addEventListener("load", () => {
       drawLine(ctx2, edge[0], edge[1]);
     });
 
-    // 5. Represent the graph (nodes & edges) as an adjacency list
+    // TODO:
+    // 5. Intermediate step which is performed every execution
+
+    // check if there is already a path along certain points.
+    // ( -> need to store all previously rendered paths )
+    // and if there is, then add edge weights along that path perhaps ??
+    //   const adjacencyList  = {
+    //     'A': [{ node: 'B', weight: 5 }, { node: 'C', weight: 3 }],
+    //     'B': [{ node: 'A', weight: 5 }, { node: 'C', weight: 8 }],
+    //     'C': [{ node: 'A', weight: 3 }, { node: 'B', weight: 8 }]
+    // };
+
+    // 6. Represent the graph (nodes & edges) as an adjacency list
 
     // implement an adjacency list as a set of key-value pairs
     // where the key is the node (base-node)
     // and the value is an array represnting what other nodes the base-node is connected to
 
-    // we will use a Map() for this, because it has additional useful API methods
+    // I will use a Map() for this, because it has additional useful API methods
     // and it behaves more like a dictionary or hashMap (found in other languages)
 
     const adjacencyList = new Map();
@@ -293,6 +305,7 @@ window.addEventListener("load", () => {
 
     // printMap(adjacencyList);
 
+    // 7. Perform pathfinding (graph search algorithm) on adjacency list
     dijkstra = new Dijkstra(adjacencyList);
     paths = dijkstra.findPaths();
 
