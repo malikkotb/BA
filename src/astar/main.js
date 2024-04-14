@@ -297,10 +297,10 @@ window.addEventListener("load", () => {
         // to add an edge (undirected), I need to update the entries for the baseNode and the connectedNode
         adjacencyList
           .get(keyBaseNode)
-          .push({ node: keyConnectedNode, weight: calculateDistance(keyBaseNode, keyConnectedNode), gCost: 0, hCost: 0 });
+          .push({ node: keyConnectedNode, weight: calculateDistance(keyBaseNode, keyConnectedNode), gCost: 12, hCost: 0 });
         adjacencyList
           .get(keyConnectedNode)
-          .push({ node: keyBaseNode, weight: calculateDistance(keyConnectedNode, keyBaseNode), gCost: 0, hCost: 0 }); // do inverse of line above to update the connectedNode also
+          .push({ node: keyBaseNode, weight: calculateDistance(keyConnectedNode, keyBaseNode), gCost: 12, hCost: 0 }); // do inverse of line above to update the connectedNode also
       }
     });
 

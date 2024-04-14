@@ -1,3 +1,5 @@
+// TODO: reference the implementation in paper: https://github.com/luciopaiva/heapify
+import { MinQueue } from "https://unpkg.com/heapify/heapify.mjs";
 export class aStar {
   // Edge Weights: Represent the Euclidean distance between connected nodes.
   // g-Cost: Cumulative distance traveled from the start node along the explored path.
@@ -5,19 +7,26 @@ export class aStar {
   // f-Cost: Total estimated cost of reaching the goal node via the current node, sum of g-cost and h-cost.
 
   findPaths(adjacencyList, start, target) {
-    const openSet = [];
     // TODO: change openSet from arrray to priority queue with min-heap implemenation
-    // https://medium.com/@adityakashyap_36551/priority-queue-in-javascript-binary-heap-076d0d38703f#:~:text=In%20JavaScript%2C%20there%20is%20no,to%20use%20a%20binary%20heap.
+    const openSet = new MinQueue(64, [], [], Array, Uint32Array);
     const closedSet = [];
-    let startNode = { node: start.midpoint, connectioins: adjacencyList.get(start.midpoint) };
-    openSet.push(startNode);
+    let startNode = { node: start, connections: adjacencyList.get(start.midpoint) };
+    openSet.push(startNode, startNode.node.gCost);
+    console.log(openSet.peekPriority())
+    // nodes defined like this: { node: start.midpoint, connections: adjacencyList.get(start.midpoint) }
 
-    // get connected nodes for a node in openSet: adjacencyList.get(node)
-    console.log(startNode);
+    // openSet.push(1, 10); // pushes the key and a priority (= f_cost)
 
-    // while (this.openSet.length > 0) {
-    //   // let current = // current node in openSet wit lowest f_cost
-    // }
+
+
+
+    while (openSet.size > 0) {
+      let current = openSet[0]; // current node in openSet wit lowest f_cost
+      console.log(current);
+      openSet;
+
+      return;
+    }
   }
 
   // Function to calculate Euclidean distance between two nodes
