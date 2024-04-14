@@ -297,10 +297,14 @@ window.addEventListener("load", () => {
         // to add an edge (undirected), I need to update the entries for the baseNode and the connectedNode
         adjacencyList
           .get(keyBaseNode)
-          .push({ node: keyConnectedNode, weight: calculateDistance(keyBaseNode, keyConnectedNode), gCost: 12, hCost: 0 });
+          .push({
+            node: keyConnectedNode,
+            weight: calculateDistance(keyBaseNode, keyConnectedNode),
+          });
+        // do inverse of line above to update the connectedNode also
         adjacencyList
           .get(keyConnectedNode)
-          .push({ node: keyBaseNode, weight: calculateDistance(keyConnectedNode, keyBaseNode), gCost: 12, hCost: 0 }); // do inverse of line above to update the connectedNode also
+          .push({ node: keyBaseNode, weight: calculateDistance(keyConnectedNode, keyBaseNode), gCost: 0, hCost: 0 });
       }
     });
 
@@ -311,7 +315,7 @@ window.addEventListener("load", () => {
 
     // 7. Perform pathfinding (graph search algorithm) on adjacency list
     astar = new aStar();
-    paths = astar.findPaths(adjacencyList, startNode, targetNode); // pass in the midpoint, as those represent nodes in the adjacency list (graph)
+    paths = astar.findPaths(adjacencyList, startNode.midpoint, targetNode.midpoint); // pass in the midpoint, as those represent nodes in the adjacency list (graph)
 
     // 8. POST-PROCESSING (Rendering the edges)
     edgeConnections.map((edge) => {
