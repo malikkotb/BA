@@ -1,6 +1,6 @@
 import Delaunator from "https://cdn.skypack.dev/delaunator@5.0.0";
 import { Grid } from "./grid.js";
-import { Dijkstra } from "./graphSearch.js";
+import { aStar } from "./graphSearch.js";
 // import Delaunator from "delaunator";
 window.addEventListener("load", () => {
   const canvas = document.querySelector("#grid");
@@ -28,7 +28,7 @@ window.addEventListener("load", () => {
   let nodeMidpoints = [];
   let centroids = [];
   let convexHull = []; // convexHull of nodes
-  let dijkstra = null;
+  let astar = null;
 
   let grid = null;
   let paths = []; // shortest paths
@@ -270,18 +270,16 @@ window.addEventListener("load", () => {
     // check if there is already a path along certain points.
     // ( -> need to store all previously rendered paths )
     // and if there is, then add edge weights along that path perhaps ??
-    //   const adjacencyList  = {
-    //     'A': [{ node: 'B', weight: 5 }, { node: 'C', weight: 3 }],
-    //     'B': [{ node: 'A', weight: 5 }, { node: 'C', weight: 8 }],
-    //     'C': [{ node: 'A', weight: 3 }, { node: 'B', weight: 8 }]
-    // };
+    // I can perhaps add weights to the edges for edges that are crossing another edge or sth. similar like that to influence the path.
+
+    // TODO:==> add these calculated weights when setting 'weight' property
+    // of an aded node
 
     // 6. Represent the graph (nodes & edges) as an adjacency list
 
     // implement an adjacency list as a set of key-value pairs
     // where the key is the node (base-node)
     // and the value is an array represnting what other nodes the base-node is connected to
-
     // I will use a Map() for this, because it has additional useful API methods
     // and it behaves more like a dictionary or hashMap (found in other languages)
 
@@ -298,16 +296,20 @@ window.addEventListener("load", () => {
       const keyConnectedNode = keysArray.find((key) => compareNodes(edge[1], key));
       if (keyBaseNode) {
         // to add an edge (undirected), I need to update the entries for the baseNode and the connectedNode
-        adjacencyList.get(keyBaseNode).push(keyConnectedNode);
-        adjacencyList.get(keyConnectedNode).push(keyBaseNode); // do inverse of line above to update the connectedNode also
+        adjacencyList
+          .get(keyBaseNode)
+          .push({ node: keyConnectedNode, weight: calculateDistance(keyBaseNode, keyConnectedNode) });
+        adjacencyList
+          .get(keyConnectedNode)
+          .push({ node: keyBaseNode, weight: calculateDistance(keyConnectedNode, keyBaseNode) }); // do inverse of line above to update the connectedNode also
       }
     });
 
     // printMap(adjacencyList);
 
     // 7. Perform pathfinding (graph search algorithm) on adjacency list
-    dijkstra = new Dijkstra(adjacencyList);
-    paths = dijkstra.findPaths();
+    astar = new aStar(adjacencyList);
+    paths = astar.findPaths();
 
     // POST-PROCESSING
     // edgeConnections.map((edge))
@@ -394,6 +396,13 @@ window.addEventListener("load", () => {
     console.log(startNode, targetNode);
 
     // return { startPos, targetPos };
+  }
+
+  // Function to calculate Euclidean distance between two nodes
+  function calculateDistance(node1, node2) {
+    const dx = node2.x - node1.x;
+    const dy = node2.y - node1.y;
+    return Math.floor(Math.sqrt(dx * dx + dy * dy));
   }
 
   // Function to find neighboring triangles for each triangle
