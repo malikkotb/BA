@@ -236,7 +236,6 @@ window.addEventListener("load", () => {
         }
       });
     });
-    console.log("pointsToReflect", pointsToReflect);
 
     // reflect centroids on convexEdges
     let reflectedPoints = [];
@@ -298,24 +297,23 @@ window.addEventListener("load", () => {
         // to add an edge (undirected), I need to update the entries for the baseNode and the connectedNode
         adjacencyList
           .get(keyBaseNode)
-          .push({ node: keyConnectedNode, weight: calculateDistance(keyBaseNode, keyConnectedNode) });
+          .push({ node: keyConnectedNode, weight: calculateDistance(keyBaseNode, keyConnectedNode), gCost: 0, hCost: 0 });
         adjacencyList
           .get(keyConnectedNode)
-          .push({ node: keyBaseNode, weight: calculateDistance(keyConnectedNode, keyBaseNode) }); // do inverse of line above to update the connectedNode also
+          .push({ node: keyBaseNode, weight: calculateDistance(keyConnectedNode, keyBaseNode), gCost: 0, hCost: 0 }); // do inverse of line above to update the connectedNode also
       }
     });
 
     // printMap(adjacencyList);
 
-    // 7. Perform pathfinding (graph search algorithm) on adjacency list
-    astar = new aStar(adjacencyList);
-    paths = astar.findPaths();
-
-    // POST-PROCESSING
-    // edgeConnections.map((edge))
     let startNode = edgeConnections[0].startNode;
     let targetNode = edgeConnections[0].targetNode;
 
+    // 7. Perform pathfinding (graph search algorithm) on adjacency list
+    astar = new aStar();
+    paths = astar.findPaths(adjacencyList, startNode, targetNode); // pass in the midpoint, as those represent nodes in the adjacency list (graph)
+
+    // 8. POST-PROCESSING (Rendering the edges)
     edgeConnections.map((edge) => {
       // ACTUALLY I DONT NEED TO CARE ABOUT THE CELLS AT ALL ANYMORE
       // THEY'RE JUST THERE FOR THE PREVIOUS APPROACH
@@ -449,7 +447,7 @@ window.addEventListener("load", () => {
       }
       const midpoint = { x: x + width / 2, y: y + height / 2 };
       nodeMidpoints.push(midpoint);
-      return { x, y, width, height };
+      return { x, y, width, height, midpoint: midpoint };
     });
   }
 
