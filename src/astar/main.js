@@ -310,22 +310,26 @@ window.addEventListener("load", () => {
       }
     });
 
-    // printMap(adjacencyList);
 
-    let startNode = edgeConnections[0].startNode;
-    let targetNode = edgeConnections[0].targetNode;
+    // let startNode = edgeConnections[0].startNode;
+    // let targetNode = edgeConnections[0].targetNode;
 
     // 7. Perform pathfinding (graph search algorithm) on adjacency list
-    astar = new aStar();
-    // TODO: need to run this method for each edge connection (user input)
-    // paths = astar.findPaths(adjacencyList, startNode.midpoint, targetNode.midpoint); // pass in the midpoint, as those represent nodes in the adjacency list (graph)
-    astar.test();
-    // 8. POST-PROCESSING (Rendering the edges)
+    astar = new aStar(adjacencyList);
+
+    // run astar.findPath for each edge connection (user input)
+    edgeConnections.map(edge => {
+      console.log(edge);
+      let path = astar.findPath(edge.startNode.midpoint, edge.targetNode.midpoint); // pass in the midpoint, as those represent nodes in the adjacency list (graph)
+      paths.push(path)
+    })
+
+
+    console.log("All paths: ", paths);
+    
+    // TODO: 8. POST-PROCESSING (Rendering the edges)
     edgeConnections.map((edge) => {
-      // ACTUALLY I DONT NEED TO CARE ABOUT THE CELLS AT ALL ANYMORE
-      // THEY'RE JUST THERE FOR THE PREVIOUS APPROACH
-      // TODO: Post-processing for rendering the edge:
-      // compute what Side I should render the starting-point of the bezier curve from
+      // compute what side I should render the starting-point of the bezier curve from
       // and determine the position on that side by the set standards (and then calculate using dimensions of the node)
       // ctx2.beginPath();
       // ctx2.moveTo(startNode.x, startNode.y); // Move to the starting point
