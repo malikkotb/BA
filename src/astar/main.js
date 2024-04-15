@@ -317,8 +317,9 @@ window.addEventListener("load", () => {
 
     // 7. Perform pathfinding (graph search algorithm) on adjacency list
     astar = new aStar();
-    paths = astar.findPaths(adjacencyList, startNode.midpoint, targetNode.midpoint); // pass in the midpoint, as those represent nodes in the adjacency list (graph)
-
+    // TODO: need to run this method for each edge connection (user input)
+    // paths = astar.findPaths(adjacencyList, startNode.midpoint, targetNode.midpoint); // pass in the midpoint, as those represent nodes in the adjacency list (graph)
+    astar.test();
     // 8. POST-PROCESSING (Rendering the edges)
     edgeConnections.map((edge) => {
       // ACTUALLY I DONT NEED TO CARE ABOUT THE CELLS AT ALL ANYMORE
