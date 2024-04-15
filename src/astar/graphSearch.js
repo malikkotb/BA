@@ -5,8 +5,9 @@ export class aStar {
   // h-Cost: Estimated distance from the current node to the goal node, based on Euclidean distance.
   // f-Cost: Total estimated cost of reaching the goal node via the current node, sum of g-cost and h-cost.
 
-  constructor(adjacencyList) {
-    this.adjacencyList = adjacencyList
+  constructor(adjacencyList, nodeMidoints) {
+    this.adjacencyList = adjacencyList;
+    this.nodeMidoints = nodeMidoints;
   }
 
   findPath(start, target) {
@@ -28,8 +29,6 @@ export class aStar {
     gScore[JSON.stringify(start)] = 0;
     fScore[JSON.stringify(start)] = this.calculateDistance(start, target);
 
-    
-
     while (!openSet.isEmpty()) {
       let current = openSet.dequeue(); // get current node in openSet wit lowest f_cost
 
@@ -41,9 +40,28 @@ export class aStar {
       for (let neighbour of this.adjacencyList.get(current)) {
         // this.calculateDistance(neighbour, current) represents the edge weight from neighbour to currnet
         let tentativeGScore = gScore[JSON.stringify(current)] + this.calculateDistance(neighbour, current);
-        // console.log("gScore[JSON.stringify(current)]", gScore[JSON.stringify(current)]);
-        // console.log("fScore[JSON.stringify(current)]", fScore[JSON.stringify(current)]);
-        // console.log("hCost", this.calculateDistance(neighbour, current));
+
+        // check if a neighbour (THAT IS NOT THE TARGETNODE AND NOT THE STARTNODE) is a nodeMidpoint -> then set edge weight to that neighbour high; as we dont want to go through another node
+        let nodeMidpointNotTargetNotStart = null;
+        const neighbourIsMidpointAndNotTarget = this.nodeMidoints.some((nodeMidoint) => {
+          nodeMidpointNotTargetNotStart = nodeMidoint;
+          return (
+            neighbour.x !== start.x &&
+            neighbour.y !== start.y &&
+            neighbour.x !== target.x &&
+            neighbour.y !== target.y &&
+            neighbour.x === nodeMidoint.x &&
+            neighbour.y === nodeMidoint.y
+          );
+        });
+        if (neighbourIsMidpointAndNotTarget) {
+          console.log(neighbourIsMidpointAndNotTarget);
+          console.log("neihgbour", neighbour);
+          console.log("target", target);
+          console.log("start", start);
+          console.log("nodeMidpontNotTarget", nodeMidpointNotTargetNotStart);
+          tentativeGScore += 100;
+        }
 
         // influence the path by simply changing weights of a particular connection:
         // so by adjusting the edge costs

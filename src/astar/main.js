@@ -258,13 +258,17 @@ window.addEventListener("load", () => {
       ctx2.fill();
     });
 
-    // 4. Draw edges for visualization
+    // 4. TODO: Add additional points and edges for dual-grid-graph that are on the outside of the convex hull -> to make travelling around all nodes on the outside possible
+    //    TODO: maybe add additonal points on the dual-grid-graph, that lie on the edges of the triangles (generated through delauney triangluation)
+    //    => to have more control-points for the bezier splines
+
+    // 5. Draw edges for visualization
     graphEdges.forEach((edge) => {
       drawLine(ctx2, edge[0], edge[1]);
     });
 
     // TODO:
-    // 5. Intermediate step which is performed every execution
+    // 6. Intermediate step which is performed every execution
 
     // check if there is already a path along certain points.
     // ( -> need to store all previously rendered paths )
@@ -274,7 +278,7 @@ window.addEventListener("load", () => {
     // TODO:==> add these calculated weights when setting 'weight' property
     // of an aded node
 
-    // 6. Represent the graph (nodes & edges) as an adjacency list
+    // 7. Represent the graph (nodes & edges) as an adjacency list
 
     // implement an adjacency list as a set of key-value pairs
     // where the key is the node (base-node)
@@ -309,16 +313,17 @@ window.addEventListener("load", () => {
     // let startNode = edgeConnections[0].startNode;
     // let targetNode = edgeConnections[0].targetNode;
 
-    // 7. Perform pathfinding (graph search algorithm) on adjacency list
-    astar = new aStar(adjacencyList);
+    // 8. Perform pathfinding (graph search algorithm) on adjacency list
+    astar = new aStar(adjacencyList, nodeMidpoints);
 
     // run astar.findPath() for each edge connection (user input)
     edgeConnections.map((edge) => {
       let path = astar.findPath(edge.startNode.midpoint, edge.targetNode.midpoint); // pass in the midpoint, as those represent nodes in the adjacency list (graph)
       paths.push(path);
+      console.log("");
     });
 
-    // TODO: 8. POST-PROCESSING (Rendering the edges as bezier curves)
+    // TODO: 9. POST-PROCESSING (Rendering the edges as bezier curves)
     paths.forEach((path, index) => {
       // TODO: compute what side I should render the starting-point of the bezier curve from
       // and determine the position on that side by the set standards (and then calculate using dimensions of the node)
@@ -327,20 +332,16 @@ window.addEventListener("load", () => {
       ctx2.beginPath();
       ctx2.moveTo(path[0].x, path[0].y); // Move to the starting point
       for (let i = 1; i < path.length; i++) {
-        // if (i === path.length - 1) 
+        // if (i === path.length - 1)
         //   break;
         ctx2.lineTo(path[i].x, path[i].y); // Draw a line to the ending point
-        if (index === 0)
-          ctx2.strokeStyle = "green"; // Set the color of the edge
-        else if (index === 1)
-          ctx2.strokeStyle = "yellow"; // Set the color of the edge
-        else if (index === 2)
-          ctx2.strokeStyle = "purple"; // Set the color of the edge
+        if (index === 0) ctx2.strokeStyle = "green"; // Set the color of the edge
+        else if (index === 1) ctx2.strokeStyle = "yellow"; // Set the color of the edge
+        else if (index === 2) ctx2.strokeStyle = "purple"; // Set the color of the edge
 
-          ctx2.lineWidth = 4; // Set the width of the edge
+        ctx2.lineWidth = 4; // Set the width of the edge
         ctx2.stroke();
       }
-
     });
   }
 
