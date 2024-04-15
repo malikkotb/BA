@@ -295,21 +295,16 @@ window.addEventListener("load", () => {
       const keyConnectedNode = keysArray.find((key) => compareNodes(edge[1], key));
       if (keyBaseNode) {
         // to add an edge (undirected), I need to update the entries for the baseNode and the connectedNode
-        adjacencyList
-          .get(keyBaseNode)
-          .push(keyConnectedNode)
-          // .push({
-          //   node: keyConnectedNode,
-          //   weight: calculateDistance(keyBaseNode, keyConnectedNode),
-          // });
+        adjacencyList.get(keyBaseNode).push(keyConnectedNode);
+        // .push({
+        //   node: keyConnectedNode,
+        //   weight: calculateDistance(keyBaseNode, keyConnectedNode),
+        // });
         // do inverse of line above to update the connectedNode also
-        adjacencyList
-          .get(keyConnectedNode)
-          .push(keyBaseNode)
-          // .push({ node: keyBaseNode, weight: calculateDistance(keyConnectedNode, keyBaseNode)});
+        adjacencyList.get(keyConnectedNode).push(keyBaseNode);
+        // .push({ node: keyBaseNode, weight: calculateDistance(keyConnectedNode, keyBaseNode)});
       }
     });
-
 
     // let startNode = edgeConnections[0].startNode;
     // let targetNode = edgeConnections[0].targetNode;
@@ -317,26 +312,35 @@ window.addEventListener("load", () => {
     // 7. Perform pathfinding (graph search algorithm) on adjacency list
     astar = new aStar(adjacencyList);
 
-    // run astar.findPath for each edge connection (user input)
-    edgeConnections.map(edge => {
-      console.log(edge);
-      let path = astar.findPath(edge.startNode.midpoint, edge.targetNode.midpoint); // pass in the midpoint, as those represent nodes in the adjacency list (graph)
-      paths.push(path)
-    })
-
-
-    console.log("All paths: ", paths);
-    
-    // TODO: 8. POST-PROCESSING (Rendering the edges)
+    // run astar.findPath() for each edge connection (user input)
     edgeConnections.map((edge) => {
-      // compute what side I should render the starting-point of the bezier curve from
+      let path = astar.findPath(edge.startNode.midpoint, edge.targetNode.midpoint); // pass in the midpoint, as those represent nodes in the adjacency list (graph)
+      paths.push(path);
+    });
+
+    // TODO: 8. POST-PROCESSING (Rendering the edges as bezier curves)
+    paths.forEach((path, index) => {
+      // TODO: compute what side I should render the starting-point of the bezier curve from
       // and determine the position on that side by the set standards (and then calculate using dimensions of the node)
-      // ctx2.beginPath();
-      // ctx2.moveTo(startNode.x, startNode.y); // Move to the starting point
-      // ctx2.lineTo(targetNode.x, targetNode.y); // Draw a line to the ending point
-      // ctx2.strokeStyle = "red"; // Set the color of the edge
-      // ctx2.lineWidth = 1; // Set the width of the edge
-      // ctx2.stroke();
+
+      // draw a segment for each section of the path
+      ctx2.beginPath();
+      ctx2.moveTo(path[0].x, path[0].y); // Move to the starting point
+      for (let i = 1; i < path.length; i++) {
+        // if (i === path.length - 1) 
+        //   break;
+        ctx2.lineTo(path[i].x, path[i].y); // Draw a line to the ending point
+        if (index === 0)
+          ctx2.strokeStyle = "green"; // Set the color of the edge
+        else if (index === 1)
+          ctx2.strokeStyle = "yellow"; // Set the color of the edge
+        else if (index === 2)
+          ctx2.strokeStyle = "purple"; // Set the color of the edge
+
+          ctx2.lineWidth = 4; // Set the width of the edge
+        ctx2.stroke();
+      }
+
     });
   }
 

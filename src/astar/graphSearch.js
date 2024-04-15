@@ -28,14 +28,13 @@ export class aStar {
     gScore[JSON.stringify(start)] = 0;
     fScore[JSON.stringify(start)] = this.calculateDistance(start, target);
 
-    console.log("");
+    
 
     while (!openSet.isEmpty()) {
       let current = openSet.dequeue(); // get current node in openSet wit lowest f_cost
 
       // get neighbours/(connected nodes) of a node: this.adjacencyList.get(current);
       if (current.x === target.x && current.y === target.y) {
-        console.log("path found");
         return this.reconstructPath(cameFrom, target);
       }
 
@@ -53,8 +52,8 @@ export class aStar {
         //   tentativeGScore += 10;
         // }
 
-        console.log("neighbour: ", JSON.stringify(neighbour), ", tentativeGscore", tentativeGScore);
-        console.log("");
+        // console.log("neighbour: ", JSON.stringify(neighbour), ", tentativeGscore", tentativeGScore);
+        // console.log("");
         if (tentativeGScore < gScore[JSON.stringify(neighbour)]) {
           cameFrom[JSON.stringify(neighbour)] = current;
           gScore[JSON.stringify(neighbour)] = tentativeGScore;
