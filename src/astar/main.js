@@ -41,7 +41,7 @@ window.addEventListener("load", () => {
 
   // draw triangle mesh
   document.getElementById("triangleMeshBtn").addEventListener("click", () => drawDelaunayTriangles(ctx2));
-  
+
   // hide triangle mesh
   document.getElementById("hideMeshBtn").addEventListener("click", () => hideMesh(ctx2));
 
@@ -318,32 +318,42 @@ window.addEventListener("load", () => {
       }
     });
 
-    // let startNode = edgeConnections[0].startNode;
-    // let targetNode = edgeConnections[0].targetNode;
+    // 8. Sort edges in edgeConnections array based on euclidean distances
+    // that are closest together are rendered first
+    // ensuring that the scenario: "connect two nodes directly via quadratic bezier curve"
+    // is always fulfilled
+    edgeConnections.sort((edgeA, edgeB) => {
+      // Calculate euclidean distances for each edge
+      const euclideanDistA = calculateDistance(edgeA.startNode, edgeA.targetNode);
+      const euclideanDistB = calculateDistance(edgeB.startNode, edgeB.targetNode);
 
-    // 8. Perform pathfinding (graph search algorithm) on adjacency list
+      // Compare the euclidean distances and return the comparison result
+      return euclideanDistA - euclideanDistB;
+    });
+
+    // 9. Perform pathfinding (graph search algorithm) on adjacency list
     astar = new aStar(adjacencyList, nodeMidpoints);
 
     // run astar.findPath() for each edge connection (user input)
-    edgeConnections.map((edge) => {
+    edgeConnections.forEach((edge) => {
       let path = astar.findPath(edge.startNode.midpoint, edge.targetNode.midpoint); // pass in the midpoint, as those represent nodes in the adjacency list (graph)
       paths.push(path);
       console.log("");
     });
 
-    // TODO: 9. POST-PROCESSING (Rendering the edges as bezier curves)
+    // TODO: 10. POST-PROCESSING (Rendering the edges as bezier curves)
+    // drawing on ctx (and not ctx2)
     paths.forEach((path, index) => {
       // TODO: compute what side I should render the starting-point of the bezier curve from
       // and determine the position on that side by the set standards (and then calculate using dimensions of the node)
 
       if (path.length <= 3) {
-        // scenario: connect two nodes directly via quadratic bezier curve
+        // scenario: "connect two nodes directly via quadratic bezier curve"
         ctx.beginPath();
         ctx.moveTo(path[0].x, path[0].y);
         ctx.quadraticCurveTo(path[1].x, path[1].y, path[2].x, path[2].y);
         ctx.stroke();
       } else {
-
         // TODO: if path length > 3, use bezier splines and connect them accordingly for
         // a segment of 3 (or in some cases 2 (at the end)) points along the path
 
@@ -351,20 +361,12 @@ window.addEventListener("load", () => {
         ctx.beginPath();
         ctx.moveTo(path[0].x, path[0].y); // Move to the starting point
         for (let i = 1; i < path.length; i++) {
-          // if (i === path.length - 1)
-          //   break;
-          if (index === 1) {
-            continue;
-          }
+          ctx.strokeStyle = "purple";
           ctx.lineTo(path[i].x, path[i].y); // Draw a line to the ending point
-          if (index === 0) ctx.strokeStyle = "green"; // Set the color of the edge
-          else if (index === 1) ctx.strokeStyle = "yellow"; // Set the color of the edge
-          else if (index === 2) ctx.strokeStyle = "purple"; // Set the color of the edge
 
           ctx.lineWidth = 2; // Set the width of the edge
           ctx.stroke();
         }
-
       }
     });
   }

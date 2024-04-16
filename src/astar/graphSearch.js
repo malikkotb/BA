@@ -41,6 +41,10 @@ export class aStar {
         // this.calculateDistance(neighbour, current) represents the edge weight from neighbour to currnet
         let tentativeGScore = gScore[JSON.stringify(current)] + this.calculateDistance(neighbour, current);
 
+        // check if a neighbour is already part of another path
+
+
+
         // check if a neighbour (THAT IS NOT THE TARGETNODE AND NOT THE STARTNODE) is a nodeMidpoint -> then set edge weight to that neighbour high; as we dont want to go through another node
         let nodeMidpointNotTargetNotStart = null;
         const neighbourIsMidpointAndNotTarget = this.nodeMidoints.some((nodeMidoint) => {
