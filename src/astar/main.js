@@ -353,6 +353,34 @@ window.addEventListener("load", () => {
         ctx.moveTo(path[0].x, path[0].y);
         ctx.quadraticCurveTo(path[1].x, path[1].y, path[2].x, path[2].y);
         ctx.stroke();
+
+        // Assuming path is an array of points
+        const controlPoint = path[1];
+        const endPoint = path[2];
+
+        // Calculate the angle of the line segment formed by the last two points
+        const angle = Math.atan2(endPoint.y - controlPoint.y, endPoint.x - controlPoint.x);
+
+        // Length of the arrowhead
+        const arrowLength = 10;
+
+        // Calculate the coordinates of the points of the arrowhead
+        const arrowPoint1 = {
+          x: endPoint.x - arrowLength * Math.cos(angle - Math.PI / 6),
+          y: endPoint.y - arrowLength * Math.sin(angle - Math.PI / 6),
+        };
+        const arrowPoint2 = {
+          x: endPoint.x - arrowLength * Math.cos(angle + Math.PI / 6),
+          y: endPoint.y - arrowLength * Math.sin(angle + Math.PI / 6),
+        };
+
+        // Draw the arrowhead
+        ctx.beginPath();
+        ctx.moveTo(endPoint.x, endPoint.y);
+        ctx.lineTo(arrowPoint1.x, arrowPoint1.y);
+        ctx.lineTo(arrowPoint2.x, arrowPoint2.y);
+        ctx.closePath();
+        ctx.fill();
       } else {
         // TODO: if path length > 3, use bezier splines and connect them accordingly for
         // a segment of 3 (or in some cases 2 (at the end)) points along the path
