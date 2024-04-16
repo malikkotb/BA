@@ -8,6 +8,7 @@ export class aStar {
   constructor(adjacencyList, nodeMidoints) {
     this.adjacencyList = adjacencyList;
     this.nodeMidoints = nodeMidoints;
+    this.centroidsOnPaths = [];
   }
 
   findPath(start, target) {
@@ -41,8 +42,14 @@ export class aStar {
         // this.calculateDistance(neighbour, current) represents the edge weight from neighbour to currnet
         let tentativeGScore = gScore[JSON.stringify(current)] + this.calculateDistance(neighbour, current);
 
-        // check if a neighbour is already part of another path
-
+        // check if neighbour is a centroid that's already part of another path
+        // to avoid crossong edges
+        // this is a desirable condition but not necessary as there will inevitably be some edge crossing
+        // especially with larger graphs and many connections
+        const neighbourIsCentroidOfExisitngPath = this.isNodeInArray(neighbour, this.centroidsOnPaths);
+        if (neighbourIsCentroidOfExisitngPath) {
+          tentativeGScore += 100;
+        }
 
 
         // check if a neighbour (THAT IS NOT THE TARGETNODE AND NOT THE STARTNODE) is a nodeMidpoint -> then set edge weight to that neighbour high; as we dont want to go through another node
@@ -59,18 +66,9 @@ export class aStar {
           );
         });
         if (neighbourIsMidpointAndNotTarget) {
-          tentativeGScore += 100;
+          tentativeGScore += 1000;
         }
 
-        // influence the path by simply changing weights of a particular connection:
-        // so by adjusting the edge costs
-        // if (JSON.stringify(neighbour) === '{"x":300,"y":183.33333333333334}') {
-        //   console.log("here");
-        //   tentativeGScore += 10;
-        // }
-
-        // console.log("neighbour: ", JSON.stringify(neighbour), ", tentativeGscore", tentativeGScore);
-        // console.log("");
         if (tentativeGScore < gScore[JSON.stringify(neighbour)]) {
           cameFrom[JSON.stringify(neighbour)] = current;
           gScore[JSON.stringify(neighbour)] = tentativeGScore;
@@ -92,7 +90,13 @@ export class aStar {
       current = cameFrom[JSON.stringify(current)];
       totalPath.unshift(current);
     }
+    this.centroidsOnPaths.push(...totalPath.slice(1, -1));
     return totalPath;
+  }
+
+  // Function to check if a specific node is in the array
+  isNodeInArray(node, array) {
+    return array.some((n) => n.x === node.x && n.y === node.y);
   }
 
   // Function to calculate Euclidean distance between two nodes

@@ -364,7 +364,7 @@ window.addEventListener("load", () => {
           ctx.strokeStyle = "purple";
           ctx.lineTo(path[i].x, path[i].y); // Draw a line to the ending point
 
-          ctx.lineWidth = 2; // Set the width of the edge
+          ctx.lineWidth = 3; // Set the width of the edge
           ctx.stroke();
         }
       }
