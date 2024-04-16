@@ -55,11 +55,6 @@ export class aStar {
           );
         });
         if (neighbourIsMidpointAndNotTarget) {
-          console.log(neighbourIsMidpointAndNotTarget);
-          console.log("neihgbour", neighbour);
-          console.log("target", target);
-          console.log("start", start);
-          console.log("nodeMidpontNotTarget", nodeMidpointNotTargetNotStart);
           tentativeGScore += 100;
         }
 

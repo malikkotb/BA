@@ -276,7 +276,7 @@ window.addEventListener("load", () => {
     // I can perhaps add weights to the edges for edges that are crossing another edge or sth. similar like that to influence the path.
 
     // TODO:==> add these calculated weights when setting 'weight' property
-    // of an aded node
+    // of an added node
 
     // 7. Represent the graph (nodes & edges) as an adjacency list
 
@@ -328,12 +328,27 @@ window.addEventListener("load", () => {
       // TODO: compute what side I should render the starting-point of the bezier curve from
       // and determine the position on that side by the set standards (and then calculate using dimensions of the node)
 
+      if (index === 1) {
+        ctx2.beginPath();
+        ctx2.moveTo(path[0].x, path[0].y);
+        ctx2.quadraticCurveTo(path[1].x, path[1].y, path[2].x, path[2].y);
+        ctx2.stroke();
+      }
+
+      // TODO: if path length <= 3, use quadratic bezier curve
+      // TODO: if path length > 3, use bezier splines and connect them accordingly for 
+      // a segment of 3 (or in some cases 2 (at the end)) points along the path
+      // console.log(path.length);
+
       // draw a segment for each section of the path
       ctx2.beginPath();
       ctx2.moveTo(path[0].x, path[0].y); // Move to the starting point
       for (let i = 1; i < path.length; i++) {
         // if (i === path.length - 1)
         //   break;
+        if (index === 1) {
+          continue;
+        } 
         ctx2.lineTo(path[i].x, path[i].y); // Draw a line to the ending point
         if (index === 0) ctx2.strokeStyle = "green"; // Set the color of the edge
         else if (index === 1) ctx2.strokeStyle = "yellow"; // Set the color of the edge
