@@ -359,41 +359,80 @@ window.addEventListener("load", () => {
         // exists from nodeB to nodeA => them edges: A->B are beziers, edge B->A is straight line
 
         // TODO: adjust start and end point of edge => calculate intersection point of bezier curve and node
-        intersectionBezierAndNode(path);
-
+        const { startPos, endPos } = intersectionBezierAndNode(path);
+        console.log(startPos);
+        console.log(endPos);
         // scenario: "connect two nodes directly via quadratic bezier curve"
+
         ctx.beginPath();
-        ctx.moveTo(path[0].x, path[0].y);
-        ctx.quadraticCurveTo(path[1].x, path[1].y, path[2].x, path[2].y);
+        ctx.moveTo(startPos[0], startPos[1]);
+        ctx.quadraticCurveTo(path[1].x, path[1].y, endPos[0], endPos[1]);
         ctx.stroke();
 
+
+        // DRAWING ARROWHEAD
         // Assuming path is an array of points
-        const controlPoint = path[1];
-        const endPoint = path[2];
+        // const controlPoint = path[1];
+        // const endPoint = path[2];
 
-        // Calculate the angle of the line segment formed by the last two points
-        const angle = Math.atan2(endPoint.y - controlPoint.y, endPoint.x - controlPoint.x);
+        // // Calculate the angle of the line segment formed by the last two points
+        // const angle = Math.atan2(endPoint.y - controlPoint.y, endPoint.x - controlPoint.x);
 
-        // Length of the arrowhead
-        const arrowLength = 10;
+        // // Length of the arrowhead
+        // const arrowLength = 10;
 
-        // Calculate the coordinates of the points of the arrowhead
-        const arrowPoint1 = {
-          x: endPoint.x - arrowLength * Math.cos(angle - Math.PI / 6),
-          y: endPoint.y - arrowLength * Math.sin(angle - Math.PI / 6),
-        };
-        const arrowPoint2 = {
-          x: endPoint.x - arrowLength * Math.cos(angle + Math.PI / 6),
-          y: endPoint.y - arrowLength * Math.sin(angle + Math.PI / 6),
-        };
+        // // Calculate the coordinates of the points of the arrowhead
+        // const arrowPoint1 = {
+        //   x: endPoint.x - arrowLength * Math.cos(angle - Math.PI / 6),
+        //   y: endPoint.y - arrowLength * Math.sin(angle - Math.PI / 6),
+        // };
+        // const arrowPoint2 = {
+        //   x: endPoint.x - arrowLength * Math.cos(angle + Math.PI / 6),
+        //   y: endPoint.y - arrowLength * Math.sin(angle + Math.PI / 6),
+        // };
 
-        // Draw the arrowhead
-        ctx.beginPath();
-        ctx.moveTo(endPoint.x, endPoint.y);
-        ctx.lineTo(arrowPoint1.x, arrowPoint1.y);
-        ctx.lineTo(arrowPoint2.x, arrowPoint2.y);
-        ctx.closePath();
-        ctx.fill();
+        // // Draw the arrowhead
+        // ctx.beginPath();
+        // ctx.moveTo(endPoint.x, endPoint.y);
+        // ctx.lineTo(arrowPoint1.x, arrowPoint1.y);
+        // ctx.lineTo(arrowPoint2.x, arrowPoint2.y);
+        // ctx.closePath();
+        // ctx.fill();
+
+        ////////////////////////////////
+
+        // ctx.beginPath();
+        // ctx.moveTo(path[0].x, path[0].y);
+        // ctx.quadraticCurveTo(path[1].x, path[1].y, path[2].x, path[2].y);
+        // ctx.stroke();
+
+        // // Assuming path is an array of points
+        // const controlPoint = path[1];
+        // const endPoint = path[2];
+
+        // // Calculate the angle of the line segment formed by the last two points
+        // const angle = Math.atan2(endPoint.y - controlPoint.y, endPoint.x - controlPoint.x);
+
+        // // Length of the arrowhead
+        // const arrowLength = 10;
+
+        // // Calculate the coordinates of the points of the arrowhead
+        // const arrowPoint1 = {
+        //   x: endPoint.x - arrowLength * Math.cos(angle - Math.PI / 6),
+        //   y: endPoint.y - arrowLength * Math.sin(angle - Math.PI / 6),
+        // };
+        // const arrowPoint2 = {
+        //   x: endPoint.x - arrowLength * Math.cos(angle + Math.PI / 6),
+        //   y: endPoint.y - arrowLength * Math.sin(angle + Math.PI / 6),
+        // };
+
+        // // Draw the arrowhead
+        // ctx.beginPath();
+        // ctx.moveTo(endPoint.x, endPoint.y);
+        // ctx.lineTo(arrowPoint1.x, arrowPoint1.y);
+        // ctx.lineTo(arrowPoint2.x, arrowPoint2.y);
+        // ctx.closePath();
+        // ctx.fill();
       } else {
         // TODO: if path length > 3, use bezier splines and connect them accordingly for
         // a segment of 3 (or in some cases 2 (at the end)) points along the path
@@ -419,14 +458,14 @@ window.addEventListener("load", () => {
       const startNode = getNode(path[0]);
       const endNode = getNode(path[2]);
 
-      // TODO: use startNode and endNode & their respecive width & height
+      let startPos = null;
+      let endPos = null;
+
+      // Explaination: use startNode and endNode & their respecive width & height
       // to calculate what angle the bezier is going out of (from the midpoint)
       // => to know which side it of the node it is intersecting with
       // and then use that side as the line to calculate intersection with
-
-      //TODO: all of this code needs to be called twice
-      // once for strartNode and once for endNode
-      // -> same points but differnet line (side of node) to intersect with
+      // the intersection represents the point where the bzezier curve should dock
 
       // start-, control- and end- point of bezier curve
       const points = [
@@ -453,10 +492,22 @@ window.addEventListener("load", () => {
       const intersectStartLeft = getIntersection(points, leftSideStartNode);
       const intersectStartRight = getIntersection(points, rightSideStartNode);
 
-      if (intersectStartTop) console.log("top side", intersectStartTop);
-      if (intersectStartBottom) console.log("bottom side", intersectStartBottom);
-      if (intersectStartLeft) console.log("left side", intersectStartLeft);
-      if (intersectStartRight) console.log("right side", intersectStartRight);
+      if (intersectStartTop) {
+        // console.log("top side", intersectStartTop);
+        startPos = intersectStartTop;
+      }
+      if (intersectStartBottom) {
+        // console.log("bottom side", intersectStartBottom);
+        startPos = intersectStartBottom;
+      }
+      if (intersectStartLeft) {
+        // console.log("left side", intersectStartLeft);
+        startPos = intersectStartLeft;
+      }
+      if (intersectStartRight) {
+        // console.log("right side", intersectStartRight);
+        startPos = intersectStartRight;
+      }
 
       // sides of endNode
       const {
@@ -475,10 +526,24 @@ window.addEventListener("load", () => {
       const intersectEndLeft = getIntersection(points, leftSideEndNode);
       const intersectEndRight = getIntersection(points, rightSideEndNode);
 
-      if (intersectEndTop) console.log("top side", intersectEndTop);
-      if (intersectEndBottom) console.log("bottom side", intersectEndBottom);
-      if (intersectEndLeft) console.log("left side", intersectEndLeft);
-      if (intersectEndRight) console.log("right side", intersectEndRight);
+      if (intersectEndTop) {
+        // console.log("top side", intersectEndTop);
+        endPos = intersectEndTop;
+      }
+      if (intersectEndBottom) {
+        // console.log("bottom side", intersectEndBottom);
+        endPos = intersectEndBottom;
+      }
+      if (intersectEndLeft) {
+        // console.log("left side", intersectEndLeft);
+        endPos = intersectEndLeft;
+      }
+      if (intersectEndRight) {
+        // console.log("right side", intersectEndRight);
+        endPos = intersectEndRight;
+      }
+
+      return { startPos, endPos };
     }
   }
 
