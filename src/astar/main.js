@@ -421,32 +421,44 @@ window.addEventListener("load", () => {
 
       // TODO: use startNode and endNode & their respecive width & height
       // to calculate what angle the bezier is going out of (from the midpoint)
-      // => to know which side it of the node it is intersecting with 
+      // => to know which side it of the node it is intersecting with
       // and then use that side as the line to calculate intersection with
-      
 
       console.log("startNode", startNode);
-      console.log("controilPoint ", controlPoint);
       console.log("endNode ", endNode);
 
-      console.log("path 0", path[0]);
-      console.log("path 1", path[1]);
-      console.log("path 2", path[2]);
+      //TODO: all of this code needs to be called twice
+      // once for strartNode and once for endNode
+      // -> same points but differnet line (side of node) to intersect with
 
-      // start-, control- and end- point of bezier curve 
+      // start-, control- and end- point of bezier curve
       const points = [
-        [200, 300],
-        [640, 175],
-        [1080, 300],
+        [path[0].x, path[0].y],
+        [path[1].x, path[1].y],
+        [path[2].x, path[2].y],
       ];
 
       // Destructure the points array
       const [[x1, y1], [x2, y2], [x3, y3]] = points;
 
+      // sides of startNode
+      // TODO: do same for endNode
+      // line -> represents the side of where the bezier is going through
+      // returns sides of a node:
+      const { top, bottom, left, right } = calculateNodeSides(startNode.width, startNode.height, {
+        x: startNode.x,
+        y: startNode.y,
+      });
       const line = [
         [650, 60],
         [650, 550],
       ];
+      const side = [
+        [650, 60],
+        [650, 550],
+      ];
+
+      console.log("sides", top, bottom, left, right);
 
       const roots = getRoots(points, line);
       console.log(`roots: ${roots.join(`, `)}`);
@@ -465,7 +477,7 @@ window.addEventListener("load", () => {
     let midPoint = null;
     nodeCoordinates.some((node) => {
       if (node.midpoint.x === point.x && node.midpoint.y === point.y) {
-        midPoint = point;
+        midPoint = node;
       }
     });
     return midPoint;
@@ -553,6 +565,32 @@ window.addEventListener("load", () => {
     // And if there are two roots we compute the "full" formula
     const w = sqrt(v) / (2 * a);
     return [u + w, u - w];
+  }
+
+  // returns sides of a node: { top, bottom, left, right}
+  function calculateNodeSides(width, height, topLeftCorner) {
+    const halfWidth = width / 2;
+    const halfHeight = height / 2;
+
+    // Calculate coordinates of each side
+    const top = [
+      [topLeftCorner.x, topLeftCorner.y],
+      [topLeftCorner.x + width, topLeftCorner.y],
+    ];
+    const bottom = [
+      [topLeftCorner.x, topLeftCorner.y + height],
+      [topLeftCorner.x + width, topLeftCorner.y + height],
+    ];
+    const left = [
+      [topLeftCorner.x, topLeftCorner.y],
+      [topLeftCorner.x, topLeftCorner.y + height],
+    ];
+    const right = [
+      [topLeftCorner.x + width, topLeftCorner.y],
+      [topLeftCorner.x + width, topLeftCorner.y + height],
+    ];
+
+    return { top, bottom, left, right };
   }
 
   function specifyDockingPoints(startNode, targetNode) {
