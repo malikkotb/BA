@@ -438,39 +438,33 @@ window.addEventListener("load", () => {
         [path[2].x, path[2].y],
       ];
 
-      // Destructure the points array
-      const [[x1, y1], [x2, y2], [x3, y3]] = points;
-
-      // sides of startNode
       // TODO: do same for endNode
-      // line -> represents the side of where the bezier is going through
-      // returns sides of a node:
+      // sides of startNode
       const { top, bottom, left, right } = calculateNodeSides(startNode.width, startNode.height, {
         x: startNode.x,
         y: startNode.y,
       });
-      const line = [
-        [650, 60],
-        [650, 550],
-      ];
-      const side = [
-        [650, 60],
-        [650, 550],
-      ];
 
       console.log("sides", top, bottom, left, right);
+      console.log();
+      const coordinatesTop = getIntersection(points, top);
+      const coordinatesBottom = getIntersection(points, bottom);
+      const coordinatesLeft = getIntersection(points, left);
+      const coordinatesRight = getIntersection(points, right);
 
-      const roots = getRoots(points, line);
-      console.log(`roots: ${roots.join(`, `)}`);
-
-      const coordForRoot = (t) => {
-        const mt = 1 - t;
-        return [x1 * mt ** 2 + 2 * x2 * t * mt + x3 * t ** 2, y1 * mt ** 2 + 2 * y2 * t * mt + y3 * t ** 2];
-      };
-
-      const coordinates = roots.map((t) => coordForRoot(t).map((v) => v.toFixed(2)));
-      console.log(`coordinates: ${coordinates.join(`, `)}`);
     }
+  }
+
+  function getIntersection(points, line) {
+    // Destructure the points array
+    const [[x1, y1], [x2, y2], [x3, y3]] = points;
+    const roots = getRoots(points, line);
+    const coordForRoot = (t) => {
+      const mt = 1 - t;
+      return [x1 * mt ** 2 + 2 * x2 * t * mt + x3 * t ** 2, y1 * mt ** 2 + 2 * y2 * t * mt + y3 * t ** 2];
+    };
+    const coordinates = roots.map((t) => coordForRoot(t).map((v) => v.toFixed(2)));
+    console.log(`coordinates: ${coordinates.join(`, `)}`);
   }
 
   function getNode(point) {
