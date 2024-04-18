@@ -36,6 +36,8 @@ window.addEventListener("load", () => {
   let grid = null;
   let paths = []; // shortest paths
 
+  const { atan2, cos, sin, sqrt } = Math;
+
   // Triangulation Canvas Layer
   const triangleCanvas = document.querySelector("#layer1");
   const ctx2 = triangleCanvas.getContext("2d");
@@ -413,53 +415,49 @@ window.addEventListener("load", () => {
   // calculate intersection point of bezier curve and node
   function intersectionBezierAndNode(path) {
     if (path.length <= 3) {
-      // Import the bezier-intersect package
-
-      // Define the control points of the quadratic Bezier curve
-      const ax = 0;
-      const ay = 0;
-      const cx = 100;
-      const cy = 50;
-      const bx = 200;
-      const by = 0;
-
-      // Define the endpoints of the line segment
-      const l1x = 50;
-      const l1y = 50;
-      const l2x = 150;
-      const l2y = 150;
-
-      // Define an array to store the intersection points
-      const intersectionPoints = [];
-
-      // Call the quadBezierLine function
-      const numberOfIntersections = bezierIntersect.quadBezierLine(
-        ax,
-        ay,
-        cx,
-        cy,
-        bx,
-        by,
-        l1x,
-        l1y,
-        l2x,
-        l2y,
-        intersectionPoints
-      );
-
-      // Log the number of intersections and intersection points
-      console.log("Number of intersections:", numberOfIntersections);
-      console.log("Intersection points:", intersectionPoints);
-
-
-      const controlPoint = path[1];
       // TODO: find corresponding point in nodeCoordinates array to get width and height of them
       const startNode = getNode(path[0]);
       const endNode = getNode(path[2]);
 
+      // TODO: use startNode and endNode & their respecive width & height
+      // to calculate what angle the bezier is going out of (from the midpoint)
+      // => to know which side it of the node it is intersecting with 
+      // and then use that side as the line to calculate intersection with
+      
+
       console.log("startNode", startNode);
       console.log("controilPoint ", controlPoint);
       console.log("endNode ", endNode);
+
+      console.log("path 0", path[0]);
+      console.log("path 1", path[1]);
+      console.log("path 2", path[2]);
+
+      // start-, control- and end- point of bezier curve 
+      const points = [
+        [200, 300],
+        [640, 175],
+        [1080, 300],
+      ];
+
+      // Destructure the points array
+      const [[x1, y1], [x2, y2], [x3, y3]] = points;
+
+      const line = [
+        [650, 60],
+        [650, 550],
+      ];
+
+      const roots = getRoots(points, line);
+      console.log(`roots: ${roots.join(`, `)}`);
+
+      const coordForRoot = (t) => {
+        const mt = 1 - t;
+        return [x1 * mt ** 2 + 2 * x2 * t * mt + x3 * t ** 2, y1 * mt ** 2 + 2 * y2 * t * mt + y3 * t ** 2];
+      };
+
+      const coordinates = roots.map((t) => coordForRoot(t).map((v) => v.toFixed(2)));
+      console.log(`coordinates: ${coordinates.join(`, `)}`);
     }
   }
 
@@ -523,6 +521,38 @@ window.addEventListener("load", () => {
 
       console.log(`${JSON.stringify(intKey)} => ${JSON.stringify(intValue)}`);
     });
+  }
+
+  // TODO: reference the following code from stackoverflow article
+  // https://stackoverflow.com/questions/77003429/intersection-of-quadratic-bezier-path-and-line
+  function getRoots(pts, [[x1, y1], [x2, y2]]) {
+    // Transform and rotate our coordinates as per above,
+    // noting that we only care about the y coordinate:
+    const angle = atan2(y2 - y1, x2 - x1);
+    const v = pts.map(([x, y]) => (x - x1) * sin(-angle) + (y - y1) * cos(-angle));
+    // And now we're essentially done, we can trivially find our roots:
+    return (
+      solveQuadratic(v[0], v[1], v[2])
+        // ...as long as those roots are in the Bezier interval [0,1] of course.
+        .filter((t) => 0 <= t && t <= 1)
+    );
+  }
+
+  // TODO: reference the following code from stackoverflow article
+  // https://stackoverflow.com/questions/77003429/intersection-of-quadratic-bezier-path-and-line
+  function solveQuadratic(v1, v2, v3) {
+    const a = v1 - 2 * v2 + v3,
+      b = 2 * (v2 - v1),
+      c = v1;
+    // quick check, is "a" zero? if so, the solution is linear.
+    if (a === 0) return b === 0 ? [] : [-c / b];
+    const u = -b / (2 * a),
+      v = b ** 2 - 4 * a * c;
+    if (v < 0) return []; // If there are no roots, there are no roots. Done.
+    if (v === 0) return [u]; // If there's only one root, return that.
+    // And if there are two roots we compute the "full" formula
+    const w = sqrt(v) / (2 * a);
+    return [u + w, u - w];
   }
 
   function specifyDockingPoints(startNode, targetNode) {
