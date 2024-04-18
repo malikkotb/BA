@@ -41,7 +41,7 @@ export class aStar {
         oppositePathExists = true;
       }
     });
-    console.log("existiingPath", existingPath);
+    // console.log("existiingPath", existingPath);
 
     while (!openSet.isEmpty()) {
       let current = openSet.dequeue(); // get current node in openSet wit lowest f_cost

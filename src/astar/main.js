@@ -1,4 +1,7 @@
 import Delaunator from "https://cdn.skypack.dev/delaunator@5.0.0";
+// import { quadBezierLine } from "https://unpkg.com/bezier-intersect";
+// import { quadBezierLine } from 'bezier-intersect';
+
 import { Grid } from "./grid.js";
 import { aStar } from "./graphSearch.js";
 // import Delaunator from "delaunator";
@@ -348,6 +351,14 @@ window.addEventListener("load", () => {
       // and determine the position on that side by the set standards (and then calculate using dimensions of the node)
 
       if (path.length <= 3) {
+        // TODO: check if the same path exists twice -> draw 2 parallel lines
+
+        // TODO: check if same path exists twice from nodeA to nodeB && if exactly 1 path
+        // exists from nodeB to nodeA => them edges: A->B are beziers, edge B->A is straight line
+
+        // TODO: adjust start and end point of edge => calculate intersection point of bezier curve and node
+        intersectionBezierAndNode(path);
+
         // scenario: "connect two nodes directly via quadratic bezier curve"
         ctx.beginPath();
         ctx.moveTo(path[0].x, path[0].y);
@@ -397,6 +408,69 @@ window.addEventListener("load", () => {
         }
       }
     });
+  }
+
+  // calculate intersection point of bezier curve and node
+  function intersectionBezierAndNode(path) {
+    if (path.length <= 3) {
+      // Import the bezier-intersect package
+
+      // Define the control points of the quadratic Bezier curve
+      const ax = 0;
+      const ay = 0;
+      const cx = 100;
+      const cy = 50;
+      const bx = 200;
+      const by = 0;
+
+      // Define the endpoints of the line segment
+      const l1x = 50;
+      const l1y = 50;
+      const l2x = 150;
+      const l2y = 150;
+
+      // Define an array to store the intersection points
+      const intersectionPoints = [];
+
+      // Call the quadBezierLine function
+      const numberOfIntersections = bezierIntersect.quadBezierLine(
+        ax,
+        ay,
+        cx,
+        cy,
+        bx,
+        by,
+        l1x,
+        l1y,
+        l2x,
+        l2y,
+        intersectionPoints
+      );
+
+      // Log the number of intersections and intersection points
+      console.log("Number of intersections:", numberOfIntersections);
+      console.log("Intersection points:", intersectionPoints);
+
+
+      const controlPoint = path[1];
+      // TODO: find corresponding point in nodeCoordinates array to get width and height of them
+      const startNode = getNode(path[0]);
+      const endNode = getNode(path[2]);
+
+      console.log("startNode", startNode);
+      console.log("controilPoint ", controlPoint);
+      console.log("endNode ", endNode);
+    }
+  }
+
+  function getNode(point) {
+    let midPoint = null;
+    nodeCoordinates.some((node) => {
+      if (node.midpoint.x === point.x && node.midpoint.y === point.y) {
+        midPoint = point;
+      }
+    });
+    return midPoint;
   }
 
   function compareNodes(node1, node2) {

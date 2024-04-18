@@ -4,6 +4,45 @@
     <title>Aesthetic</title>
     <link rel="stylesheet" type="text/css" href="style.css" />
     <script src="https://cdn.jsdelivr.net/npm/fabric"></script>
+    <script src="https://unpkg.com/bezier-intersect"></script>
+    <script>
+
+      // Define the control points of the quadratic Bezier curve
+      const ax = 0;
+      const ay = 0;
+      const cx = 100; // Adjusted control point to ensure intersection
+      const cy = 100; // Adjusted control point to ensure intersection
+      const bx = 200;
+      const by = 0;
+
+      // Define the endpoints of the line segment
+      const l1x = 50;
+      const l1y = 50;
+      const l2x = 150;
+      const l2y = 150;
+
+      // Define an array to store the intersection points
+      const intersectionPoints = [];
+
+      // Call the quadBezierLine function
+      const numberOfIntersections = bezierIntersect.quadBezierLine(
+        ax,
+        ay,
+        cx,
+        cy,
+        bx,
+        by,
+        l1x,
+        l1y,
+        l2x,
+        l2y,
+        intersectionPoints
+      );
+
+      // Log the number of intersections and intersection points
+      console.log("Number of intersections:", numberOfIntersections);
+      console.log("Intersection points:", intersectionPoints);
+    </script>
   </head>
   <body>
     <!-- grid canvas and script -->
@@ -15,16 +54,14 @@
  0,350,100,100; 650,50,100,100</textarea
     >
 
-    <p>
-      Two coordinate pairs represent two connected nodes. Enter edges (x1, y1) (x2, y2); (x3, y3)
-      (x4, y4); ..
-    </p>
-    <!-- Input Format: the user can specify connections using the coordinates of the nodes they want to connect. 
-      e.g. userInput = "(0, 0) (100, 0); (100, 0) (0, 100)"
-    -->
-    <textarea id="edgeInput" placeholder="Enter edges (x1, y1) (x2, y2); (x3, y3) (x4, y4); ...  ">
+    <p>Two coordinate pairs represent two connected nodes. Enter edges (x1, y1) (x2, y2); (x3, y3) (x4, y4); ..</p>
+    <!-- <textarea id="edgeInput" placeholder="Enter edges (x1, y1) (x2, y2); (x3, y3) (x4, y4); ...  ">
 (650, 50) (0, 350); (100, 100) (250,300); (250,300) (100, 100); (100,100) (400,0); (400,0) (100,100); (400,0) (250,300); (250,300) (400,0)</textarea
+    > -->
+    <textarea id="edgeInput" placeholder="Enter edges (x1, y1) (x2, y2); (x3, y3) (x4, y4); ...  ">
+    (650, 50) (0, 350); (100, 100) (250,300); (250,300) (100, 100); (100,100) (400,0); (400,0) (100,100); (400,0) (250,300); (250,300) (400,0); (400,0) (650, 50); (650, 50) (400,0); (400,0) (500,200); (500, 200) (400,0)</textarea
     >
+
     <div style="display: flex; gap: 4px">
       <button id="updateButton" style="padding: 5px">Update Graph</button>
       <button id="triangleMeshBtn" style="padding: 5px">Show Triangle Mesh</button>
