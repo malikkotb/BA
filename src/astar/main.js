@@ -424,9 +424,6 @@ window.addEventListener("load", () => {
       // => to know which side it of the node it is intersecting with
       // and then use that side as the line to calculate intersection with
 
-      console.log("startNode", startNode);
-      console.log("endNode ", endNode);
-
       //TODO: all of this code needs to be called twice
       // once for strartNode and once for endNode
       // -> same points but differnet line (side of node) to intersect with
@@ -438,20 +435,50 @@ window.addEventListener("load", () => {
         [path[2].x, path[2].y],
       ];
 
-      // TODO: do same for endNode
       // sides of startNode
-      const { top, bottom, left, right } = calculateNodeSides(startNode.width, startNode.height, {
+      // const { topSideStartNode, bottomSideStartNode, leftSideStartNode, rightSideStartNode } = calculateNodeSides(
+      const {
+        top: topSideStartNode,
+        bottom: bottomSideStartNode,
+        left: leftSideStartNode,
+        right: rightSideStartNode,
+      } = calculateNodeSides(startNode.width, startNode.height, {
         x: startNode.x,
         y: startNode.y,
       });
+      console.log("");
+      console.log("startNode", startNode);
+      const intersectStartTop = getIntersection(points, topSideStartNode);
+      const intersectStartBottom = getIntersection(points, bottomSideStartNode);
+      const intersectStartLeft = getIntersection(points, leftSideStartNode);
+      const intersectStartRight = getIntersection(points, rightSideStartNode);
 
-      console.log("sides", top, bottom, left, right);
-      console.log();
-      const coordinatesTop = getIntersection(points, top);
-      const coordinatesBottom = getIntersection(points, bottom);
-      const coordinatesLeft = getIntersection(points, left);
-      const coordinatesRight = getIntersection(points, right);
+      if (intersectStartTop) console.log("top side", intersectStartTop);
+      if (intersectStartBottom) console.log("bottom side", intersectStartBottom);
+      if (intersectStartLeft) console.log("left side", intersectStartLeft);
+      if (intersectStartRight) console.log("right side", intersectStartRight);
 
+      // sides of endNode
+      const {
+        top: topSideEndNode,
+        bottom: bottomSideEndNode,
+        left: leftSideEndNode,
+        right: rightSideEndNode,
+      } = calculateNodeSides(endNode.width, endNode.height, {
+        x: endNode.x,
+        y: endNode.y,
+      });
+
+      console.log("endNode", endNode);
+      const intersectEndTop = getIntersection(points, topSideEndNode);
+      const intersectEndBottom = getIntersection(points, bottomSideEndNode);
+      const intersectEndLeft = getIntersection(points, leftSideEndNode);
+      const intersectEndRight = getIntersection(points, rightSideEndNode);
+
+      if (intersectEndTop) console.log("top side", intersectEndTop);
+      if (intersectEndBottom) console.log("bottom side", intersectEndBottom);
+      if (intersectEndLeft) console.log("left side", intersectEndLeft);
+      if (intersectEndRight) console.log("right side", intersectEndRight);
     }
   }
 
@@ -464,7 +491,32 @@ window.addEventListener("load", () => {
       return [x1 * mt ** 2 + 2 * x2 * t * mt + x3 * t ** 2, y1 * mt ** 2 + 2 * y2 * t * mt + y3 * t ** 2];
     };
     const coordinates = roots.map((t) => coordForRoot(t).map((v) => v.toFixed(2)));
-    console.log(`coordinates: ${coordinates.join(`, `)}`);
+    if (
+      pointOnLine(
+        coordinates[0]?.map((str) => parseFloat(str)),
+        line[0],
+        line[1]
+      )
+    ) {
+      // console.log("True, coordinates", coordinates, "\ncoordinatres[0]:", coordinates[0], "\nline:", line);
+      return coordinates[0].map((str) => parseFloat(str));
+    }
+  }
+
+  function pointOnLine(point, lineStart, lineEnd) {
+    if (!point) {
+      return false;
+    }
+    const [x, y] = point;
+    const [x1, y1] = lineStart;
+    const [x2, y2] = lineEnd;
+    return (
+      (x - x1) * (y2 - y1) === (y - y1) * (x2 - x1) &&
+      Math.min(x1, x2) <= x &&
+      x <= Math.max(x1, x2) &&
+      Math.min(y1, y2) <= y &&
+      y <= Math.max(y1, y2)
+    );
   }
 
   function getNode(point) {
@@ -563,9 +615,6 @@ window.addEventListener("load", () => {
 
   // returns sides of a node: { top, bottom, left, right}
   function calculateNodeSides(width, height, topLeftCorner) {
-    const halfWidth = width / 2;
-    const halfHeight = height / 2;
-
     // Calculate coordinates of each side
     const top = [
       [topLeftCorner.x, topLeftCorner.y],
@@ -583,7 +632,6 @@ window.addEventListener("load", () => {
       [topLeftCorner.x + width, topLeftCorner.y],
       [topLeftCorner.x + width, topLeftCorner.y + height],
     ];
-
     return { top, bottom, left, right };
   }
 
