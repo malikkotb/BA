@@ -360,8 +360,6 @@ window.addEventListener("load", () => {
 
         // TODO: adjust start and end point of edge => calculate intersection point of bezier curve and node
         const { startPos, endPos } = intersectionBezierAndNode(path);
-        console.log(startPos);
-        console.log(endPos);
         // scenario: "connect two nodes directly via quadratic bezier curve"
 
         ctx.beginPath();
@@ -369,44 +367,8 @@ window.addEventListener("load", () => {
         ctx.quadraticCurveTo(path[1].x, path[1].y, endPos[0], endPos[1]);
         ctx.stroke();
 
-
         // DRAWING ARROWHEAD
         // Assuming path is an array of points
-        // const controlPoint = path[1];
-        // const endPoint = path[2];
-
-        // // Calculate the angle of the line segment formed by the last two points
-        // const angle = Math.atan2(endPoint.y - controlPoint.y, endPoint.x - controlPoint.x);
-
-        // // Length of the arrowhead
-        // const arrowLength = 10;
-
-        // // Calculate the coordinates of the points of the arrowhead
-        // const arrowPoint1 = {
-        //   x: endPoint.x - arrowLength * Math.cos(angle - Math.PI / 6),
-        //   y: endPoint.y - arrowLength * Math.sin(angle - Math.PI / 6),
-        // };
-        // const arrowPoint2 = {
-        //   x: endPoint.x - arrowLength * Math.cos(angle + Math.PI / 6),
-        //   y: endPoint.y - arrowLength * Math.sin(angle + Math.PI / 6),
-        // };
-
-        // // Draw the arrowhead
-        // ctx.beginPath();
-        // ctx.moveTo(endPoint.x, endPoint.y);
-        // ctx.lineTo(arrowPoint1.x, arrowPoint1.y);
-        // ctx.lineTo(arrowPoint2.x, arrowPoint2.y);
-        // ctx.closePath();
-        // ctx.fill();
-
-        ////////////////////////////////
-
-        // ctx.beginPath();
-        // ctx.moveTo(path[0].x, path[0].y);
-        // ctx.quadraticCurveTo(path[1].x, path[1].y, path[2].x, path[2].y);
-        // ctx.stroke();
-
-        // // Assuming path is an array of points
         // const controlPoint = path[1];
         // const endPoint = path[2];
 
@@ -509,6 +471,8 @@ window.addEventListener("load", () => {
         startPos = intersectStartRight;
       }
 
+      console.log(startPos);
+
       // sides of endNode
       const {
         top: topSideEndNode,
@@ -543,6 +507,11 @@ window.addEventListener("load", () => {
         endPos = intersectEndRight;
       }
 
+      console.log(endPos);
+
+      // THERE IS SOME WEIRD BUG, THAT THE GETINTERSECTION METHOD LOGS TWO POINTS & one of them is completely wrong
+      // & that one gets chosen sometimes and then pointOnLine(returns null)
+
       return { startPos, endPos };
     }
   }
@@ -556,6 +525,8 @@ window.addEventListener("load", () => {
       return [x1 * mt ** 2 + 2 * x2 * t * mt + x3 * t ** 2, y1 * mt ** 2 + 2 * y2 * t * mt + y3 * t ** 2];
     };
     const coordinates = roots.map((t) => coordForRoot(t).map((v) => v.toFixed(2)));
+    console.log("");
+    console.log("line", line, "coordinates: ", coordinates);
     if (
       pointOnLine(
         coordinates[0]?.map((str) => parseFloat(str)),
@@ -563,8 +534,11 @@ window.addEventListener("load", () => {
         line[1]
       )
     ) {
-      // console.log("True, coordinates", coordinates, "\ncoordinatres[0]:", coordinates[0], "\nline:", line);
+      console.log("True, coordinates", coordinates, "\ncoordinatres[0]:", coordinates[0], "\nline:", line);
       return coordinates[0].map((str) => parseFloat(str));
+    } else {
+      console.log("Nope, points: ", points, "coords: ",coordinates, "\n line:", line);
+      return undefined;
     }
   }
 
