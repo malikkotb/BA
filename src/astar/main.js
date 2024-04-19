@@ -361,8 +361,6 @@ window.addEventListener("load", () => {
         const { startPos, endPos } = intersectionBezierAndNode(path);
         // scenario: "connect two nodes directly via quadratic bezier curve"
 
-        const bezier = new Bezier()
-
         ctx.beginPath();
         ctx.moveTo(startPos[0], startPos[1]);
         ctx.quadraticCurveTo(path[1].x, path[1].y, endPos[0], endPos[1]);
@@ -431,11 +429,7 @@ window.addEventListener("load", () => {
       // the intersection represents the point where the bzezier curve should dock
 
       // start-, control- and end- point of bezier curve
-      const points = [
-        [path[0].x, path[0].y],
-        [path[1].x, path[1].y],
-        [path[2].x, path[2].y],
-      ];
+      const points = [path[0].x, path[0].y, path[1].x, path[1].y, path[2].x, path[2].y];
 
       // sides of startNode
       // const { topSideStartNode, bottomSideStartNode, leftSideStartNode, rightSideStartNode } = calculateNodeSides(
@@ -450,10 +444,10 @@ window.addEventListener("load", () => {
       });
       console.log("");
       console.log("startNode", startNode);
-      const intersectStartTop = getIntersection(points, topSideStartNode);
-      const intersectStartBottom = getIntersection(points, bottomSideStartNode);
-      const intersectStartLeft = getIntersection(points, leftSideStartNode);
-      const intersectStartRight = getIntersection(points, rightSideStartNode);
+      const intersectStartTop = getIntersection(...points, topSideStartNode);
+      const intersectStartBottom = getIntersection(...points, bottomSideStartNode);
+      const intersectStartLeft = getIntersection(...points, leftSideStartNode);
+      const intersectStartRight = getIntersection(...points, rightSideStartNode);
 
       if (intersectStartTop) {
         // console.log("top side", intersectStartTop);
@@ -486,10 +480,10 @@ window.addEventListener("load", () => {
       });
 
       console.log("endNode", endNode);
-      const intersectEndTop = getIntersection(points, topSideEndNode);
-      const intersectEndBottom = getIntersection(points, bottomSideEndNode);
-      const intersectEndLeft = getIntersection(points, leftSideEndNode);
-      const intersectEndRight = getIntersection(points, rightSideEndNode);
+      const intersectEndTop = getIntersection(...points, topSideEndNode);
+      const intersectEndBottom = getIntersection(...points, bottomSideEndNode);
+      const intersectEndLeft = getIntersection(...points, leftSideEndNode);
+      const intersectEndRight = getIntersection(...points, rightSideEndNode);
 
       if (intersectEndTop) {
         // console.log("top side", intersectEndTop);
@@ -517,30 +511,47 @@ window.addEventListener("load", () => {
     }
   }
 
-  function getIntersection(points, line) {
-    // Destructure the points array
-    const [[x1, y1], [x2, y2], [x3, y3]] = points;
-    const roots = getRoots(points, line);
-    const coordForRoot = (t) => {
-      const mt = 1 - t;
-      return [x1 * mt ** 2 + 2 * x2 * t * mt + x3 * t ** 2, y1 * mt ** 2 + 2 * y2 * t * mt + y3 * t ** 2];
+  function getIntersection(x1, x2, c1, c2, y1, y2, line) {
+    // x1, x2 = start point of curve
+    // c1, c2 = control point of curve
+    // y1, y2 = end point of curve
+    const b = new Bezier(58, 173, 26, 28, 163, 104);
+    console.log("points", x1, x2, c1, c2, y1, y2);
+    console.log("line", line);
+
+    var draw = function () {
+      this.drawSkeleton(curve);
+      this.drawCurve(curve);
+      var line = { p1: { x: 0, y: 175 }, p2: { x: 200, y: 25 } };
+      this.setColor("red");
+      this.drawLine(line.p1, line.p2);
+      this.setColor("black");
+      curve.intersects(line).forEach((t) => this.drawPoint(curve.get(t)));
     };
-    const coordinates = roots.map((t) => coordForRoot(t).map((v) => v.toFixed(2)));
-    console.log("");
-    console.log("line", line, "coordinates: ", coordinates);
-    if (
-      pointOnLine(
-        coordinates[0]?.map((str) => parseFloat(str)),
-        line[0],
-        line[1]
-      )
-    ) {
-      console.log("True, coordinates", coordinates, "\ncoordinatres[0]:", coordinates[0], "\nline:", line);
-      return coordinates[0].map((str) => parseFloat(str));
-    } else {
-      console.log("Nope, points: ", points, "coords: ",coordinates, "\n line:", line);
-      return undefined;
-    }
+
+    // // Destructure the points array
+    // const [[x1, y1], [x2, y2], [x3, y3]] = points;
+    // const roots = getRoots(points, line);
+    // const coordForRoot = (t) => {
+    //   const mt = 1 - t;
+    //   return [x1 * mt ** 2 + 2 * x2 * t * mt + x3 * t ** 2, y1 * mt ** 2 + 2 * y2 * t * mt + y3 * t ** 2];
+    // };
+    // const coordinates = roots.map((t) => coordForRoot(t).map((v) => v.toFixed(2)));
+    // console.log("");
+    // console.log("line", line, "coordinates: ", coordinates);
+    // if (
+    //   pointOnLine(
+    //     coordinates[0]?.map((str) => parseFloat(str)),
+    //     line[0],
+    //     line[1]
+    //   )
+    // ) {
+    //   console.log("True, coordinates", coordinates, "\ncoordinatres[0]:", coordinates[0], "\nline:", line);
+    //   return coordinates[0].map((str) => parseFloat(str));
+    // } else {
+    //   console.log("Nope, points: ", points, "coords: ", coordinates, "\n line:", line);
+    //   return undefined;
+    // }
   }
 
   function pointOnLine(point, lineStart, lineEnd) {
@@ -619,38 +630,6 @@ window.addEventListener("load", () => {
 
       console.log(`${JSON.stringify(intKey)} => ${JSON.stringify(intValue)}`);
     });
-  }
-
-  // TODO: reference the following code from stackoverflow article
-  // https://stackoverflow.com/questions/77003429/intersection-of-quadratic-bezier-path-and-line
-  function getRoots(pts, [[x1, y1], [x2, y2]]) {
-    // Transform and rotate our coordinates as per above,
-    // noting that we only care about the y coordinate:
-    const angle = atan2(y2 - y1, x2 - x1);
-    const v = pts.map(([x, y]) => (x - x1) * sin(-angle) + (y - y1) * cos(-angle));
-    // And now we're essentially done, we can trivially find our roots:
-    return (
-      solveQuadratic(v[0], v[1], v[2])
-        // ...as long as those roots are in the Bezier interval [0,1] of course.
-        .filter((t) => 0 <= t && t <= 1)
-    );
-  }
-
-  // TODO: reference the following code from stackoverflow article
-  // https://stackoverflow.com/questions/77003429/intersection-of-quadratic-bezier-path-and-line
-  function solveQuadratic(v1, v2, v3) {
-    const a = v1 - 2 * v2 + v3,
-      b = 2 * (v2 - v1),
-      c = v1;
-    // quick check, is "a" zero? if so, the solution is linear.
-    if (a === 0) return b === 0 ? [] : [-c / b];
-    const u = -b / (2 * a),
-      v = b ** 2 - 4 * a * c;
-    if (v < 0) return []; // If there are no roots, there are no roots. Done.
-    if (v === 0) return [u]; // If there's only one root, return that.
-    // And if there are two roots we compute the "full" formula
-    const w = sqrt(v) / (2 * a);
-    return [u + w, u - w];
   }
 
   // returns sides of a node: { top, bottom, left, right}
