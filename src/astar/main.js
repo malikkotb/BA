@@ -1,6 +1,5 @@
 import Delaunator from "https://cdn.skypack.dev/delaunator@5.0.0";
-// import { quadBezierLine } from "https://unpkg.com/bezier-intersect";
-// import { quadBezierLine } from 'bezier-intersect';
+import { Bezier } from "./bezier-js/bezier.js";
 
 import { Grid } from "./grid.js";
 import { aStar } from "./graphSearch.js";
@@ -361,6 +360,8 @@ window.addEventListener("load", () => {
         // TODO: adjust start and end point of edge => calculate intersection point of bezier curve and node
         const { startPos, endPos } = intersectionBezierAndNode(path);
         // scenario: "connect two nodes directly via quadratic bezier curve"
+
+        const bezier = new Bezier()
 
         ctx.beginPath();
         ctx.moveTo(startPos[0], startPos[1]);
