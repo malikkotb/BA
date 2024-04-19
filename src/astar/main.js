@@ -342,7 +342,6 @@ window.addEventListener("load", () => {
     edgeConnections.forEach((edge) => {
       let path = astar.findPath(edge.startNode.midpoint, edge.targetNode.midpoint); // pass in the midpoint, as those represent nodes in the adjacency list (graph)
       paths.push(path);
-      console.log("");
     });
 
     // TODO: 10. POST-PROCESSING (Rendering the edges as bezier curves)
@@ -361,9 +360,14 @@ window.addEventListener("load", () => {
         const { startPos, endPos } = intersectionBezierAndNode(path);
         // scenario: "connect two nodes directly via quadratic bezier curve"
 
+        // ctx.beginPath();
+        // ctx.moveTo(startPos[0], startPos[1]);
+        // ctx.quadraticCurveTo(path[1].x, path[1].y, endPos[0], endPos[1]);
+        // ctx.stroke();
+
         ctx.beginPath();
-        ctx.moveTo(startPos[0], startPos[1]);
-        ctx.quadraticCurveTo(path[1].x, path[1].y, endPos[0], endPos[1]);
+        ctx.moveTo(path[0].x, path[0].y);
+        ctx.quadraticCurveTo(path[1].x, path[1].y, path[2].x, path[2].y);
         ctx.stroke();
 
         // DRAWING ARROWHEAD
@@ -430,7 +434,7 @@ window.addEventListener("load", () => {
 
       // start-, control- and end- point of bezier curve
       const points = [path[0].x, path[0].y, path[1].x, path[1].y, path[2].x, path[2].y];
-
+      console.log("points on path:", points);
       // sides of startNode
       // const { topSideStartNode, bottomSideStartNode, leftSideStartNode, rightSideStartNode } = calculateNodeSides(
       const {
@@ -516,9 +520,30 @@ window.addEventListener("load", () => {
     // c1, c2 = control point of curve
     // y1, y2 = end point of curve
     //TODO: reference in Paper: https://github.com/Pomax/bezierjs
-    const curve = new Bezier(x1, x2, c1, c2, y1, y2);
+    // const curve = new Bezier(x1, x2, c1, c2, y1, y2);
+    // console.log("line", line);
+    // console.log(curve);
+    // console.log("curve intersects", curve.intersects(line));
+    const intersectionPoints = [];
+    const controlPoints = [
+      { x: 200, y: 300 },
+      { x: 640, y: 175 },
+      { x: 1080, y: 300 },
+    ];
+    const line1 = { p1: { x: 640, y: 50 }, p2: { x: 640, y: 550 } };
+    const bezierCurve = new Bezier(x1,x2,c1,c2,y1,y2);
+    const intersections = bezierCurve.lineIntersects(line);
+    if (intersections.length > 0) {
+      for (let e = 0; e < intersections.length; e++) {
+        let n = intersections[e],
+          t = bezierCurve.get(n);
+        intersectionPoints.push(t);
+      }
+    }
+    console.log("Intersection Points:", intersectionPoints);
 
-    return curve.intersects(line).map(t => curve.get(t))[0] ?? null;
+    return intersectionPoints;
+    // return curve.intersects(line).map((t) => curve.get(t))[0] ?? null;
 
     // var draw = function () {
     //   this.drawSkeleton(curve);
