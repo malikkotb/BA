@@ -451,22 +451,22 @@ window.addEventListener("load", () => {
 
       if (intersectStartTop) {
         // console.log("top side", intersectStartTop);
-        startPos = intersectStartTop;
+        startPos = [intersectStartTop.x, intersectStartTop.y];
       }
       if (intersectStartBottom) {
         // console.log("bottom side", intersectStartBottom);
-        startPos = intersectStartBottom;
+        startPos = [intersectStartBottom.x, intersectStartBottom.y];
       }
       if (intersectStartLeft) {
         // console.log("left side", intersectStartLeft);
-        startPos = intersectStartLeft;
+        startPos = [intersectStartLeft.x, intersectStartLeft.y];
       }
       if (intersectStartRight) {
         // console.log("right side", intersectStartRight);
-        startPos = intersectStartRight;
+        startPos = [intersectStartRight.x, intersectStartRight.y];
       }
 
-      console.log(startPos);
+      console.log("startPos: ", startPos);
 
       // sides of endNode
       const {
@@ -487,22 +487,22 @@ window.addEventListener("load", () => {
 
       if (intersectEndTop) {
         // console.log("top side", intersectEndTop);
-        endPos = intersectEndTop;
+        endPos = [intersectEndTop.x, intersectEndTop.y];
       }
       if (intersectEndBottom) {
         // console.log("bottom side", intersectEndBottom);
-        endPos = intersectEndBottom;
+        endPos = [intersectEndBottom.x, intersectEndBottom.y];
       }
       if (intersectEndLeft) {
         // console.log("left side", intersectEndLeft);
-        endPos = intersectEndLeft;
+        endPos = [intersectEndLeft.x, intersectEndLeft.y];
       }
       if (intersectEndRight) {
         // console.log("right side", intersectEndRight);
-        endPos = intersectEndRight;
+        endPos = [intersectEndRight.x, intersectEndRight.y];
       }
 
-      console.log(endPos);
+      console.log("endPos: ", endPos);
 
       // THERE IS SOME WEIRD BUG, THAT THE GETINTERSECTION METHOD LOGS TWO POINTS & one of them is completely wrong
       // & that one gets chosen sometimes and then pointOnLine(returns null)
@@ -515,19 +515,20 @@ window.addEventListener("load", () => {
     // x1, x2 = start point of curve
     // c1, c2 = control point of curve
     // y1, y2 = end point of curve
-    const b = new Bezier(58, 173, 26, 28, 163, 104);
-    console.log("points", x1, x2, c1, c2, y1, y2);
-    console.log("line", line);
+    //TODO: reference in Paper: https://github.com/Pomax/bezierjs
+    const curve = new Bezier(x1, x2, c1, c2, y1, y2);
 
-    var draw = function () {
-      this.drawSkeleton(curve);
-      this.drawCurve(curve);
-      var line = { p1: { x: 0, y: 175 }, p2: { x: 200, y: 25 } };
-      this.setColor("red");
-      this.drawLine(line.p1, line.p2);
-      this.setColor("black");
-      curve.intersects(line).forEach((t) => this.drawPoint(curve.get(t)));
-    };
+    return curve.intersects(line).map(t => curve.get(t))[0] ?? null;
+
+    // var draw = function () {
+    //   this.drawSkeleton(curve);
+    //   this.drawCurve(curve);
+    //   var line = { p1: { x: 0, y: 175 }, p2: { x: 200, y: 25 } };
+    //   this.setColor("red");
+    //   this.drawLine(line.p1, line.p2);
+    //   this.setColor("black");
+    //   curve.intersects(line).forEach((t) => this.drawPoint(curve.get(t)));
+    // };
 
     // // Destructure the points array
     // const [[x1, y1], [x2, y2], [x3, y3]] = points;
@@ -635,22 +636,26 @@ window.addEventListener("load", () => {
   // returns sides of a node: { top, bottom, left, right}
   function calculateNodeSides(width, height, topLeftCorner) {
     // Calculate coordinates of each side
-    const top = [
-      [topLeftCorner.x, topLeftCorner.y],
-      [topLeftCorner.x + width, topLeftCorner.y],
-    ];
-    const bottom = [
-      [topLeftCorner.x, topLeftCorner.y + height],
-      [topLeftCorner.x + width, topLeftCorner.y + height],
-    ];
-    const left = [
-      [topLeftCorner.x, topLeftCorner.y],
-      [topLeftCorner.x, topLeftCorner.y + height],
-    ];
-    const right = [
-      [topLeftCorner.x + width, topLeftCorner.y],
-      [topLeftCorner.x + width, topLeftCorner.y + height],
-    ];
+    var line = { p1: { x: 0, y: 175 }, p2: { x: 200, y: 25 } };
+    const top = {
+      p1: { x: topLeftCorner.x, y: topLeftCorner.y },
+      p2: { x: topLeftCorner.x + width, y: topLeftCorner.y },
+    };
+
+    const bottom = {
+      p1: { x: topLeftCorner.x, y: topLeftCorner.y + height },
+      p2: { x: topLeftCorner.x + width, y: topLeftCorner.y + height },
+    };
+
+    const left = {
+      p1: { x: topLeftCorner.x, y: topLeftCorner.y },
+      p2: { x: topLeftCorner.x, y: topLeftCorner.y + height },
+    };
+
+    const right = {
+      p1: { x: topLeftCorner.x + width, y: topLeftCorner.y },
+      p2: { x: topLeftCorner.x + width, y: topLeftCorner.y + height },
+    };
     return { top, bottom, left, right };
   }
 
