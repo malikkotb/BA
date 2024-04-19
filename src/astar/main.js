@@ -525,14 +525,16 @@ window.addEventListener("load", () => {
     // console.log(curve);
     // console.log("curve intersects", curve.intersects(line));
     const intersectionPoints = [];
-    const controlPoints = [
-      { x: 200, y: 300 },
-      { x: 640, y: 175 },
-      { x: 1080, y: 300 },
-    ];
-    const line1 = { p1: { x: 640, y: 50 }, p2: { x: 640, y: 550 } };
-    const bezierCurve = new Bezier(x1,x2,c1,c2,y1,y2);
-    const intersections = bezierCurve.lineIntersects(line);
+
+    let slantLine = line;
+    //add invisible slant to vertical lines
+    if (slantLine.p1.x === slantLine.p2.x && slantLine.p1.y !== slantLine.p2.y) {
+      slantLine.p1.x += 0.001//  1e-8;
+    }
+
+    const bezierCurve = new Bezier(x1, x2, c1, c2, y1, y2);
+    console.log(x1, x2, c1, c2, y1, y2);
+    const intersections = bezierCurve.lineIntersects(slantLine);
     if (intersections.length > 0) {
       for (let e = 0; e < intersections.length; e++) {
         let n = intersections[e],
