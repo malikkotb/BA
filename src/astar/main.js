@@ -279,18 +279,7 @@ window.addEventListener("load", () => {
       drawLine(ctx2, edge[0], edge[1]);
     });
 
-    // TODO:
-    // 6. Intermediate step which is performed every execution
-
-    // check if there is already a path along certain points.
-    // ( -> need to store all previously rendered paths )
-    // and if there is, then add edge weights along that path perhaps ??
-    // I can perhaps add weights to the edges for edges that are crossing another edge or sth. similar like that to influence the path.
-
-    // TODO:==> add these calculated weights when setting 'weight' property
-    // of an added node
-
-    // 7. Represent the graph (nodes & edges) as an adjacency list
+    // 6. Represent the graph (nodes & edges) as an adjacency list
 
     // implement an adjacency list as a set of key-value pairs
     // where the key is the node (base-node)
@@ -322,7 +311,7 @@ window.addEventListener("load", () => {
       }
     });
 
-    // 8. Sort edges in edgeConnections array based on euclidean distances
+    // 7. Sort edges in edgeConnections array based on euclidean distances
     // that are closest together are rendered first
     // ensuring that the scenario: "connect two nodes directly via quadratic bezier curve"
     // is always fulfilled
@@ -335,28 +324,43 @@ window.addEventListener("load", () => {
       return euclideanDistA - euclideanDistB;
     });
 
-    // 9. Perform pathfinding (graph search algorithm) on adjacency list
+    // 8. Perform pathfinding (graph search algorithm) on adjacency list
     astar = new aStar(adjacencyList, nodeMidpoints);
 
-    // run astar.findPath() for each edge connection (user input)
-    edgeConnections.forEach((edge) => {
+    const duplicateEdgesSet = findDuplicates(edgeConnections);
+    console.log("duplicateEdges", duplicateEdgesSet);
+
+    edgeConnections.forEach((edge, index) => {
+      const connection = JSON.stringify(edge);
+      if (duplicateEdgesSet.has(connection)) {
+        // check if the same path exists twice -> draw 2 parallel edges and need to specify docking points for these edges
+        console.log("duplicate edge -> draw straight line from start to end", edge);
+        // TODO: muss mir was überlegen, wie ich die docking points für die parallelen edges spezifiziere
+        // weil die ja nicht einfach nur parallel sind, sondern auch noch an den nodes andocken müssen
+        // und andere edges schon evenuell da sind
+        // Vielleicht kann ich die dockingPoints speichern pro Node (also von vorherigen Beziers die schon gezecihnet wurden)
+        // und davon entsprechend die geraden Edges zeichnen mit einem Offset von 5-10px oder so
+
+      } 
+      // else {
+      // }
+      // run astar.findPath() for each edge connection (user input)
       let path = astar.findPath(edge.startNode.midpoint, edge.targetNode.midpoint); // pass in the midpoint, as those represent nodes in the adjacency list (graph)
       paths.push(path);
     });
 
-    // TODO: 10. POST-PROCESSING (Rendering the edges as bezier curves)
+    // 9. POST-PROCESSING (Rendering the edges as bezier curves)
     // drawing on ctx (and not ctx2)
+
     paths.forEach((path, index) => {
       // TODO: compute what side I should render the starting-point of the bezier curve from
       // and determine the position on that side by the set standards (and then calculate using dimensions of the node)
 
       if (path.length <= 3) {
-        // TODO: check if the same path exists twice -> draw 2 parallel lines
-
         // TODO: check if same path exists twice from nodeA to nodeB && if exactly 1 path
         // exists from nodeB to nodeA => them edges: A->B are beziers, edge B->A is straight line
 
-        // TODO: adjust start and end point of edge => calculate intersection point of bezier curve and node
+        // Calculate intersection point of bezier curve and node to get startPos and endPos of bezier curve
         const { startPos, endPos } = intersectionBezierAndNode(path);
         // scenario: "connect two nodes directly via quadratic bezier curve"
 
@@ -477,17 +481,12 @@ window.addEventListener("load", () => {
 
       console.log("endPos of bezier: ", endPos);
 
-      // THERE IS SOME WEIRD BUG, THAT THE GETINTERSECTION METHOD LOGS TWO POINTS & one of them is completely wrong
-      // & that one gets chosen sometimes and then pointOnLine(returns null)
-
       return { startPos, endPos };
     }
   }
 
   function getIntersection(x1, x2, c1, c2, y1, y2, line) {
-    // x1, x2 = start point of curve
-    // c1, c2 = control point of curve
-    // y1, y2 = end point of curve
+    // x1, x2, c1, c2, y1, y2 = points of bezier curve
     //TODO: reference in Paper: https://github.com/Pomax/bezierjs
     const intersectionPoints = [];
 
@@ -511,20 +510,19 @@ window.addEventListener("load", () => {
     return intersectionPoints[0];
   }
 
-  function pointOnLine(point, lineStart, lineEnd) {
-    if (!point) {
-      return false;
+  function findDuplicates(array) {
+    const seen = new Set();
+    const duplicates = new Set();
+
+    for (let item of array) {
+      if (seen.has(JSON.stringify(item))) {
+        duplicates.add(JSON.stringify(item));
+      } else {
+        seen.add(JSON.stringify(item));
+      }
     }
-    const [x, y] = point;
-    const [x1, y1] = lineStart;
-    const [x2, y2] = lineEnd;
-    return (
-      (x - x1) * (y2 - y1) === (y - y1) * (x2 - x1) &&
-      Math.min(x1, x2) <= x &&
-      x <= Math.max(x1, x2) &&
-      Math.min(y1, y2) <= y &&
-      y <= Math.max(y1, y2)
-    );
+
+    return duplicates;
   }
 
   function getNode(point) {
