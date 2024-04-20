@@ -365,15 +365,9 @@ window.addEventListener("load", () => {
         ctx.quadraticCurveTo(path[1].x, path[1].y, endPos[0], endPos[1]);
         ctx.stroke();
 
-        // ctx.beginPath();
-        // ctx.moveTo(path[0].x, path[0].y);
-        // ctx.quadraticCurveTo(path[1].x, path[1].y, path[2].x, path[2].y);
-        // ctx.stroke();
-
-        // DRAWING ARROWHEAD
+        // DRAW ARROWHEAD
         // Assuming path is an array of points
         const controlPoint = path[1];
-        const endPoint = path[2];
 
         // Calculate the angle of the line segment formed by the last two points
         const angle = Math.atan2(endPos[1] - controlPoint.y, endPos[0] - controlPoint.x);
@@ -397,7 +391,7 @@ window.addEventListener("load", () => {
         ctx.lineTo(arrowPoint1.x, arrowPoint1.y);
         ctx.lineTo(arrowPoint2.x, arrowPoint2.y);
         ctx.closePath();
-        ctx.fillStyle = "black"
+        ctx.fillStyle = "black";
         ctx.fill();
       } else {
         // TODO: if path length > 3, use bezier splines and connect them accordingly for
@@ -447,29 +441,17 @@ window.addEventListener("load", () => {
       });
       console.log("");
       console.log("startNode", startNode);
-      const intersectStartTop = getIntersection(...points, topSideStartNode);
-      const intersectStartBottom = getIntersection(...points, bottomSideStartNode);
-      const intersectStartLeft = getIntersection(...points, leftSideStartNode);
-      const intersectStartRight = getIntersection(...points, rightSideStartNode);
 
-      if (intersectStartTop) {
-        // console.log("top side", intersectStartTop);
-        startPos = [intersectStartTop.x, intersectStartTop.y];
-      }
-      if (intersectStartBottom) {
-        // console.log("bottom side", intersectStartBottom);
-        startPos = [intersectStartBottom.x, intersectStartBottom.y];
-      }
-      if (intersectStartLeft) {
-        // console.log("left side", intersectStartLeft);
-        startPos = [intersectStartLeft.x, intersectStartLeft.y];
-      }
-      if (intersectStartRight) {
-        // console.log("right side", intersectStartRight);
-        startPos = [intersectStartRight.x, intersectStartRight.y];
-      }
+      const sideStartNodes = [topSideStartNode, bottomSideStartNode, leftSideStartNode, rightSideStartNode];
 
-      console.log("startPos: ", startPos);
+      sideStartNodes.forEach((node) => {
+        const intersection = getIntersection(...points, node);
+        if (intersection) {
+          startPos = [intersection.x, intersection.y];
+        }
+      });
+
+      console.log("startPos of bezier: ", startPos);
 
       // sides of endNode
       const {
@@ -483,29 +465,17 @@ window.addEventListener("load", () => {
       });
 
       console.log("endNode", endNode);
-      const intersectEndTop = getIntersection(...points, topSideEndNode);
-      const intersectEndBottom = getIntersection(...points, bottomSideEndNode);
-      const intersectEndLeft = getIntersection(...points, leftSideEndNode);
-      const intersectEndRight = getIntersection(...points, rightSideEndNode);
 
-      if (intersectEndTop) {
-        // console.log("top side", intersectEndTop);
-        endPos = [intersectEndTop.x, intersectEndTop.y];
-      }
-      if (intersectEndBottom) {
-        // console.log("bottom side", intersectEndBottom);
-        endPos = [intersectEndBottom.x, intersectEndBottom.y];
-      }
-      if (intersectEndLeft) {
-        // console.log("left side", intersectEndLeft);
-        endPos = [intersectEndLeft.x, intersectEndLeft.y];
-      }
-      if (intersectEndRight) {
-        // console.log("right side", intersectEndRight);
-        endPos = [intersectEndRight.x, intersectEndRight.y];
-      }
+      const sideEndNodes = [topSideEndNode, bottomSideEndNode, leftSideEndNode, rightSideEndNode];
 
-      console.log("endPos: ", endPos);
+      sideEndNodes.forEach((node) => {
+        const intersection = getIntersection(...points, node);
+        if (intersection) {
+          endPos = [intersection.x, intersection.y];
+        }
+      });
+
+      console.log("endPos of bezier: ", endPos);
 
       // THERE IS SOME WEIRD BUG, THAT THE GETINTERSECTION METHOD LOGS TWO POINTS & one of them is completely wrong
       // & that one gets chosen sometimes and then pointOnLine(returns null)
@@ -535,8 +505,8 @@ window.addEventListener("load", () => {
           t = bezierCurve.get(n);
         intersectionPoints.push(t);
       }
+      // console.log("Intersection Points:", intersectionPoints);
     }
-    console.log("Intersection Points:", intersectionPoints);
 
     return intersectionPoints[0];
   }
