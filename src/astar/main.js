@@ -402,14 +402,14 @@ window.addEventListener("load", () => {
 
         const segments = splitIntoSegments(path);
 
-        segments.forEach((segment, index) => {
+        segments.forEach((segment, segmentIndex) => {
           // Calculate intersection point of bezier curve and node to get startPos and endPos of bezier curve
           const positions = intersectionBezierAndNode(segment);
           const startPos = positions.startPos;
           const endPos = positions.endPos;
           console.log("segment", segment);
           console.log("startPos", startPos, "endPos", endPos);
-          console.log(index);
+          console.log(segmentIndex);
 
           if (segment.length === 2) {
             // // draw a straight line segment for each section of the path
@@ -426,37 +426,38 @@ window.addEventListener("load", () => {
             console.log("");
           }
 
-          // only draw arrowhead for the last point of the path
-          if (index === path.length - 1) {
-            
+          // only draw arrowhead for the last segment of the path
+          if (segmentIndex === segments.length - 1) {
+
+            // TODO: i think there are 2 cases to consider:
+            // 1. if the path is a straight line (only 2 points)
+            // 2. if the path is a bezier curve (3 points)
+            // need to draw arrowhead for both cases
+
+            // Assuming path is an array of points
+            const controlPoint = segment[1];
+            // Calculate the angle of the line segment formed by the last two points
+            const angle = Math.atan2(endPos[1] - controlPoint.y, endPos[0] - controlPoint.x);
+            // Length of the arrowhead
+            const arrowLength = 10;
+            // Calculate the coordinates of the points of the arrowhead
+            const arrowPoint1 = {
+              x: endPos[0] - arrowLength * Math.cos(angle - Math.PI / 6),
+              y: endPos[1] - arrowLength * Math.sin(angle - Math.PI / 6),
+            };
+            const arrowPoint2 = {
+              x: endPos[0] - arrowLength * Math.cos(angle + Math.PI / 6),
+              y: endPos[1] - arrowLength * Math.sin(angle + Math.PI / 6),
+            };
+            // Draw the arrowhead
+            ctx.beginPath();
+            ctx.moveTo(endPos[0], endPos[1]);
+            ctx.lineTo(arrowPoint1.x, arrowPoint1.y);
+            ctx.lineTo(arrowPoint2.x, arrowPoint2.y);
+            ctx.closePath();
+            ctx.fillStyle = "black";
+            ctx.fill();
           }
-          // // Assuming path is an array of points
-          // const controlPoint = segment[1];
-
-          // // Calculate the angle of the line segment formed by the last two points
-          // const angle = Math.atan2(endPos[1] - controlPoint.y, endPos[0] - controlPoint.x);
-
-          // // Length of the arrowhead
-          // const arrowLength = 10;
-
-          // // Calculate the coordinates of the points of the arrowhead
-          // const arrowPoint1 = {
-          //   x: endPos[0] - arrowLength * Math.cos(angle - Math.PI / 6),
-          //   y: endPos[1] - arrowLength * Math.sin(angle - Math.PI / 6),
-          // };
-          // const arrowPoint2 = {
-          //   x: endPos[0] - arrowLength * Math.cos(angle + Math.PI / 6),
-          //   y: endPos[1] - arrowLength * Math.sin(angle + Math.PI / 6),
-          // };
-
-          // // Draw the arrowhead
-          // ctx.beginPath();
-          // ctx.moveTo(endPos[0], endPos[1]);
-          // ctx.lineTo(arrowPoint1.x, arrowPoint1.y);
-          // ctx.lineTo(arrowPoint2.x, arrowPoint2.y);
-          // ctx.closePath();
-          // ctx.fillStyle = "black";
-          // ctx.fill();
         });
 
         // // draw a straight line segment for each section of the path
