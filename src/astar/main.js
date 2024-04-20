@@ -340,8 +340,7 @@ window.addEventListener("load", () => {
         // und andere edges schon evenuell da sind
         // Vielleicht kann ich die dockingPoints speichern pro Node (also von vorherigen Beziers die schon gezecihnet wurden)
         // und davon entsprechend die geraden Edges zeichnen mit einem Offset von 5-10px oder so
-
-      } 
+      }
       // else {
       // }
       // run astar.findPath() for each edge connection (user input)
@@ -401,23 +400,68 @@ window.addEventListener("load", () => {
         // TODO: if path length > 3, use bezier splines and connect them accordingly for
         // a segment of 3 (or in some cases 2 (at the end)) points along the path
 
-        // draw a segment for each section of the path
-        ctx.beginPath();
-        ctx.moveTo(path[0].x, path[0].y); // Move to the starting point
-        for (let i = 1; i < path.length; i++) {
-          ctx.strokeStyle = "purple";
-          ctx.lineTo(path[i].x, path[i].y); // Draw a line to the ending point
+        const segments = splitIntoSegments(path);
 
-          ctx.lineWidth = 3; // Set the width of the edge
+        segments.forEach((segment) => {
+          // Calculate intersection point of bezier curve and node to get startPos and endPos of bezier curve
+          const positions = intersectionBezierAndNode(segment);
+          const startPos = positions.startPos;
+          const endPos = positions.endPos;
+          console.log("segment", segment);
+          console.log(positions.startPos, positions.endPos);
+          ctx.beginPath();
+          ctx.moveTo(startPos[0], startPos[1]);
+          ctx.quadraticCurveTo(segment[1].x, segment[1].y, endPos[0], endPos[1]);
           ctx.stroke();
-        }
+          console.log("");
+
+          // DRAW ARROWHEAD -> TODO: only draw for the last point of the path
+          // // Assuming path is an array of points
+          // const controlPoint = segment[1];
+
+          // // Calculate the angle of the line segment formed by the last two points
+          // const angle = Math.atan2(endPos[1] - controlPoint.y, endPos[0] - controlPoint.x);
+
+          // // Length of the arrowhead
+          // const arrowLength = 10;
+
+          // // Calculate the coordinates of the points of the arrowhead
+          // const arrowPoint1 = {
+          //   x: endPos[0] - arrowLength * Math.cos(angle - Math.PI / 6),
+          //   y: endPos[1] - arrowLength * Math.sin(angle - Math.PI / 6),
+          // };
+          // const arrowPoint2 = {
+          //   x: endPos[0] - arrowLength * Math.cos(angle + Math.PI / 6),
+          //   y: endPos[1] - arrowLength * Math.sin(angle + Math.PI / 6),
+          // };
+
+          // // Draw the arrowhead
+          // ctx.beginPath();
+          // ctx.moveTo(endPos[0], endPos[1]);
+          // ctx.lineTo(arrowPoint1.x, arrowPoint1.y);
+          // ctx.lineTo(arrowPoint2.x, arrowPoint2.y);
+          // ctx.closePath();
+          // ctx.fillStyle = "black";
+          // ctx.fill();
+        });
+
+        // // draw a straight line segment for each section of the path
+        // ctx.beginPath();
+        // ctx.moveTo(path[0].x, path[0].y); // Move to the starting point
+        // for (let i = 1; i < path.length; i++) {
+        //   ctx.strokeStyle = "purple";
+        //   ctx.lineTo(path[i].x, path[i].y); // Draw a line to the ending point
+
+        //   ctx.lineWidth = 3; // Set the width of the edge
+        //   ctx.stroke();
+        // }
       }
     });
   }
 
   // calculate intersection point of bezier curve and node
   function intersectionBezierAndNode(path) {
-    if (path.length <= 3) {
+    if (path.length === 3) {
       // TODO: find corresponding point in nodeCoordinates array to get width and height of them
       const startNode = getNode(path[0]);
       const endNode = getNode(path[2]);
@@ -433,55 +477,70 @@ window.addEventListener("load", () => {
 
       // start-, control- and end- point of bezier curve
       const points = [path[0].x, path[0].y, path[1].x, path[1].y, path[2].x, path[2].y];
-      // sides of startNode
-      const {
-        top: topSideStartNode,
-        bottom: bottomSideStartNode,
-        left: leftSideStartNode,
-        right: rightSideStartNode,
-      } = calculateNodeSides(startNode.width, startNode.height, {
-        x: startNode.x,
-        y: startNode.y,
-      });
-      console.log("");
-      console.log("startNode", startNode);
+      if (startNode) {
+        // sides of startNode
+        const {
+          top: topSideStartNode,
+          bottom: bottomSideStartNode,
+          left: leftSideStartNode,
+          right: rightSideStartNode,
+        } = calculateNodeSides(startNode.width, startNode.height, {
+          x: startNode.x,
+          y: startNode.y,
+        });
+        console.log("");
+        console.log("startNode", startNode);
 
-      const sideStartNodes = [topSideStartNode, bottomSideStartNode, leftSideStartNode, rightSideStartNode];
+        const sideStartNodes = [topSideStartNode, bottomSideStartNode, leftSideStartNode, rightSideStartNode];
 
-      sideStartNodes.forEach((node) => {
-        const intersection = getIntersection(...points, node);
-        if (intersection) {
-          startPos = [intersection.x, intersection.y];
-        }
-      });
+        sideStartNodes.forEach((node) => {
+          const intersection = getIntersection(...points, node);
+          if (intersection) {
+            startPos = [intersection.x, intersection.y];
+          }
+        });
 
-      console.log("startPos of bezier: ", startPos);
+        console.log("startPos of bezier: ", startPos);
+      }
 
-      // sides of endNode
-      const {
-        top: topSideEndNode,
-        bottom: bottomSideEndNode,
-        left: leftSideEndNode,
-        right: rightSideEndNode,
-      } = calculateNodeSides(endNode.width, endNode.height, {
-        x: endNode.x,
-        y: endNode.y,
-      });
+      if (endNode) {
+        // sides of endNode
+        const {
+          top: topSideEndNode,
+          bottom: bottomSideEndNode,
+          left: leftSideEndNode,
+          right: rightSideEndNode,
+        } = calculateNodeSides(endNode.width, endNode.height, {
+          x: endNode.x,
+          y: endNode.y,
+        });
 
-      console.log("endNode", endNode);
+        console.log("endNode", endNode);
 
-      const sideEndNodes = [topSideEndNode, bottomSideEndNode, leftSideEndNode, rightSideEndNode];
+        const sideEndNodes = [topSideEndNode, bottomSideEndNode, leftSideEndNode, rightSideEndNode];
 
-      sideEndNodes.forEach((node) => {
-        const intersection = getIntersection(...points, node);
-        if (intersection) {
-          endPos = [intersection.x, intersection.y];
-        }
-      });
+        sideEndNodes.forEach((node) => {
+          const intersection = getIntersection(...points, node);
+          if (intersection) {
+            endPos = [intersection.x, intersection.y];
+          }
+        });
 
-      console.log("endPos of bezier: ", endPos);
+        console.log("endPos of bezier: ", endPos);
+      }
+
+      // for connected bezier curves
+      if (startNode === null && endNode === null) {
+        return { startPos: Object.values(path[0]), endPos: Object.values(path[2]) };
+      } else if (startNode === null) {
+        return { startPos: Object.values(path[0]), endPos: endPos };
+      } else if (endNode === null) {
+        return { startPos: startPos, endPos: Object.values(path[2]) };
+      }
 
       return { startPos, endPos };
+    } else if (path.length === 2) {
+      return { startPos: Object.values(path[0]), endPos: Object.values(path[1]) };
     }
   }
 
@@ -510,6 +569,19 @@ window.addEventListener("load", () => {
     return intersectionPoints[0];
   }
 
+  function splitIntoSegments(array) {
+    const segments = [];
+
+    for (let i = 0; i < array.length; i += 2) {
+      if (i < array.length - 1) {
+        const segment = array.slice(i, i + 3);
+        segments.push(segment);
+      }
+    }
+
+    return segments;
+  }
+
   function findDuplicates(array) {
     const seen = new Set();
     const duplicates = new Set();
@@ -526,6 +598,7 @@ window.addEventListener("load", () => {
   }
 
   function getNode(point) {
+    if (!point) return null;
     let midPoint = null;
     nodeCoordinates.some((node) => {
       if (node.midpoint.x === point.x && node.midpoint.y === point.y) {
