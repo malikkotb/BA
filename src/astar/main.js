@@ -402,20 +402,34 @@ window.addEventListener("load", () => {
 
         const segments = splitIntoSegments(path);
 
-        segments.forEach((segment) => {
+        segments.forEach((segment, index) => {
           // Calculate intersection point of bezier curve and node to get startPos and endPos of bezier curve
           const positions = intersectionBezierAndNode(segment);
           const startPos = positions.startPos;
           const endPos = positions.endPos;
           console.log("segment", segment);
-          console.log(positions.startPos, positions.endPos);
-          ctx.beginPath();
-          ctx.moveTo(startPos[0], startPos[1]);
-          ctx.quadraticCurveTo(segment[1].x, segment[1].y, endPos[0], endPos[1]);
-          ctx.stroke();
-          console.log("");
+          console.log("startPos", startPos, "endPos", endPos);
+          console.log(index);
 
-          // DRAW ARROWHEAD -> TODO: only draw for the last point of the path
+          if (segment.length === 2) {
+            // // draw a straight line segment for each section of the path
+            ctx.beginPath();
+            ctx.moveTo(startPos[0], startPos[1]); // Move to the starting point
+            ctx.strokeStyle = "purple";
+            ctx.lineTo(endPos[0], endPos[1]); // Draw a line to the ending point
+            ctx.stroke();
+          } else {
+            ctx.beginPath();
+            ctx.moveTo(startPos[0], startPos[1]);
+            ctx.quadraticCurveTo(segment[1].x, segment[1].y, endPos[0], endPos[1]);
+            ctx.stroke();
+            console.log("");
+          }
+
+          // only draw arrowhead for the last point of the path
+          if (index === path.length - 1) {
+            
+          }
           // // Assuming path is an array of points
           // const controlPoint = segment[1];
 
@@ -540,7 +554,41 @@ window.addEventListener("load", () => {
 
       return { startPos, endPos };
     } else if (path.length === 2) {
-      return { startPos: Object.values(path[0]), endPos: Object.values(path[1]) };
+      // get intersection point of staright line (bezier is a straight line in this case, bc there are only 2 points for a
+      // potential bezier cruve) and node
+
+      const endNode = getNode(path[1]);
+
+      // sides of endNode
+      const {
+        top: topSideEndNode,
+        bottom: bottomSideEndNode,
+        left: leftSideEndNode,
+        right: rightSideEndNode,
+      } = calculateNodeSides(endNode.width, endNode.height, {
+        x: endNode.x,
+        y: endNode.y,
+      });
+
+      let endPos = null;
+
+      console.log("endNode", endNode);
+
+      const sideEndNodes = [topSideEndNode, bottomSideEndNode, leftSideEndNode, rightSideEndNode];
+
+      console.log("line of curve", path[0], path[1]);
+      sideEndNodes.forEach((node) => {
+        console.log("sideNode: ", node);
+        const intersection = getLineLineIntersection(path[0], path[1], node.p1, node.p2);
+        if (intersection) {
+          console.log(node);
+          endPos = [intersection.x, intersection.y];
+        }
+      });
+
+      console.log("endPos of bezier: ", endPos);
+
+      return { startPos: Object.values(path[0]), endPos: endPos };
     }
   }
 
@@ -567,6 +615,30 @@ window.addEventListener("load", () => {
     }
 
     return intersectionPoints[0];
+  }
+
+  function getLineLineIntersection(line1Start, line1End, line2Start, line2End) {
+    const { x: x1, y: y1 } = line1Start;
+    const { x: x2, y: y2 } = line1End;
+    const { x: x3, y: y3 } = line2Start;
+    const { x: x4, y: y4 } = line2End;
+
+    const denominator = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+
+    if (denominator === 0) {
+      return null; // The lines are parallel or coincident
+    }
+
+    const t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / denominator;
+    const u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / denominator;
+
+    if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
+      const intersectionX = x1 + t * (x2 - x1);
+      const intersectionY = y1 + t * (y2 - y1);
+      return { x: intersectionX, y: intersectionY };
+    }
+
+    return null; // The lines do not intersect within the line segments
   }
 
   function splitIntoSegments(array) {
