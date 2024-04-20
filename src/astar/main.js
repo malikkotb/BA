@@ -360,44 +360,45 @@ window.addEventListener("load", () => {
         const { startPos, endPos } = intersectionBezierAndNode(path);
         // scenario: "connect two nodes directly via quadratic bezier curve"
 
-        // ctx.beginPath();
-        // ctx.moveTo(startPos[0], startPos[1]);
-        // ctx.quadraticCurveTo(path[1].x, path[1].y, endPos[0], endPos[1]);
-        // ctx.stroke();
-
         ctx.beginPath();
-        ctx.moveTo(path[0].x, path[0].y);
-        ctx.quadraticCurveTo(path[1].x, path[1].y, path[2].x, path[2].y);
+        ctx.moveTo(startPos[0], startPos[1]);
+        ctx.quadraticCurveTo(path[1].x, path[1].y, endPos[0], endPos[1]);
         ctx.stroke();
+
+        // ctx.beginPath();
+        // ctx.moveTo(path[0].x, path[0].y);
+        // ctx.quadraticCurveTo(path[1].x, path[1].y, path[2].x, path[2].y);
+        // ctx.stroke();
 
         // DRAWING ARROWHEAD
         // Assuming path is an array of points
-        // const controlPoint = path[1];
-        // const endPoint = path[2];
+        const controlPoint = path[1];
+        const endPoint = path[2];
 
-        // // Calculate the angle of the line segment formed by the last two points
-        // const angle = Math.atan2(endPoint.y - controlPoint.y, endPoint.x - controlPoint.x);
+        // Calculate the angle of the line segment formed by the last two points
+        const angle = Math.atan2(endPos[1] - controlPoint.y, endPos[0] - controlPoint.x);
 
-        // // Length of the arrowhead
-        // const arrowLength = 10;
+        // Length of the arrowhead
+        const arrowLength = 10;
 
-        // // Calculate the coordinates of the points of the arrowhead
-        // const arrowPoint1 = {
-        //   x: endPoint.x - arrowLength * Math.cos(angle - Math.PI / 6),
-        //   y: endPoint.y - arrowLength * Math.sin(angle - Math.PI / 6),
-        // };
-        // const arrowPoint2 = {
-        //   x: endPoint.x - arrowLength * Math.cos(angle + Math.PI / 6),
-        //   y: endPoint.y - arrowLength * Math.sin(angle + Math.PI / 6),
-        // };
+        // Calculate the coordinates of the points of the arrowhead
+        const arrowPoint1 = {
+          x: endPos[0] - arrowLength * Math.cos(angle - Math.PI / 6),
+          y: endPos[1] - arrowLength * Math.sin(angle - Math.PI / 6),
+        };
+        const arrowPoint2 = {
+          x: endPos[0] - arrowLength * Math.cos(angle + Math.PI / 6),
+          y: endPos[1] - arrowLength * Math.sin(angle + Math.PI / 6),
+        };
 
-        // // Draw the arrowhead
-        // ctx.beginPath();
-        // ctx.moveTo(endPoint.x, endPoint.y);
-        // ctx.lineTo(arrowPoint1.x, arrowPoint1.y);
-        // ctx.lineTo(arrowPoint2.x, arrowPoint2.y);
-        // ctx.closePath();
-        // ctx.fill();
+        // Draw the arrowhead
+        ctx.beginPath();
+        ctx.moveTo(endPos[0], endPos[1]);
+        ctx.lineTo(arrowPoint1.x, arrowPoint1.y);
+        ctx.lineTo(arrowPoint2.x, arrowPoint2.y);
+        ctx.closePath();
+        ctx.fillStyle = "black"
+        ctx.fill();
       } else {
         // TODO: if path length > 3, use bezier splines and connect them accordingly for
         // a segment of 3 (or in some cases 2 (at the end)) points along the path
@@ -434,9 +435,7 @@ window.addEventListener("load", () => {
 
       // start-, control- and end- point of bezier curve
       const points = [path[0].x, path[0].y, path[1].x, path[1].y, path[2].x, path[2].y];
-      console.log("points on path:", points);
       // sides of startNode
-      // const { topSideStartNode, bottomSideStartNode, leftSideStartNode, rightSideStartNode } = calculateNodeSides(
       const {
         top: topSideStartNode,
         bottom: bottomSideStartNode,
@@ -520,20 +519,15 @@ window.addEventListener("load", () => {
     // c1, c2 = control point of curve
     // y1, y2 = end point of curve
     //TODO: reference in Paper: https://github.com/Pomax/bezierjs
-    // const curve = new Bezier(x1, x2, c1, c2, y1, y2);
-    // console.log("line", line);
-    // console.log(curve);
-    // console.log("curve intersects", curve.intersects(line));
     const intersectionPoints = [];
 
     let slantLine = line;
     //add invisible slant to vertical lines
     if (slantLine.p1.x === slantLine.p2.x && slantLine.p1.y !== slantLine.p2.y) {
-      slantLine.p1.x += 0.001//  1e-8;
+      slantLine.p1.x += 0.001; //  1e-8;
     }
 
     const bezierCurve = new Bezier(x1, x2, c1, c2, y1, y2);
-    console.log(x1, x2, c1, c2, y1, y2);
     const intersections = bezierCurve.lineIntersects(slantLine);
     if (intersections.length > 0) {
       for (let e = 0; e < intersections.length; e++) {
@@ -544,42 +538,7 @@ window.addEventListener("load", () => {
     }
     console.log("Intersection Points:", intersectionPoints);
 
-    return intersectionPoints;
-    // return curve.intersects(line).map((t) => curve.get(t))[0] ?? null;
-
-    // var draw = function () {
-    //   this.drawSkeleton(curve);
-    //   this.drawCurve(curve);
-    //   var line = { p1: { x: 0, y: 175 }, p2: { x: 200, y: 25 } };
-    //   this.setColor("red");
-    //   this.drawLine(line.p1, line.p2);
-    //   this.setColor("black");
-    //   curve.intersects(line).forEach((t) => this.drawPoint(curve.get(t)));
-    // };
-
-    // // Destructure the points array
-    // const [[x1, y1], [x2, y2], [x3, y3]] = points;
-    // const roots = getRoots(points, line);
-    // const coordForRoot = (t) => {
-    //   const mt = 1 - t;
-    //   return [x1 * mt ** 2 + 2 * x2 * t * mt + x3 * t ** 2, y1 * mt ** 2 + 2 * y2 * t * mt + y3 * t ** 2];
-    // };
-    // const coordinates = roots.map((t) => coordForRoot(t).map((v) => v.toFixed(2)));
-    // console.log("");
-    // console.log("line", line, "coordinates: ", coordinates);
-    // if (
-    //   pointOnLine(
-    //     coordinates[0]?.map((str) => parseFloat(str)),
-    //     line[0],
-    //     line[1]
-    //   )
-    // ) {
-    //   console.log("True, coordinates", coordinates, "\ncoordinatres[0]:", coordinates[0], "\nline:", line);
-    //   return coordinates[0].map((str) => parseFloat(str));
-    // } else {
-    //   console.log("Nope, points: ", points, "coords: ", coordinates, "\n line:", line);
-    //   return undefined;
-    // }
+    return intersectionPoints[0];
   }
 
   function pointOnLine(point, lineStart, lineEnd) {
