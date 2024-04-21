@@ -397,8 +397,16 @@ window.addEventListener("load", () => {
         ctx.fillStyle = "black";
         ctx.fill();
       } else {
-        // TODO: if path length > 3, use bezier splines and connect them accordingly for
-        // a segment of 3 (or in some cases 2 (at the end)) points along the path
+        // TODO: if path length > 3
+        // first approach: Catmol-Rom Splines from p5.js
+        // Splines describe a transformation of control points
+        // Given some control points, you use a spline, to generate curves
+        // One can think of splines as curve generators, that make certain promises
+        // about continuity in the curve Joins, and how it treats the input control points
+        // Catmull-Rom splines are a type of spline that is very useful for computer graphics
+        // because they are easy to use and generate nice curves
+
+
 
         const segments = splitIntoSegments(path);
 
@@ -460,16 +468,15 @@ window.addEventListener("load", () => {
           }
         });
 
-        // // draw a straight line segment for each section of the path
-        // ctx.beginPath();
-        // ctx.moveTo(path[0].x, path[0].y); // Move to the starting point
-        // for (let i = 1; i < path.length; i++) {
-        //   ctx.strokeStyle = "purple";
-        //   ctx.lineTo(path[i].x, path[i].y); // Draw a line to the ending point
+        // draw a straight line segment for each section of the path = linear spline
+        ctx.beginPath();
+        ctx.moveTo(path[0].x, path[0].y); // Move to the starting point
+        for (let i = 1; i < path.length; i++) {
+          ctx.strokeStyle = "purple";
+          ctx.lineTo(path[i].x, path[i].y); // Draw a line to the ending point
 
-        //   ctx.lineWidth = 3; // Set the width of the edge
-        //   ctx.stroke();
-        // }
+          ctx.stroke();
+        }
       }
     });
   }
