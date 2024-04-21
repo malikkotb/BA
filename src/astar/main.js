@@ -364,7 +364,7 @@ window.addEventListener("load", () => {
         // but then calculating intersection of the node and that potential bezier curve to get the start and end position of the new bezier curve
         // which goes from the intersection point of the node and the bezier curve to the intersection point of the node and the bezier curve
         // to draw the shorter more aesthetically pleasing bezier curve
-        const { startPos, endPos } = intersectionBezierAndNode(path);
+        const { startPos, endPos } = intersectionCurveAndNode(path);
         // scenario: "connect two nodes directly via quadratic bezier curve"
 
         ctx.beginPath();
@@ -403,11 +403,11 @@ window.addEventListener("load", () => {
       } else {
         // TODO: if path length > 3
 
-        // 1. approach: Splitting path into segments and drawing bezier curves and straight lines for each of them
+        // 0. approach: Splitting path into segments and drawing bezier curves and straight lines for each of them
         // const segments = splitIntoSegments(path);
         // segments.forEach((segment, segmentIndex) => {
         //   // Calculate intersection point of bezier curve and node to get startPos and endPos of bezier curve
-        //   const positions = intersectionBezierAndNode(segment);
+        //   const positions = intersectionCurveAndNode(segment);
         //   const startPos = positions.startPos;
         //   const endPos = positions.endPos;
         //   console.log("segment", segment);
@@ -432,10 +432,6 @@ window.addEventListener("load", () => {
         //   // only draw arrowhead for the last segment of the path
         //   if (segmentIndex === segments.length - 1) {
 
-        //     // TODO: i think there are 2 cases to consider:
-        //     // 1. if the path is a straight line (only 2 points)
-        //     // 2. if the path is a bezier curve (3 points)
-        //     // need to draw arrowhead for both cases
 
         //     // Assuming path is an array of points
         //     const controlPoint = segment[1];
@@ -463,20 +459,42 @@ window.addEventListener("load", () => {
         //   }
         // });
 
+        // 1. aproach: This code creates a smooth path through a set of points using midpoints for smooth transitions and each point as a control point for quadratic Bézier curves, ending with a straight line to the last point.
+
+        /* GPT: "The calculation of midpoints in the code you're referring to is used for drawing smooth curves through a series of points using quadratic Bézier curves.
+        // A quadratic Bézier curve requires three points: a start point, an end point, and a control point. The curve starts at the start point, ends at the end point, and is pulled towards the control point, creating a smooth curve.
+        // In this code, each point in the path array (except for the first and last) is used as a control point for a Bézier curve. The start point of each curve is the previous point in the array, and the end point is the midpoint between the control point and the next point in the array. This creates a series of curves that smoothly pass through each point in the path.
+        Calculating the midpoints allows the curve to smoothly transition from one point to the next, as the end point of one curve is the start point of the next. This ensures that the curve doesn't have any sharp corners and instead forms a smooth, continuous line." */
         ctx.beginPath();
         ctx.moveTo(path[0].x, path[0].y);
-    
+        let secondLastPoint = null; 
+        // The for loop iterates through the path array, starting from the second point and
+        // ending at the second-to-last point. For each point, it does the following:
         for (let i = 1; i < path.length - 1; i++) {
+          // calculates the coordinates of the midpoint between the current point and the next point.
           const xc = (path[i].x + path[i + 1].x) / 2;
           const yc = (path[i].y + path[i + 1].y) / 2;
+          // The quadratic Bézier curve starts at the current point in the path,
+          // uses the current point as a control point, and ends at the midpoint between the current point and the next point.
+          // This creates a smooth curve that passes through each point in the path array.
           ctx.quadraticCurveTo(path[i].x, path[i].y, xc, yc);
+          secondLastPoint = {x: xc, y: yc}
         }
-    
+
+        // const positions = intersectionCurveAndNode([secondLastPoint, path[path.length - 1]]);
+        const positions = intersectionCurveAndNode([path[path.length - 2], path[path.length - 1]]);
+        const endPos = positions.endPos;
+
         // Connect the last two path with a straight line
-        ctx.lineTo(path[path.length - 1].x, path[path.length - 1].y);
-        //TODO: add intersection with the nodes to get the startPos & endPos of the bezier curve
+        ctx.lineTo(endPos[0], endPos[1]); // end line at intersection with last node
+        // ctx.lineTo(path[path.length - 1].x, path[path.length - 1].y); // end line in midpoint of last node
         //TODO: draw arrowhead
         ctx.stroke();
+
+
+
+
+
 
 
         // TODO: 2. approach: Catmol-Rom Splines from p5.js
@@ -498,13 +516,12 @@ window.addEventListener("load", () => {
 
         //   ctx.stroke();
         // }
-
       }
     });
   }
 
   // calculate intersection point of bezier curve and node
-  function intersectionBezierAndNode(path) {
+  function intersectionCurveAndNode(path) {
     if (path.length === 3) {
       // TODO: find corresponding point in nodeCoordinates array to get width and height of them
       const startNode = getNode(path[0]);
@@ -608,7 +625,7 @@ window.addEventListener("load", () => {
 
       console.log("line of curve", path[0], path[1]);
       sideEndNodes.forEach((node) => {
-        console.log("sideNode: ", node);
+        // console.log("sideNode: ", node);
         const intersection = getLineLineIntersection(path[0], path[1], node.p1, node.p2);
         if (intersection) {
           console.log(node);
@@ -669,10 +686,6 @@ window.addEventListener("load", () => {
     }
 
     return null; // The lines do not intersect within the line segments
-  }
-
-  function drawSmoothCurve(points, ctx) {
-   
   }
 
   function splitIntoSegments(array) {
