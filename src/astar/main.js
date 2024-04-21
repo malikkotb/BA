@@ -360,6 +360,10 @@ window.addEventListener("load", () => {
         // exists from nodeB to nodeA => them edges: A->B are beziers, edge B->A is straight line
 
         // Calculate intersection point of bezier curve and node to get startPos and endPos of bezier curve
+        //-> EXPLAIN THIS: I am using the original points of each path as the control points of the bezier curve
+        // but then calculating intersection of the node and that potential bezier curve to get the start and end position of the new bezier curve
+        // which goes from the intersection point of the node and the bezier curve to the intersection point of the node and the bezier curve
+        // to draw the shorter more aesthetically pleasing bezier curve
         const { startPos, endPos } = intersectionBezierAndNode(path);
         // scenario: "connect two nodes directly via quadratic bezier curve"
 
@@ -398,85 +402,103 @@ window.addEventListener("load", () => {
         ctx.fill();
       } else {
         // TODO: if path length > 3
-        // first approach: Catmol-Rom Splines from p5.js
+
+        // 1. approach: Splitting path into segments and drawing bezier curves and straight lines for each of them
+        // const segments = splitIntoSegments(path);
+        // segments.forEach((segment, segmentIndex) => {
+        //   // Calculate intersection point of bezier curve and node to get startPos and endPos of bezier curve
+        //   const positions = intersectionBezierAndNode(segment);
+        //   const startPos = positions.startPos;
+        //   const endPos = positions.endPos;
+        //   console.log("segment", segment);
+        //   console.log("startPos", startPos, "endPos", endPos);
+        //   console.log(segmentIndex);
+
+        //   if (segment.length === 2) {
+        //     // // draw a straight line segment for each section of the path
+        //     ctx.beginPath();
+        //     ctx.moveTo(startPos[0], startPos[1]); // Move to the starting point
+        //     ctx.strokeStyle = "purple";
+        //     ctx.lineTo(endPos[0], endPos[1]); // Draw a line to the ending point
+        //     ctx.stroke();
+        //   } else {
+        //     ctx.beginPath();
+        //     ctx.moveTo(startPos[0], startPos[1]);
+        //     ctx.quadraticCurveTo(segment[1].x, segment[1].y, endPos[0], endPos[1]);
+        //     ctx.stroke();
+        //     console.log("");
+        //   }
+
+        //   // only draw arrowhead for the last segment of the path
+        //   if (segmentIndex === segments.length - 1) {
+
+        //     // TODO: i think there are 2 cases to consider:
+        //     // 1. if the path is a straight line (only 2 points)
+        //     // 2. if the path is a bezier curve (3 points)
+        //     // need to draw arrowhead for both cases
+
+        //     // Assuming path is an array of points
+        //     const controlPoint = segment[1];
+        //     // Calculate the angle of the line segment formed by the last two points
+        //     const angle = Math.atan2(endPos[1] - controlPoint.y, endPos[0] - controlPoint.x);
+        //     // Length of the arrowhead
+        //     const arrowLength = 10;
+        //     // Calculate the coordinates of the points of the arrowhead
+        //     const arrowPoint1 = {
+        //       x: endPos[0] - arrowLength * Math.cos(angle - Math.PI / 6),
+        //       y: endPos[1] - arrowLength * Math.sin(angle - Math.PI / 6),
+        //     };
+        //     const arrowPoint2 = {
+        //       x: endPos[0] - arrowLength * Math.cos(angle + Math.PI / 6),
+        //       y: endPos[1] - arrowLength * Math.sin(angle + Math.PI / 6),
+        //     };
+        //     // Draw the arrowhead
+        //     ctx.beginPath();
+        //     ctx.moveTo(endPos[0], endPos[1]);
+        //     ctx.lineTo(arrowPoint1.x, arrowPoint1.y);
+        //     ctx.lineTo(arrowPoint2.x, arrowPoint2.y);
+        //     ctx.closePath();
+        //     ctx.fillStyle = "black";
+        //     ctx.fill();
+        //   }
+        // });
+
+        ctx.beginPath();
+        ctx.moveTo(path[0].x, path[0].y);
+    
+        for (let i = 1; i < path.length - 1; i++) {
+          const xc = (path[i].x + path[i + 1].x) / 2;
+          const yc = (path[i].y + path[i + 1].y) / 2;
+          ctx.quadraticCurveTo(path[i].x, path[i].y, xc, yc);
+        }
+    
+        // Connect the last two path with a straight line
+        ctx.lineTo(path[path.length - 1].x, path[path.length - 1].y);
+        //TODO: add intersection with the nodes to get the startPos & endPos of the bezier curve
+        //TODO: draw arrowhead
+        ctx.stroke();
+
+
+        // TODO: 2. approach: Catmol-Rom Splines from p5.js
         // Splines describe a transformation of control points
         // Given some control points, you use a spline, to generate curves
         // One can think of splines as curve generators, that make certain promises
         // about continuity in the curve Joins, and how it treats the input control points
         // Catmull-Rom splines are a type of spline that is very useful for computer graphics
         // because they are easy to use and generate nice curves
+        console.log("");
+        console.log("path", path);
 
+        // Draw a straight line segment for each section of the path ()= linear spline) for comparison
+        // ctx.beginPath();
+        // ctx.moveTo(path[0].x, path[0].y); // Move to the starting point
+        // for (let i = 1; i < path.length; i++) {
+        //   ctx.strokeStyle = "purple";
+        //   ctx.lineTo(path[i].x, path[i].y); // Draw a line to the ending point
 
+        //   ctx.stroke();
+        // }
 
-        const segments = splitIntoSegments(path);
-
-        segments.forEach((segment, segmentIndex) => {
-          // Calculate intersection point of bezier curve and node to get startPos and endPos of bezier curve
-          const positions = intersectionBezierAndNode(segment);
-          const startPos = positions.startPos;
-          const endPos = positions.endPos;
-          console.log("segment", segment);
-          console.log("startPos", startPos, "endPos", endPos);
-          console.log(segmentIndex);
-
-          if (segment.length === 2) {
-            // // draw a straight line segment for each section of the path
-            ctx.beginPath();
-            ctx.moveTo(startPos[0], startPos[1]); // Move to the starting point
-            ctx.strokeStyle = "purple";
-            ctx.lineTo(endPos[0], endPos[1]); // Draw a line to the ending point
-            ctx.stroke();
-          } else {
-            ctx.beginPath();
-            ctx.moveTo(startPos[0], startPos[1]);
-            ctx.quadraticCurveTo(segment[1].x, segment[1].y, endPos[0], endPos[1]);
-            ctx.stroke();
-            console.log("");
-          }
-
-          // only draw arrowhead for the last segment of the path
-          if (segmentIndex === segments.length - 1) {
-
-            // TODO: i think there are 2 cases to consider:
-            // 1. if the path is a straight line (only 2 points)
-            // 2. if the path is a bezier curve (3 points)
-            // need to draw arrowhead for both cases
-
-            // Assuming path is an array of points
-            const controlPoint = segment[1];
-            // Calculate the angle of the line segment formed by the last two points
-            const angle = Math.atan2(endPos[1] - controlPoint.y, endPos[0] - controlPoint.x);
-            // Length of the arrowhead
-            const arrowLength = 10;
-            // Calculate the coordinates of the points of the arrowhead
-            const arrowPoint1 = {
-              x: endPos[0] - arrowLength * Math.cos(angle - Math.PI / 6),
-              y: endPos[1] - arrowLength * Math.sin(angle - Math.PI / 6),
-            };
-            const arrowPoint2 = {
-              x: endPos[0] - arrowLength * Math.cos(angle + Math.PI / 6),
-              y: endPos[1] - arrowLength * Math.sin(angle + Math.PI / 6),
-            };
-            // Draw the arrowhead
-            ctx.beginPath();
-            ctx.moveTo(endPos[0], endPos[1]);
-            ctx.lineTo(arrowPoint1.x, arrowPoint1.y);
-            ctx.lineTo(arrowPoint2.x, arrowPoint2.y);
-            ctx.closePath();
-            ctx.fillStyle = "black";
-            ctx.fill();
-          }
-        });
-
-        // draw a straight line segment for each section of the path = linear spline
-        ctx.beginPath();
-        ctx.moveTo(path[0].x, path[0].y); // Move to the starting point
-        for (let i = 1; i < path.length; i++) {
-          ctx.strokeStyle = "purple";
-          ctx.lineTo(path[i].x, path[i].y); // Draw a line to the ending point
-
-          ctx.stroke();
-        }
       }
     });
   }
@@ -647,6 +669,10 @@ window.addEventListener("load", () => {
     }
 
     return null; // The lines do not intersect within the line segments
+  }
+
+  function drawSmoothCurve(points, ctx) {
+   
   }
 
   function splitIntoSegments(array) {
