@@ -9,20 +9,6 @@ window.addEventListener("load", () => {
   /** @type {CanvasRenderingContext2D} */
   const ctx = canvas.getContext("2d");
 
-  const sketch = (p) => {
-    p.setup = () => {
-      p.createCanvas(200, 200);
-    };
-
-    p.draw = () => {
-      p.background(0);
-      p.fill(255);
-      p.ellipse(100, 100, 50, 50);
-    };
-  };
-
-  new p5(sketch);
-
   // customizable: canvas.height, canvas.width, gridHeight, gridWidth
   canvas.height = 1000;
   canvas.width = 1000;
@@ -175,7 +161,7 @@ window.addEventListener("load", () => {
   //
   // Represent data as nodes and centroids as a connected graph data structure, adjacency list (REPRESENT AS GRAPH)
   //
-  // Find shortest path on that graph (with Dijkstra or A* idk)
+  // Find shortest path on that graph (with A*)
   //
   // Then perform Post processing
   // start with the simple connections between 2 nodes, where only a quadratic bezier curve is needed
@@ -475,6 +461,45 @@ window.addEventListener("load", () => {
         // about continuity in the curve Joins, and how it treats the input control points
         // Catmull-Rom splines are a type of spline that is very useful for computer graphics
         // because they are easy to use and generate nice curves
+
+        const sketch = (p) => {
+          // p.setup = () => {
+          //   p.createCanvas(1000, 1000);
+          // };
+
+          p.setup = () => {
+            // canvas.parent("canvas-container");
+            // let cnv = p.createCanvas(canvas.width, canvas.height);
+            // background(200);
+
+            // let x = (windowWidth - width) / 2;
+            // let y = (windowHeight - height) / 2;
+            // cnv.position(x, y);
+          };
+
+          p.draw = () => {
+            p.strokeWeight(5);
+            p.point(84, 91);
+            p.point(68, 19);
+            p.point(21, 17);
+            p.point(32, 91);
+            p.strokeWeight(1);
+
+            p.noFill();
+            p.beginShape();
+            p.curveVertex(84, 91);
+            p.curveVertex(84, 91);
+            p.curveVertex(68, 19);
+            p.curveVertex(21, 17);
+            p.curveVertex(32, 91);
+            p.curveVertex(32, 91);
+            p.endShape();
+          };
+        };
+
+        // new p5(sketch);
+        new p5(sketch, "canvas-container");
+
         console.log("");
         console.log("path", path);
 
