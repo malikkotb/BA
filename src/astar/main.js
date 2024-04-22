@@ -1,6 +1,5 @@
 import Delaunator from "https://cdn.skypack.dev/delaunator@5.0.0";
 import { Bezier } from "./bezier-js/bezier.js";
-
 import { Grid } from "./grid.js";
 import { aStar } from "./graphSearch.js";
 // import Delaunator from "delaunator";
@@ -9,6 +8,20 @@ window.addEventListener("load", () => {
   // define what context we are working in
   /** @type {CanvasRenderingContext2D} */
   const ctx = canvas.getContext("2d");
+
+  const sketch = (p) => {
+    p.setup = () => {
+      p.createCanvas(200, 200);
+    };
+
+    p.draw = () => {
+      p.background(0);
+      p.fill(255);
+      p.ellipse(100, 100, 50, 50);
+    };
+  };
+
+  new p5(sketch);
 
   // customizable: canvas.height, canvas.width, gridHeight, gridWidth
   canvas.height = 1000;
@@ -352,7 +365,6 @@ window.addEventListener("load", () => {
     // drawing on ctx (and not ctx2)
 
     paths.forEach((path, index) => {
-
       if (path.length <= 3) {
         // TODO: check if same path exists twice from nodeA to nodeB && if exactly 1 path
         // exists from nodeB to nodeA => them edges: A->B are beziers, edge B->A is straight line
@@ -371,9 +383,7 @@ window.addEventListener("load", () => {
         ctx.stroke();
 
         drawArrowhead(ctx, path, endPos);
-       
       } else {
-
         // 0. approach: Splitting path into segments and drawing bezier curves and straight lines for each of them
         // const segments = splitIntoSegments(path);
         // segments.forEach((segment, segmentIndex) => {
@@ -439,7 +449,7 @@ window.addEventListener("load", () => {
         // calculate docking point for the first bezier curve, which goes out of the startNode of the path
         const startPos = intersectionCurveAndNode([path[0], path[1], path[2]]).startPos;
         console.log("startPos", startPos);
-        ctx.moveTo(startPos[0], startPos[1]); 
+        ctx.moveTo(startPos[0], startPos[1]);
         for (let i = 1; i < path.length - 1; i++) {
           // calculates the coordinates of the midpoint between the current point and the next point.
           const xc = (path[i].x + path[i + 1].x) / 2;
@@ -458,7 +468,6 @@ window.addEventListener("load", () => {
         //TODO: draw arrowhead
         drawArrowhead(ctx, path.slice(-3), endPos);
 
-
         // TODO: 2. approach: Catmol-Rom Splines from p5.js
         // Splines describe a transformation of control points
         // Given some control points, you use a spline, to generate curves
@@ -469,15 +478,15 @@ window.addEventListener("load", () => {
         console.log("");
         console.log("path", path);
 
-        // Draw a straight line segment for each section of the path ()= linear spline) for comparison
-        // ctx.beginPath();
-        // ctx.moveTo(path[0].x, path[0].y); // Move to the starting point
-        // for (let i = 1; i < path.length; i++) {
-        //   ctx.strokeStyle = "purple";
-        //   ctx.lineTo(path[i].x, path[i].y); // Draw a line to the ending point
+        // Draw straight line segment for comparison; to visualize used control points
+        ctx.beginPath();
+        ctx.moveTo(path[0].x, path[0].y); // Move to the starting point
+        for (let i = 1; i < path.length; i++) {
+          ctx.strokeStyle = "purple";
+          ctx.lineTo(path[i].x, path[i].y); // Draw a line to the ending point
 
-        //   ctx.stroke();
-        // }
+          ctx.stroke();
+        }
       }
     });
   }
@@ -659,12 +668,12 @@ window.addEventListener("load", () => {
 
     // Calculate the coordinates of the points of the arrowhead
     const arrowPoint1 = {
-        x: endPos[0] - arrowLength * Math.cos(angle - Math.PI / 6),
-        y: endPos[1] - arrowLength * Math.sin(angle - Math.PI / 6),
+      x: endPos[0] - arrowLength * Math.cos(angle - Math.PI / 6),
+      y: endPos[1] - arrowLength * Math.sin(angle - Math.PI / 6),
     };
     const arrowPoint2 = {
-        x: endPos[0] - arrowLength * Math.cos(angle + Math.PI / 6),
-        y: endPos[1] - arrowLength * Math.sin(angle + Math.PI / 6),
+      x: endPos[0] - arrowLength * Math.cos(angle + Math.PI / 6),
+      y: endPos[1] - arrowLength * Math.sin(angle + Math.PI / 6),
     };
 
     ctx.beginPath();
@@ -674,7 +683,7 @@ window.addEventListener("load", () => {
     ctx.closePath();
     ctx.fillStyle = "black";
     ctx.fill();
-}
+  }
 
   function splitIntoSegments(array) {
     const segments = [];
