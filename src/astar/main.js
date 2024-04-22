@@ -432,7 +432,6 @@ window.addEventListener("load", () => {
         //   // only draw arrowhead for the last segment of the path
         //   if (segmentIndex === segments.length - 1) {
 
-
         //     // Assuming path is an array of points
         //     const controlPoint = segment[1];
         //     // Calculate the angle of the line segment formed by the last two points
@@ -465,11 +464,12 @@ window.addEventListener("load", () => {
         // A quadratic Bézier curve requires three points: a start point, an end point, and a control point. The curve starts at the start point, ends at the end point, and is pulled towards the control point, creating a smooth curve.
         // In this code, each point in the path array (except for the first and last) is used as a control point for a Bézier curve. The start point of each curve is the previous point in the array, and the end point is the midpoint between the control point and the next point in the array. This creates a series of curves that smoothly pass through each point in the path.
         Calculating the midpoints allows the curve to smoothly transition from one point to the next, as the end point of one curve is the start point of the next. This ensures that the curve doesn't have any sharp corners and instead forms a smooth, continuous line." */
+
         ctx.beginPath();
-        ctx.moveTo(path[0].x, path[0].y);
-        let secondLastPoint = null; 
-        // The for loop iterates through the path array, starting from the second point and
-        // ending at the second-to-last point. For each point, it does the following:
+        // calculate docking point for the first bezier curve, which goes out of the startNode of the path
+        const startPos = intersectionCurveAndNode([path[0], path[1], path[2]]).startPos;
+        console.log("startPos", startPos);
+        ctx.moveTo(startPos[0], startPos[1]); // ctx.moveTo(path[0].x, path[0].y);
         for (let i = 1; i < path.length - 1; i++) {
           // calculates the coordinates of the midpoint between the current point and the next point.
           const xc = (path[i].x + path[i + 1].x) / 2;
@@ -478,24 +478,16 @@ window.addEventListener("load", () => {
           // uses the current point as a control point, and ends at the midpoint between the current point and the next point.
           // This creates a smooth curve that passes through each point in the path array.
           ctx.quadraticCurveTo(path[i].x, path[i].y, xc, yc);
-          secondLastPoint = {x: xc, y: yc}
         }
 
         // const positions = intersectionCurveAndNode([secondLastPoint, path[path.length - 1]]);
-        const positions = intersectionCurveAndNode([path[path.length - 2], path[path.length - 1]]);
-        const endPos = positions.endPos;
+        const endPos = intersectionCurveAndNode([path[path.length - 2], path[path.length - 1]]).endPos;
 
         // Connect the last two path with a straight line
         ctx.lineTo(endPos[0], endPos[1]); // end line at intersection with last node
         // ctx.lineTo(path[path.length - 1].x, path[path.length - 1].y); // end line in midpoint of last node
         //TODO: draw arrowhead
         ctx.stroke();
-
-
-
-
-
-
 
         // TODO: 2. approach: Catmol-Rom Splines from p5.js
         // Splines describe a transformation of control points
@@ -619,7 +611,7 @@ window.addEventListener("load", () => {
 
       let endPos = null;
 
-      console.log("endNode", endNode);
+      // console.log("endNode", endNode);
 
       const sideEndNodes = [topSideEndNode, bottomSideEndNode, leftSideEndNode, rightSideEndNode];
 
