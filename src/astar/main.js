@@ -463,41 +463,24 @@ window.addEventListener("load", () => {
         // because they are easy to use and generate nice curves
 
         const sketch = (p) => {
-          // p.setup = () => {
-          //   p.createCanvas(1000, 1000);
-          // };
-
           p.setup = () => {
-            // canvas.parent("canvas-container");
-            // let cnv = p.createCanvas(canvas.width, canvas.height);
-            // background(200);
-
-            // let x = (windowWidth - width) / 2;
-            // let y = (windowHeight - height) / 2;
-            // cnv.position(x, y);
+            let cnv = p.createCanvas(1200, 1200);
+            const canvasElement = document.getElementById("layer1");
+            const canvasPosition = canvasElement.getBoundingClientRect();
+            const canvasX = canvasPosition.left;
+            const canvasY = canvasPosition.top;
+            cnv.style("z-index", "10");
+            cnv.style("background-color", "transparent");
+            cnv.position(canvasX, canvasY);
           };
 
           p.draw = () => {
-            p.strokeWeight(5);
-            p.point(84, 91);
-            p.point(68, 19);
-            p.point(21, 17);
-            p.point(32, 91);
-            p.strokeWeight(1);
-
-            p.noFill();
-            p.beginShape();
-            p.curveVertex(84, 91);
-            p.curveVertex(84, 91);
-            p.curveVertex(68, 19);
-            p.curveVertex(21, 17);
-            p.curveVertex(32, 91);
-            p.curveVertex(32, 91);
-            p.endShape();
+            p.background(200);
+            p.fill(255);
+            p.ellipse(150, 100, 50, 50);
           };
         };
 
-        // new p5(sketch);
         new p5(sketch, "canvas-container");
 
         console.log("");
