@@ -693,19 +693,6 @@ window.addEventListener("load", () => {
     ctx.fill();
   }
 
-  function splitIntoSegments(array) {
-    const segments = [];
-
-    for (let i = 0; i < array.length; i += 2) {
-      if (i < array.length - 1) {
-        const segment = array.slice(i, i + 3);
-        segments.push(segment);
-      }
-    }
-
-    return segments;
-  }
-
   function findDuplicates(array) {
     const seen = new Set();
     const duplicates = new Set();
@@ -772,16 +759,6 @@ window.addEventListener("load", () => {
     y = Math.round(b * (p.x - p0.x) - a * (p.y - p0.y) + p0.y);
 
     return { x: x, y: y };
-  }
-
-  function printMap(map) {
-    map.forEach((value, key) => {
-      // Convert float properties to integers
-      const intKey = { x: Math.floor(key.x), y: Math.floor(key.y) };
-      const intValue = value.map((obj) => ({ x: Math.floor(obj.x), y: Math.floor(obj.y) }));
-
-      console.log(`${JSON.stringify(intKey)} => ${JSON.stringify(intValue)}`);
-    });
   }
 
   // returns sides of a node: { top, bottom, left, right}
