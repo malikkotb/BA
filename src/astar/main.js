@@ -472,12 +472,32 @@ window.addEventListener("load", () => {
             cnv.style("z-index", "10");
             cnv.style("background-color", "transparent");
             cnv.position(canvasX, canvasY);
+            p.noLoop();
+
           };
 
           p.draw = () => {
-            p.background(200);
+            p.background(255, 0.0); // set alpha-value of p5 canvas to 0
             p.fill(255);
-            p.ellipse(150, 100, 50, 50);
+
+            // The code p.rect(100, 100, 200, 100, 20); is drawing a rectangle on the p5 canvas.
+            // rectangle width of 200 pixels, height of 100 pixels, and rounded corners with a radius of 20 pixels.
+            // The top-left corner of the rectangle is positioned at coordinates (100, 100).
+
+            p.rect(650, 50, 100, 100, 20);
+            p.rect(0, 350, 100, 100, 20);
+            p.beginShape();
+            p.curveVertex(Math.floor(startPos[0]), Math.floor(startPos[1]));
+            console.log(startPos);
+            for (let point of path.slice(1, path.length - 1)) {
+              console.log(point);
+              p.curveVertex(Math.floor(point.x), Math.floor(point.x));
+            }
+            p.curveVertex(Math.floor(endPos[0]), Math.floor(endPos[1]));
+            console.log(endPos);
+            p.endShape();
+
+         
           };
         };
 
