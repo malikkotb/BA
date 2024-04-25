@@ -9,6 +9,7 @@ window.addEventListener("load", () => {
   /** @type {CanvasRenderingContext2D} */
   const ctx = canvas.getContext("2d");
 
+
   // customizable: canvas.height, canvas.width, gridHeight, gridWidth
   canvas.height = 1000;
   canvas.width = 1000;
@@ -34,8 +35,6 @@ window.addEventListener("load", () => {
   let grid = null;
   let paths = []; // shortest paths
 
-  const { atan2, cos, sin, sqrt } = Math;
-
   // Triangulation Canvas Layer
   const triangleCanvas = document.querySelector("#layer1");
   const ctx2 = triangleCanvas.getContext("2d");
@@ -47,6 +46,8 @@ window.addEventListener("load", () => {
 
   // hide triangle mesh
   document.getElementById("hideMeshBtn").addEventListener("click", () => hideMesh(ctx2));
+
+  document.getElementById("hideGridBtn").addEventListener("click", () => hideGrid())
 
   // get state and edge configuration from input
   document.getElementById("updateButton").addEventListener("click", updateGraph);
@@ -911,6 +912,10 @@ window.addEventListener("load", () => {
     ctx.beginPath();
     ctx.roundRect(x, y, width, height, [10]);
     ctx.stroke();
+  }
+
+  function hideGrid() {
+    
   }
 
   function getRandomColor() {

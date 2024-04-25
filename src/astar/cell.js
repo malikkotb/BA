@@ -50,11 +50,14 @@ export class Cell {
       default:
         break;
     }
-    ctx.fillStyle = color;
+    // ctx.fillStyle = color; 
+    ctx.fillStyle = 'rgba(0, 0, 0, 0)'; // Black color with 0% opacity
+
     ctx.fillRect(xPosition, yPosition, cellWidth, cellHeight);
 
     // border
-    ctx.strokeStyle = "black";
+    ctx.strokeStyle = 'rgb(255, 235, 153, 80)'; // change opacity to 0 to remove the grid
+
     ctx.lineWidth = 1;
     ctx.strokeRect(xPosition, yPosition, cellWidth, cellHeight);
 
@@ -76,7 +79,7 @@ export class Cell {
 
     // Keep border
     ctx.strokeStyle = "black";
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 2;
     ctx.strokeRect(xPosition, yPosition, cellWidth, cellHeight);
   }
   
