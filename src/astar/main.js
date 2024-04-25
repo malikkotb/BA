@@ -430,6 +430,11 @@ window.addEventListener("load", () => {
         // In this code, each point in the path array (except for the first and last) is used as a control point for a Bézier curve. The start point of each curve is the previous point in the array, and the end point is the midpoint between the control point and the next point in the array. This creates a series of curves that smoothly pass through each point in the path.
         Calculating the midpoints allows the curve to smoothly transition from one point to the next, as the end point of one curve is the start point of the next. This ensures that the curve doesn't have any sharp corners and instead forms a smooth, continuous line." */
 
+        if(path.length === 5 && isMidpoint(path[2], path[1], path[3])) {
+          console.log("MAKE A SINGLE POINT OUT OF THESE 3 POINTS");
+          
+        }
+
         ctx.beginPath();
         // calculate docking point for the first bezier curve, which goes out of the startNode of the path
         const startPos = intersectionCurveAndNode([path[0], path[1], path[2]]).startPos;
@@ -674,6 +679,14 @@ window.addEventListener("load", () => {
 
     return null; // The lines do not intersect within the line segments
   }
+
+  function isMidpoint(point, point1, point2) {
+    const minY = Math.min(point1.y, point2.y);
+    const maxY = Math.max(point1.y, point2.y);
+    const midpoint = (minY + maxY) / 2;
+    return point.y === midpoint;
+  }
+
 
   function drawArrowhead(ctx, path, endPos, arrowLength = 10) {
     // Assuming path is an array of points

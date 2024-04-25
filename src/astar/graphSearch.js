@@ -75,12 +75,15 @@ export class aStar {
           tentativeGScore += 100;
         }
 
-        // TODO: make the redlected point of the centroid be the neighbour that is chosen first.
+        //TODO: some kind of check when drawing edges between child nodes inside the same parent node
+
+        // make the reflected point of the centroid be the neighbour that is chosen first.
         // => decrease priority of reflected point on path a little such that it is chosen before a centroid
+        // Explaination: doing this such that the outer path (which is more aesthetic in most cases) is chosen first
         const neighbourReflectedPoint = this.isReflectedPoint(neighbour);
         if (neighbourReflectedPoint) {
           console.log("reflected neighbour: ", neighbour);
-          tentativeGScore -= 10;
+          tentativeGScore -= 50;
         }
 
         if (oppositePathExists) {
