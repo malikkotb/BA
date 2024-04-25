@@ -47,8 +47,6 @@ window.addEventListener("load", () => {
   // hide triangle mesh
   document.getElementById("hideMeshBtn").addEventListener("click", () => hideMesh(ctx2));
 
-  document.getElementById("hideGridBtn").addEventListener("click", () => hideGrid())
-
   // get state and edge configuration from input
   document.getElementById("updateButton").addEventListener("click", updateGraph);
 
@@ -912,10 +910,6 @@ window.addEventListener("load", () => {
     ctx.beginPath();
     ctx.roundRect(x, y, width, height, [10]);
     ctx.stroke();
-  }
-
-  function hideGrid() {
-    
   }
 
   function getRandomColor() {

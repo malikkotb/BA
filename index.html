@@ -14,7 +14,8 @@
 
     <!-- Secanrio: Fig. 1 -->
     <textarea id="nodeInput">200,200,75,50; 200,350,75,50; 400,275,75,50</textarea>
-    <textarea id="edgeInput">(200,200) (200,350); (400,275) (200,200); (200,200) (400,275); (400,275) (200,350); (200,350) (400,275)</textarea>
+    <!-- <textarea id="edgeInput">(200,200) (200,350); (400,275) (200,200); (200,200) (400,275); (400,275) (200,350); (200,350) (400,275)</textarea> -->
+    <textarea id="edgeInput">(200,350) (200,200)</textarea>
 
 
     <div style="display: flex; gap: 4px">
@@ -22,7 +23,6 @@
       <button id="triangleMeshBtn" style="padding: 5px">Show Triangle Mesh</button>
       <button id="findPathBtn" style="padding: 5px">Find Path</button>
       <button id="hideMeshBtn" style="padding: 5px">Hide Mesh</button>
-      <button id="hideGridBtn" style="padding: 5px">Hide Grid</button>
     </div>
     <div class="canvas-container">
       <canvas id="grid" width="400" height="400" style="z-index: 1"></canvas>

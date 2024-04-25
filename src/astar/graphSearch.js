@@ -45,7 +45,7 @@ export class aStar {
 
     while (!openSet.isEmpty()) {
       let current = openSet.dequeue(); // get current node in openSet wit lowest f_cost
-
+      console.log(JSON.stringify(openSet));
       // get neighbours/(connected nodes) of a node: this.adjacencyList.get(current);
       if (current.x === target.x && current.y === target.y) {
         return this.reconstructPath(cameFrom, target);
