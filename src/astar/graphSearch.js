@@ -5,9 +5,11 @@ export class aStar {
   // h-Cost: Estimated distance from the current node to the goal node, based on Euclidean distance.
   // f-Cost: Total estimated cost of reaching the goal node via the current node, sum of g-cost and h-cost.
 
-  constructor(adjacencyList, nodeMidoints) {
+  constructor(adjacencyList, nodeMidoints, reflectedPoints, centroids) {
     this.adjacencyList = adjacencyList;
     this.nodeMidoints = nodeMidoints;
+    this.reflectedPoints = reflectedPoints;
+    this.centroids = centroids;
     this.centroidsOnPaths = [];
     this.paths = [];
   }
@@ -43,9 +45,11 @@ export class aStar {
     });
     // console.log("existiingPath", existingPath);
 
+    console.log("adjacency: ", this.adjacencyList);
+
     while (!openSet.isEmpty()) {
+      console.log(JSON.parse(JSON.stringify(openSet.items)));
       let current = openSet.dequeue(); // get current node in openSet wit lowest f_cost
-      console.log(JSON.stringify(openSet));
       // get neighbours/(connected nodes) of a node: this.adjacencyList.get(current);
       if (current.x === target.x && current.y === target.y) {
         return this.reconstructPath(cameFrom, target);
@@ -71,13 +75,21 @@ export class aStar {
           tentativeGScore += 100;
         }
 
+        // TODO: make the redlected point of the centroid be the neighbour that is chosen first.
+        // => decrease priority of reflected point on path a little such that it is chosen before a centroid
+        const neighbourReflectedPoint = this.isReflectedPoint(neighbour);
+        if (neighbourReflectedPoint) {
+          console.log("reflected neighbour: ", neighbour);
+          tentativeGScore -= 10;
+        }
+
         if (oppositePathExists) {
           const centroidOnOppositPath = this.isNodeInArray(neighbour, existingPath);
           if (neighbourIsCentroidOfExisitngPath && centroidOnOppositPath) {
             // console.log("we dont want this niehgbour...", neighbour);
             // increase the gScore of this neighbour, to make it not be chosen (as it is already part of the opposite path)
             gScore[JSON.stringify(neighbour)] = tentativeGScore - 100;
-          } 
+          }
           // else if (!centroidOnOppositPath && neighbourIsCentroidOfExisitngPath) {
           //   // console.log("neighbour:", neighbour, "gScore-neighbour: ", gScore[JSON.stringify(neighbour)]);
           //   console.log("this should be our chosen centroid:", neighbour);
@@ -126,6 +138,14 @@ export class aStar {
         neighbour.y === nodeMidpoint.y
       );
     });
+  }
+
+  pointExists(array, x, y) {
+    return array.some((point) => point.x === x && point.y === y);
+  }
+
+  isReflectedPoint(neighbour) {
+    return this.reflectedPoints.some(point => neighbour.x === point.x && neighbour.y === point.y)
   }
 
   areEndPoints(point1, point2, pathArray) {

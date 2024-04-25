@@ -323,7 +323,7 @@ window.addEventListener("load", () => {
     });
 
     // 8. Perform pathfinding (graph search algorithm) on adjacency list
-    astar = new aStar(adjacencyList, nodeMidpoints);
+    astar = new aStar(adjacencyList, nodeMidpoints, reflectedPoints, centroids);
 
     const duplicateEdgesSet = findDuplicates(edgeConnections);
     console.log("duplicateEdges", duplicateEdgesSet);
@@ -537,7 +537,7 @@ window.addEventListener("load", () => {
           y: startNode.y,
         });
         console.log("");
-        console.log("startNode", startNode);
+        // console.log("startNode", startNode);
 
         const sideStartNodes = [topSideStartNode, bottomSideStartNode, leftSideStartNode, rightSideStartNode];
 
@@ -563,7 +563,7 @@ window.addEventListener("load", () => {
           y: endNode.y,
         });
 
-        console.log("endNode", endNode);
+        // console.log("endNode", endNode);
 
         const sideEndNodes = [topSideEndNode, bottomSideEndNode, leftSideEndNode, rightSideEndNode];
 
