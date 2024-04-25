@@ -13,7 +13,7 @@ export class Cell {
     this.hCost = 0; // Heuristic cost to the end node
     this.width = width;
     this.height = height;
-    this.draw(context, width, height, state);
+    this.draw(context, width, height, state); // draw the grid and draw the border
   }
 
   fCost() {
@@ -23,7 +23,6 @@ export class Cell {
 
   draw(ctx, cellWidth, cellHeight, state, label = "") {
    
-    // TODO: issue of 1 node covering only 1 cell, can also lie here
     let xPosition = this.x * cellWidth;
     let yPosition = this.y * cellHeight;
 

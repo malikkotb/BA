@@ -451,10 +451,9 @@ window.addEventListener("load", () => {
         console.log(path.slice(-3));
         ctx.lineTo(endPos[0], endPos[1]); // connect last two points in the path with line that ends at intersection with last node
         ctx.stroke();
-        //TODO: draw arrowhead
         drawArrowhead(ctx, path.slice(-3), endPos);
 
-        // TODO: 2. approach: Catmol-Rom Splines from p5.js
+        // 2. approach: Catmol-Rom Splines from p5.js
         // Splines describe a transformation of control points
         // Given some control points, you use a spline, to generate curves
         // One can think of splines as curve generators, that make certain promises
@@ -473,48 +472,38 @@ window.addEventListener("load", () => {
             cnv.style("background-color", "transparent");
             cnv.position(canvasX, canvasY);
             p.noLoop();
-
           };
 
           p.draw = () => {
             p.background(255, 0.0); // set alpha-value of p5 canvas to 0
-            p.fill(255);
 
-            // The code p.rect(100, 100, 200, 100, 20); is drawing a rectangle on the p5 canvas.
-            // rectangle width of 200 pixels, height of 100 pixels, and rounded corners with a radius of 20 pixels.
-            // The top-left corner of the rectangle is positioned at coordinates (100, 100).
-
-            p.rect(650, 50, 100, 100, 20);
-            p.rect(0, 350, 100, 100, 20);
+            p.noFill();
             p.beginShape();
             p.curveVertex(Math.floor(startPos[0]), Math.floor(startPos[1]));
-            console.log(startPos);
+            p.curveVertex(Math.floor(startPos[0]), Math.floor(startPos[1]));
             for (let point of path.slice(1, path.length - 1)) {
-              console.log(point);
-              p.curveVertex(Math.floor(point.x), Math.floor(point.x));
+              p.curveVertex(Math.floor(point.x), Math.floor(point.y));
             }
             p.curveVertex(Math.floor(endPos[0]), Math.floor(endPos[1]));
-            console.log(endPos);
+            p.curveVertex(Math.floor(endPos[0]), Math.floor(endPos[1]));
             p.endShape();
-
-         
           };
         };
 
-        new p5(sketch, "canvas-container");
+        // new p5(sketch, "canvas-container"); // catmull rom spline
 
         console.log("");
         console.log("path", path);
 
         // Draw straight line segment for comparison; to visualize used control points
-        ctx.beginPath();
-        ctx.moveTo(path[0].x, path[0].y); // Move to the starting point
-        for (let i = 1; i < path.length; i++) {
-          ctx.strokeStyle = "purple";
-          ctx.lineTo(path[i].x, path[i].y); // Draw a line to the ending point
+        // ctx.beginPath();
+        // ctx.moveTo(path[0].x, path[0].y); // Move to the starting point
+        // for (let i = 1; i < path.length; i++) {
+        //   ctx.strokeStyle = "purple";
+        //   ctx.lineTo(path[i].x, path[i].y); // Draw a line to the ending point
 
-          ctx.stroke();
-        }
+        //   ctx.stroke();
+        // }
       }
     });
   }
@@ -807,21 +796,6 @@ window.addEventListener("load", () => {
     return { top, bottom, left, right };
   }
 
-  function specifyDockingPoints(startNode, targetNode) {
-    // this is part of post-processing
-    // TODO: determine starting coordinates of the edge for the startingNode and determine end coordinates for the endNode
-    // need to set standards, like on corners or in the middle of one side of the node
-
-    // TODO:
-    // get property of node to know: how many edges are going out of this node
-    // then set standards for what cells of a node to choose depending
-    // on the length of the side of the particular node
-
-    console.log(startNode, targetNode);
-
-    // return { startPos, targetPos };
-  }
-
   // Function to calculate Euclidean distance between two nodes
   function calculateDistance(node1, node2) {
     const dx = node2.x - node1.x;
@@ -921,6 +895,7 @@ window.addEventListener("load", () => {
     });
   }
 
+
   // Function to draw the graph
   function redrawGraph(nodes) {
     // ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -931,10 +906,10 @@ window.addEventListener("load", () => {
 
   function drawNode(node) {
     const { x, y, width, height } = node;
-    ctx.strokeStyle = "red";
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.roundRect(x, y, width, height, [15]);
+    ctx.roundRect(x, y, width, height, [10]);
     ctx.stroke();
   }
 

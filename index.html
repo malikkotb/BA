@@ -3,25 +3,21 @@
   <head>
     <title>Aesthetic</title>
     <link rel="stylesheet" type="text/css" href="style.css" />
-    <script src="https://cdn.jsdelivr.net/npm/fabric"></script>
     <script src="https://cdn.jsdelivr.net/npm/p5@1.9.2/lib/p5.js"></script>
   </head>
   <body>
     <!-- grid canvas and script -->
     <p>x,y coordinates represent the top left corner of the drawn node.</p>
     <!-- <textarea id="nodeInput" placeholder="Enter nodes as id,x,y,width,height; ...">
-      200,100,100,100; 300,100,100,100; 200,200,100,100; 300,200,100,100; 400,200,100,100;  500,200,100,100; 600,200,100,100; 600,400,100,100</textarea> -->
-    <textarea id="nodeInput" placeholder="Enter nodes as id,x,y,width,height; ...">
 100,100,100,100; 800,200,100,100; 600,400,100,100; 250,300,100,100; 400,0,100,100; 500,200,100,100; 150,500,100,100;
  0,350,100,100; 650,50,100,100</textarea
-    >
-
-    <p>Two coordinate pairs represent two connected nodes. Enter edges (x1, y1) (x2, y2); (x3, y3) (x4, y4); ..</p>
-    <!-- <textarea id="edgeInput" placeholder="Enter edges (x1, y1) (x2, y2); (x3, y3) (x4, y4); ...  ">(400,0) (100,100); (100,100) (400,0)</textarea> -->
-    <!-- <textarea id="edgeInput" placeholder="Enter edges (x1, y1) (x2, y2); (x3, y3) (x4, y4); ...  ">
-    (650, 50) (0, 350); (100, 100) (250,300); (250,300) (100, 100); (100,100) (400,0); (400,0) (100,100); (400,0) (250,300); (250,300) (400,0); (400,0) (650, 50); (650, 50) (400,0); (400,0) (500,200); (500, 200) (400,0)</textarea
     > -->
-    <textarea id="edgeInput" placeholder="Enter edges (x1, y1) (x2, y2); (x3, y3) (x4, y4); ...  ">(650, 50) (0, 350)</textarea>
+    <!-- <textarea id="nodeInput" placeholder="Enter nodes: x,y,width,height; ...">0,0,250,250; 100,100,100,100; 800,200,100,100; 600,400,100,100; 250,300,100,100; 400,0,100,100; 500,200,100,100; 150,500,100,100; 0,350,100,100; 650,50,100,100</textarea> -->
+    <textarea id="nodeInput" placeholder="Enter nodes: x,y,width,height; ...">50,50,200,200; 100,100,100,100; 800,200,100,100; 600,400,100,100; 250,300,100,100; 400,0,100,100; 500,200,100,100; 150,500,100,100; 0,350,100,100; 650,50,100,100</textarea>
+
+    <p>Connect two nodes. Enter edges (x1, y1) (x2, y2); ..</p>
+    <textarea id="edgeInput" placeholder="Enter edges (x1, y1) (x2, y2); ...  ">(650, 50) (0, 350); (100, 100) (250,300); (250,300) (100, 100); (100,100) (400,0); (400,0) (100,100); (400,0) (250,300); (250,300) (400,0); (400,0) (650, 50); (650, 50) (400,0); (400,0) (500,200); (500, 200) (400,0)</textarea>
+    <!-- <textarea id="edgeInput" placeholder="Enter edges (x1, y1) (x2, y2); ...  ">    (650, 50) (0, 350); (100, 100) (250,300); (250,300) (100, 100); (100,100) (400,0); (400,0) (100,100); (400,0) (250,300); (250,300) (400,0); (400,0) (650, 50); (650, 50) (400,0); (400,0) (500,200); (500, 200) (400,0); (50,50) (400,0)</textarea> -->
 
     <div style="display: flex; gap: 4px">
       <button id="updateButton" style="padding: 5px">Update Graph</button>
