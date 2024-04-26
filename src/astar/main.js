@@ -361,85 +361,39 @@ window.addEventListener("load", () => {
         const { startPos, endPos } = intersectionCurveAndNode(path);
         // scenario: "connect two nodes directly via quadratic bezier curve"
 
-        ctx.beginPath();
-        ctx.moveTo(startPos[0], startPos[1]);
-        ctx.quadraticCurveTo(path[1].x, path[1].y, endPos[0], endPos[1]);
-        ctx.stroke();
-
-        drawArrowhead(ctx, path, endPos);
+        const startNode = getNode(path[0]);
+        const targetNode = getNode(path[2]);
+        if (startNode.width > targetNode.width && startNode.height > targetNode.height) {
+          // scenario: "larger node to smaller node" -> draw straight line
+          ctx.beginPath();
+          ctx.moveTo(startPos[0], startPos[1]);
+          ctx.lineTo(endPos[0], endPos[1]);
+          ctx.stroke();
+  
+          // drawArrowhead(ctx, [{ x: fromX, y: fromY }, { x: toX, y: toY }], [toX, toY]);
+          drawArrowheadLine(ctx, startPos[0], startPos[1], endPos[0], endPos[1]);
+        } else {
+          ctx.beginPath();
+          ctx.moveTo(startPos[0], startPos[1]);
+          ctx.quadraticCurveTo(path[1].x, path[1].y, endPos[0], endPos[1]);
+          ctx.stroke();
+          drawArrowhead(ctx, path, endPos);
+        }
       } else {
-        // 0. approach: Splitting path into segments and drawing bezier curves and straight lines for each of them
-        // const segments = splitIntoSegments(path);
-        // segments.forEach((segment, segmentIndex) => {
-        //   // Calculate intersection point of bezier curve and node to get startPos and endPos of bezier curve
-        //   const positions = intersectionCurveAndNode(segment);
-        //   const startPos = positions.startPos;
-        //   const endPos = positions.endPos;
-        //   console.log("segment", segment);
-        //   console.log("startPos", startPos, "endPos", endPos);
-        //   console.log(segmentIndex);
-
-        //   if (segment.length === 2) {
-        //     // // draw a straight line segment for each section of the path
-        //     ctx.beginPath();
-        //     ctx.moveTo(startPos[0], startPos[1]); // Move to the starting point
-        //     ctx.strokeStyle = "purple";
-        //     ctx.lineTo(endPos[0], endPos[1]); // Draw a line to the ending point
-        //     ctx.stroke();
-        //   } else {
-        //     ctx.beginPath();
-        //     ctx.moveTo(startPos[0], startPos[1]);
-        //     ctx.quadraticCurveTo(segment[1].x, segment[1].y, endPos[0], endPos[1]);
-        //     ctx.stroke();
-        //     console.log("");
-        //   }
-
-        //   // only draw arrowhead for the last segment of the path
-        //   if (segmentIndex === segments.length - 1) {
-
-        //     // Assuming path is an array of points
-        //     const controlPoint = segment[1];
-        //     // Calculate the angle of the line segment formed by the last two points
-        //     const angle = Math.atan2(endPos[1] - controlPoint.y, endPos[0] - controlPoint.x);
-        //     // Length of the arrowhead
-        //     const arrowLength = 10;
-        //     // Calculate the coordinates of the points of the arrowhead
-        //     const arrowPoint1 = {
-        //       x: endPos[0] - arrowLength * Math.cos(angle - Math.PI / 6),
-        //       y: endPos[1] - arrowLength * Math.sin(angle - Math.PI / 6),
-        //     };
-        //     const arrowPoint2 = {
-        //       x: endPos[0] - arrowLength * Math.cos(angle + Math.PI / 6),
-        //       y: endPos[1] - arrowLength * Math.sin(angle + Math.PI / 6),
-        //     };
-        //     // Draw the arrowhead
-        //     ctx.beginPath();
-        //     ctx.moveTo(endPos[0], endPos[1]);
-        //     ctx.lineTo(arrowPoint1.x, arrowPoint1.y);
-        //     ctx.lineTo(arrowPoint2.x, arrowPoint2.y);
-        //     ctx.closePath();
-        //     ctx.fillStyle = "black";
-        //     ctx.fill();
-        //   }
-        // });
-
         // 1. aproach: This code creates a smooth path through a set of points using midpoints for smooth transitions and each point as a control point for quadratic Bézier curves, ending with a straight line to the last point.
         /* GPT: "The calculation of midpoints in the code you're referring to is used for drawing smooth curves through a series of points using quadratic Bézier curves.
         // A quadratic Bézier curve requires three points: a start point, an end point, and a control point. The curve starts at the start point, ends at the end point, and is pulled towards the control point, creating a smooth curve.
         // In this code, each point in the path array (except for the first and last) is used as a control point for a Bézier curve. The start point of each curve is the previous point in the array, and the end point is the midpoint between the control point and the next point in the array. This creates a series of curves that smoothly pass through each point in the path.
         Calculating the midpoints allows the curve to smoothly transition from one point to the next, as the end point of one curve is the start point of the next. This ensures that the curve doesn't have any sharp corners and instead forms a smooth, continuous line." */
 
-
         // approach to make the path simpler when connecting two nodes inside a parent Node -> Scenario Fig. 2
         if (path.length === 5 && isMidpointAboveAndBelowPoints(path[2], path[1], path[3])) {
-          console.log("MAKE A SINGLE POINT OUT OF THESE 3 POINTS");
           // Remove middle points of path with indices 1, 2, and 3 and create a new element at that point
-          console.log(path[1], path[2], path[3]);
           const minY = Math.min(path[1].y, path[3].y);
           const maxY = Math.max(path[1].y, path[3].y);
           const midpoint = (minY + maxY) / 2;
 
-          path.splice(1, 3, {x: path[1].x, y: midpoint});
+          path.splice(1, 3, { x: path[1].x, y: midpoint });
         }
 
         ctx.beginPath();
@@ -717,6 +671,28 @@ window.addEventListener("load", () => {
     ctx.lineTo(arrowPoint2.x, arrowPoint2.y);
     ctx.closePath();
     ctx.fillStyle = "black";
+    ctx.fill();
+  }
+
+  function drawArrowheadLine(ctx, fromX, fromY, toX, toY, size = 10) {
+    // Calculate angle of the line
+    const angle = Math.atan2(toY - fromY, toX - fromX);
+
+    // Calculate points for arrowhead
+    const p1x = toX - size * Math.cos(angle - Math.PI / 6);
+    const p1y = toY - size * Math.sin(angle - Math.PI / 6);
+    const p2x = toX - size * Math.cos(angle + Math.PI / 6);
+    const p2y = toY - size * Math.sin(angle + Math.PI / 6);
+
+    // Draw the arrowhead lines
+    ctx.beginPath();
+    ctx.moveTo(toX, toY);
+    ctx.lineTo(p1x, p1y);
+    ctx.lineTo(p2x, p2y);
+    ctx.closePath(); // Close the path to form a triangle
+
+    // Fill the arrowhead
+    ctx.fillStyle = "#000"; // Set arrowhead fill color
     ctx.fill();
   }
 
