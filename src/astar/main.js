@@ -9,7 +9,6 @@ window.addEventListener("load", () => {
   /** @type {CanvasRenderingContext2D} */
   const ctx = canvas.getContext("2d");
 
-
   // customizable: canvas.height, canvas.width, gridHeight, gridWidth
   canvas.height = 1000;
   canvas.width = 1000;
@@ -430,9 +429,17 @@ window.addEventListener("load", () => {
         // In this code, each point in the path array (except for the first and last) is used as a control point for a Bézier curve. The start point of each curve is the previous point in the array, and the end point is the midpoint between the control point and the next point in the array. This creates a series of curves that smoothly pass through each point in the path.
         Calculating the midpoints allows the curve to smoothly transition from one point to the next, as the end point of one curve is the start point of the next. This ensures that the curve doesn't have any sharp corners and instead forms a smooth, continuous line." */
 
-        if(path.length === 5 && isMidpoint(path[2], path[1], path[3])) {
+
+        // approach to make the path simpler when connecting two nodes inside a parent Node -> Scenario Fig. 2
+        if (path.length === 5 && isMidpointAboveAndBelowPoints(path[2], path[1], path[3])) {
           console.log("MAKE A SINGLE POINT OUT OF THESE 3 POINTS");
-          
+          // Remove middle points of path with indices 1, 2, and 3 and create a new element at that point
+          console.log(path[1], path[2], path[3]);
+          const minY = Math.min(path[1].y, path[3].y);
+          const maxY = Math.max(path[1].y, path[3].y);
+          const midpoint = (minY + maxY) / 2;
+
+          path.splice(1, 3, {x: path[1].x, y: midpoint});
         }
 
         ctx.beginPath();
@@ -680,13 +687,12 @@ window.addEventListener("load", () => {
     return null; // The lines do not intersect within the line segments
   }
 
-  function isMidpoint(point, point1, point2) {
+  function isMidpointAboveAndBelowPoints(point, point1, point2) {
     const minY = Math.min(point1.y, point2.y);
     const maxY = Math.max(point1.y, point2.y);
     const midpoint = (minY + maxY) / 2;
-    return point.y === midpoint;
+    return point.y === midpoint && point1.x === point2.x;
   }
-
 
   function drawArrowhead(ctx, path, endPos, arrowLength = 10) {
     // Assuming path is an array of points
@@ -906,7 +912,6 @@ window.addEventListener("load", () => {
       }
     });
   }
-
 
   // Function to draw the graph
   function redrawGraph(nodes) {

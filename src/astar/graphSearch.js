@@ -15,7 +15,6 @@ export class aStar {
   }
 
   findPath(start, target) {
-    // TODO: change openSet from arrray to priority queue with min-heap implemenation
     const openSet = new PriorityQueue();
 
     // priority is the fCost
@@ -45,10 +44,10 @@ export class aStar {
     });
     // console.log("existiingPath", existingPath);
 
-    console.log("adjacency: ", this.adjacencyList);
+    // console.log("adjacency: ", this.adjacencyList);
 
     while (!openSet.isEmpty()) {
-      console.log(JSON.parse(JSON.stringify(openSet.items)));
+      // console.log(JSON.parse(JSON.stringify(openSet.items)));
       let current = openSet.dequeue(); // get current node in openSet wit lowest f_cost
       // get neighbours/(connected nodes) of a node: this.adjacencyList.get(current);
       if (current.x === target.x && current.y === target.y) {
@@ -75,14 +74,12 @@ export class aStar {
           tentativeGScore += 100;
         }
 
-        //TODO: some kind of check when drawing edges between child nodes inside the same parent node
-
         // make the reflected point of the centroid be the neighbour that is chosen first.
         // => decrease priority of reflected point on path a little such that it is chosen before a centroid
         // Explaination: doing this such that the outer path (which is more aesthetic in most cases) is chosen first
         const neighbourReflectedPoint = this.isReflectedPoint(neighbour);
         if (neighbourReflectedPoint) {
-          console.log("reflected neighbour: ", neighbour);
+          // console.log("reflected neighbour: ", neighbour);
           tentativeGScore -= 50;
         }
 
