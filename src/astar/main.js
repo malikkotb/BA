@@ -364,14 +364,29 @@ window.addEventListener("load", () => {
         const startNode = getNode(path[0]);
         const targetNode = getNode(path[2]);
         if (startNode.width > targetNode.width && startNode.height > targetNode.height) {
-          // scenario: "larger node to smaller node" -> draw straight line
+          // Scenario: "larger node to smaller node" -> draw straight line to middle of the nodes
+
+          // straight line from intersection points of previous bezier curve:
+          // ctx.beginPath();
+          // ctx.moveTo(startPos[0], startPos[1]);
+          // ctx.lineTo(endPos[0], endPos[1]);
+          // ctx.stroke();
+
+          // Straight line directly from the middle of the larger node to the middle of the smaller node -> This is required in almost all scenarios in the 80s Statechart paper
+
+          // use startPos[0] and endPos[0] for x-coordinates of start and end points of the straight line
+          // use middle of height of the respecitve nodes for y-coordinates of the start and end points of the line
+          const startPosX = startPos[0];
+          const startPosY = startNode.midpoint.y;
+          const endPosX = endPos[0];
+          const endPosY = targetNode.midpoint.y;
+
           ctx.beginPath();
-          ctx.moveTo(startPos[0], startPos[1]);
-          ctx.lineTo(endPos[0], endPos[1]);
+          ctx.moveTo(startPosX, startPosY)
+          ctx.lineTo(endPosX, endPosY)
           ctx.stroke();
-  
-          // drawArrowhead(ctx, [{ x: fromX, y: fromY }, { x: toX, y: toY }], [toX, toY]);
-          drawArrowheadLine(ctx, startPos[0], startPos[1], endPos[0], endPos[1]);
+
+          drawArrowheadLine(ctx, startPosX, startPosY, endPosX, endPosY);
         } else {
           ctx.beginPath();
           ctx.moveTo(startPos[0], startPos[1]);

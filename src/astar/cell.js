@@ -56,7 +56,7 @@ export class Cell {
     ctx.fillRect(xPosition, yPosition, cellWidth, cellHeight);
 
     // border
-    ctx.strokeStyle = 'rgb(255, 235, 153, 80)'; // change opacity to 0 to remove the grid
+    ctx.strokeStyle = 'rgb(255, 235, 153, 0)'; // change opacity to 0 to remove the grid
 
     ctx.lineWidth = 1;
     ctx.strokeRect(xPosition, yPosition, cellWidth, cellHeight);
