@@ -23,6 +23,7 @@ window.addEventListener("load", () => {
 
   let nodeInput = document.getElementById("nodeInput").value;
   let edgeInput = document.getElementById("edgeInput").value;
+  let parent;
 
   let graphEdges = []; // list of edges from which I will extract the adjacency list
   let triangleMesh = []; // list of objects with all important triangle nodes for one triangle and their respective coordinates (includes: vertices (corner points) and centroids of a single triangle)
@@ -87,7 +88,8 @@ window.addEventListener("load", () => {
 
   function drawDelaunayTriangles(ctx) {
     nodeInput = document.getElementById("nodeInput").value;
-    let points = processNodeInputForTriangulation(nodeInput);
+    edgeInput = document.getElementById("edgeInput").value;
+    let points = processNodeInputForTriangulation(nodeInput, edgeInput);
     const delaunay = Delaunator.from(points);
     let triangles = delaunay.triangles;
     let triangleCoordinates = [];
@@ -213,10 +215,9 @@ window.addEventListener("load", () => {
 
     // 3. Reflect centroids between nodes on convex hull on the line connecting two nodes on convex hull
     // Reflect point along line: https://gist.github.com/balint42/b99934b2a6990a53e14b // method is from this source -> REFERENCE in Paper
-
-    // TODO: use reflect method
+    // use reflect method
     // go over convex hull maybe ? as those are the edges and vertices I need to respect
-    // adding a node for each of the outher edges of the convex hull should in principal take care of the scenarios for the outside nodes
+    // adding a node for each of the outer edges of the convex hull should in principal take care of the scenarios for the outside nodes
     // such that the scenario where you can go back and forth in between two close-by nodes is always possible
 
     // get convex-hull edges
@@ -382,8 +383,8 @@ window.addEventListener("load", () => {
           const endPosY = targetNode.midpoint.y;
 
           ctx.beginPath();
-          ctx.moveTo(startPosX, startPosY)
-          ctx.lineTo(endPosX, endPosY)
+          ctx.moveTo(startPosX, startPosY);
+          ctx.lineTo(endPosX, endPosY);
           ctx.stroke();
 
           drawArrowheadLine(ctx, startPosX, startPosY, endPosX, endPosY);
@@ -737,6 +738,17 @@ window.addEventListener("load", () => {
     return midPoint;
   }
 
+  //Needed to establish hierarchies 
+  function isNode2InsideNode1(node1, node2) {
+    const topLeftInside = node2.x >= node1.x && node2.y >= node1.y;
+    const topRightInside = node2.x + node2.width <= node1.x + node1.width && node2.y >= node1.y;
+    const bottomLeftInside = node2.x >= node1.x && node2.y + node2.height <= node1.y + node1.height;
+    const bottomRightInside =
+      node2.x + node2.width <= node1.x + node1.width && node2.y + node2.height <= node1.y + node1.height;
+
+    return topLeftInside && topRightInside && bottomLeftInside && bottomRightInside;
+  }
+
   function compareNodes(node1, node2) {
     return node1.x === node2.x && node1.y === node2.y;
   }
@@ -860,7 +872,36 @@ window.addEventListener("load", () => {
     });
   }
 
-  function processNodeInputForTriangulation(nodeInput) {
+  function processNodeInputForTriangulation(nodeInput, edgeInput) {
+    console.log("number of nodes", nodeInput.split(";").length);
+    console.log("number of edges", edgeInput.split(";").length);
+
+    // might have to loop through all edges and check if there is such a realtionship of a parent node and another smaller node
+    // ich glaub ich muss über edges gehen UND größe der nodes die connected werden sollen
+
+    console.log(nodeCoordinates);
+    console.log(edgeConnections);
+
+    // also wenn es 2 nodes gibt die connected werden sollen
+
+    // Folgendes wird behandelt als wären es nur 2 nodes: (der parent node und der andere kleinere node)
+    // bzw. wenn es 2 parent nodes gibt die connected werden sollen und keine edges zu den child nodes
+    // wenn es überhaupt child nodes gibt (Scenario 4)
+    //
+
+    // UND es edges gibt zwischen diesen nodes
+    // -> add the extra points to the larger node of the two, so I have enough points for triangulation
+
+    const numberOfNodes = nodeInput.split(";").length;
+
+    // if (numberOfNodes == 2 && ) {
+    //   // Scenario: Fig. 3 & 4
+    //   // they cant be of the same size in this scenario
+    //   // add the extra points to the larger node of the two
+    // } else if (numberOfNodes && sameSize) {
+    //   // Scenario: Fig. 5
+    // }
+
     return nodeInput.split(";").map((entry) => {
       let [x, y, width, height] = entry.split(",").map(Number);
       if (isNaN(x) || isNaN(y)) {
