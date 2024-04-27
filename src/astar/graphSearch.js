@@ -42,9 +42,9 @@ export class aStar {
         oppositePathExists = true;
       }
     });
-    // console.log("existiingPath", existingPath);
+    console.log("existiingPath", existingPath);
 
-    // console.log("adjacency: ", this.adjacencyList);
+    console.log("adjacency: ", this.adjacencyList);
 
     while (!openSet.isEmpty()) {
       // console.log(JSON.parse(JSON.stringify(openSet.items)));

@@ -30,6 +30,7 @@ window.addEventListener("load", () => {
   let nodeMidpoints = [];
   let centroids = [];
   let convexHull = []; // convexHull of nodes
+  let additionalPointsForEdgeCases = [];
   let astar = null;
 
   let grid = null;
@@ -89,7 +90,7 @@ window.addEventListener("load", () => {
   function drawDelaunayTriangles(ctx) {
     nodeInput = document.getElementById("nodeInput").value;
     edgeInput = document.getElementById("edgeInput").value;
-    let points = processNodeInputForTriangulation(nodeInput, edgeInput);
+    let points = processNodeInputForTriangulation(nodeInput);
     const delaunay = Delaunator.from(points);
     let triangles = delaunay.triangles;
     let triangleCoordinates = [];
@@ -268,6 +269,7 @@ window.addEventListener("load", () => {
       ctx2.fill();
     });
 
+    // FUTURE WORK:
     // 4. TODO: Add additional points and edges for dual-grid-graph that are on the outside of the convex hull -> to make travelling around all nodes on the outside possible
     //    TODO: maybe add additonal points on the dual-grid-graph, that lie on the edges of the triangles (generated through delauney triangluation)
     //    => to have more control-points for the bezier splines
@@ -286,7 +288,7 @@ window.addEventListener("load", () => {
     // and it behaves more like a dictionary or hashMap (found in other languages)
 
     const adjacencyList = new Map();
-    [...nodeMidpoints, ...centroids, ...reflectedPoints].forEach((node) => {
+    [...nodeMidpoints, ...centroids, ...reflectedPoints, ...additionalPointsForEdgeCases].forEach((node) => {
       adjacencyList.set(node, []);
     });
 
@@ -336,8 +338,6 @@ window.addEventListener("load", () => {
         // TODO: muss mir was überlegen, wie ich die docking points für die parallelen edges spezifiziere
         // weil die ja nicht einfach nur parallel sind, sondern auch noch an den nodes andocken müssen
         // und andere edges schon evenuell da sind
-        // Vielleicht kann ich die dockingPoints speichern pro Node (also von vorherigen Beziers die schon gezecihnet wurden)
-        // und davon entsprechend die geraden Edges zeichnen mit einem Offset von 5-10px oder so
       }
       // else {
       // }
@@ -429,7 +429,7 @@ window.addEventListener("load", () => {
 
         // const positions = intersectionCurveAndNode([secondLastPoint, path[path.length - 1]]);
         const endPos = intersectionCurveAndNode([path[path.length - 2], path[path.length - 1]]).endPos;
-        console.log(path.slice(-3));
+        console.log(path);
         ctx.lineTo(endPos[0], endPos[1]); // connect last two points in the path with line that ends at intersection with last node
         ctx.stroke();
         drawArrowhead(ctx, path.slice(-3), endPos);
@@ -739,7 +739,7 @@ window.addEventListener("load", () => {
   }
 
   function createHierarchyMap() {
-    const hierarchyMap = new Map;
+    const hierarchyMap = new Map();
 
     // Iterate over each node
     for (const node of nodeCoordinates) {
@@ -760,15 +760,15 @@ window.addEventListener("load", () => {
       hierarchyMap.set(parentNode, childNodes);
     }
 
-    // filter top level nodes
+    // loop through hierarchyMap and remove all child nodes to only have top level nodes (no parents) => filter top level nodes
     const topLevelNodes = new Map(hierarchyMap);
 
     for (const [parentNode, childNodes] of hierarchyMap) {
-        for (const childNode of childNodes) {
-            if (topLevelNodes.has(childNode)) {
-                topLevelNodes.delete(childNode);
-            }
+      for (const childNode of childNodes) {
+        if (topLevelNodes.has(childNode)) {
+          topLevelNodes.delete(childNode);
         }
+      }
     }
 
     return topLevelNodes;
@@ -788,6 +788,10 @@ window.addEventListener("load", () => {
 
   function compareNodes(node1, node2) {
     return node1.x === node2.x && node1.y === node2.y;
+  }
+
+  function isNodeInArray(node, array) {
+    return array.some((n) => n.x === node.x && n.y === node.y);
   }
 
   function isEdgeOnTriangle(edge, triangle) {
@@ -909,44 +913,66 @@ window.addEventListener("load", () => {
     });
   }
 
-  function processNodeInputForTriangulation(nodeInput, edgeInput) {
-    console.log("number of nodes", nodeInput.split(";").length);
-    console.log("number of edges", edgeInput.split(";").length);
-
-    // loop through hierarchyMap and remove all child nodes to only have top level nodes (no parents)
-    // then check if there is an edge connection required for these two top level nodes that have no parents
-
+  function processNodeInputForTriangulation(nodeInput) {
+    // only have to do this for a connection from a smaller node to a larger node
 
     topLevelParentNodes = createHierarchyMap();
     console.log("top level nodes", topLevelParentNodes);
 
-    // also wenn es 2 nodes gibt die connected werden sollen (EDGES CHECKEN)
-
     // Folgendes wird behandelt als wären es nur 2 nodes: (der parent node und der andere kleinere node)
     // bzw. wenn es 2 parent nodes gibt die connected werden sollen und keine edges zu den child nodes
-    // wenn es überhaupt child nodes gibt (Scenario 4)
-    //
+
+    const additionalPoints = [];
+    if (topLevelParentNodes.size === 2) {
+      // "both target and start node are top level nodes" -> is fulfilled as there are only two top level nodes
+      for (let edge of edgeConnections) {
+        const startNode = edge.startNode;
+        const targetNode = edge.targetNode;
+        if (startNode.width < targetNode.width && startNode.height < targetNode.height) {
+          // => startNode NEEDS to be the smaller node and targetNode the larger node
+          console.log("add additional points to the larger (target) node");
+          const { x, y, width, height } = targetNode;
+          const topLeft = { x, y };
+          const topRight = { x: x + width, y };
+          const bottomLeft = { x, y: y + height };
+          const bottomRight = { x: x + width, y: y + height };
+
+          // add the 4 (or 2 right now) corners of the larger node to the additionalPoints array
+          console.log("additionalPoints right now: ", additionalPointsForEdgeCases);
+          if (
+            !isNodeInArray(topRight, additionalPointsForEdgeCases) &&
+            !isNodeInArray(bottomRight, additionalPointsForEdgeCases)
+          ) {
+            // if (!additionalPointsForEdgeCases.includes(topRight) && !additionalPointsForEdgeCases.includes(bottomRight)) {
+            additionalPointsForEdgeCases.push(topRight, bottomRight);
+            additionalPoints.push([x + width, y], [x + width, y + height]);
+          }
+          console.log("additionalPoints right now: ", additionalPointsForEdgeCases);
+        }
+      }
+    }
 
     // UND es edges gibt zwischen diesen nodes
     // -> add the extra points to the larger node of the two, so I have enough points for triangulation
 
-    const numberOfNodes = nodeInput.split(";").length;
-
-    // if (numberOfNodes === 2 && !sameSize) {
+    // if (numberTopLevelNodes === 2 && !sameSize && edgesExistBeteenTopLevelNodes) {
     //   // Scenario: Fig. 3 & 4
     //   // they cant be of the same size in this scenario
     //   // add the extra points to the larger node of the two
-    // } else if (numberOfNodes === 2 && sameSize) {
+    // } else if (numberTopLevelNodes === 2 && sameSize) {
     //   // Scenario: Fig. 5
     // }
 
-    return nodeInput.split(";").map((entry) => {
+    const nodeMidpoints = nodeInput.split(";").map((entry) => {
       let [x, y, width, height] = entry.split(",").map(Number);
       if (isNaN(x) || isNaN(y)) {
         throw new Error("Invalid node input");
       }
       return [x + width / 2, y + height / 2]; // get center/midpoint of the node (rectangle/square shape)
     });
+    const points = [...nodeMidpoints, ...additionalPoints];
+    console.log("pts inside func", points);
+    return points;
   }
 
   function drawLine(ctx, start, end) {
