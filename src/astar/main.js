@@ -23,7 +23,7 @@ window.addEventListener("load", () => {
 
   let nodeInput = document.getElementById("nodeInput").value;
   let edgeInput = document.getElementById("edgeInput").value;
-  let hierarchyMap = null;
+  let topLevelParentNodes = null;
 
   let graphEdges = []; // list of edges from which I will extract the adjacency list
   let triangleMesh = []; // list of objects with all important triangle nodes for one triangle and their respective coordinates (includes: vertices (corner points) and centroids of a single triangle)
@@ -90,7 +90,6 @@ window.addEventListener("load", () => {
     nodeInput = document.getElementById("nodeInput").value;
     edgeInput = document.getElementById("edgeInput").value;
     let points = processNodeInputForTriangulation(nodeInput, edgeInput);
-    let hierarchyMap = createHierarchyMap();
     const delaunay = Delaunator.from(points);
     let triangles = delaunay.triangles;
     let triangleCoordinates = [];
@@ -739,32 +738,6 @@ window.addEventListener("load", () => {
     return midPoint;
   }
 
-  // function createHierarchyMap() {
-  //   const hierarchyMap = new Map();
-
-  //   // Iterate over each node
-  //   for (let i = 0; i < nodeCoordinates.length; i++) {
-  //     const currentNode = nodeCoordinates[i];
-  //     const containedNodes = [];
-
-  //     // Compare with every other node
-  //     for (let j = 0; j < nodeCoordinates.length; j++) {
-  //       if (i !== j) {
-  //         const otherNode = nodeCoordinates[j];
-  //         const isInside = isNodeInsideBoundary(currentNode, otherNode);
-  //         if (isInside) {
-  //           containedNodes.push(otherNode);
-  //         }
-  //       }
-  //     }
-
-  //     // Store the list of contained nodes in the hierarchy map
-  //     hierarchyMap.set(currentNode, containedNodes);
-  //   }
-  //   console.log(hierarchyMap);
-  //   return hierarchyMap;
-  // }
-
   function createHierarchyMap() {
     const hierarchyMap = new Map;
 
@@ -787,8 +760,19 @@ window.addEventListener("load", () => {
       hierarchyMap.set(parentNode, childNodes);
     }
 
-    console.log(hierarchyMap);
-    return hierarchyMap;
+    // filter top level nodes
+    const topLevelNodes = new Map(hierarchyMap);
+
+    for (const [parentNode, childNodes] of hierarchyMap) {
+        for (const childNode of childNodes) {
+            if (topLevelNodes.has(childNode)) {
+                topLevelNodes.delete(childNode);
+            }
+        }
+    }
+
+    return topLevelNodes;
+    // return hierarchyMap;
   }
 
   //Needed to establish hierarchies
@@ -929,13 +913,14 @@ window.addEventListener("load", () => {
     console.log("number of nodes", nodeInput.split(";").length);
     console.log("number of edges", edgeInput.split(";").length);
 
-    // might have to loop through all edges and check if there is such a realtionship of a parent node and another smaller node
-    // ich glaub ich muss über edges gehen UND größe der nodes die connected werden sollen
+    // loop through hierarchyMap and remove all child nodes to only have top level nodes (no parents)
+    // then check if there is an edge connection required for these two top level nodes that have no parents
 
-    // use hierarchyMap
-    console.log(edgeConnections);
 
-    // also wenn es 2 nodes gibt die connected werden sollen
+    topLevelParentNodes = createHierarchyMap();
+    console.log("top level nodes", topLevelParentNodes);
+
+    // also wenn es 2 nodes gibt die connected werden sollen (EDGES CHECKEN)
 
     // Folgendes wird behandelt als wären es nur 2 nodes: (der parent node und der andere kleinere node)
     // bzw. wenn es 2 parent nodes gibt die connected werden sollen und keine edges zu den child nodes
