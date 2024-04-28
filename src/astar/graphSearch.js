@@ -5,14 +5,20 @@ export class aStar {
   // h-Cost: Estimated distance from the current node to the goal node, based on Euclidean distance.
   // f-Cost: Total estimated cost of reaching the goal node via the current node, sum of g-cost and h-cost.
 
-  constructor(adjacencyList, nodeMidoints, reflectedPoints, centroids) {
+  constructor(adjacencyList, nodeMidoints, reflectedPoints, centroids, topLevelParentNodes) {
     this.adjacencyList = adjacencyList;
     this.nodeMidoints = nodeMidoints;
     this.reflectedPoints = reflectedPoints;
     this.centroids = centroids;
     this.centroidsOnPaths = [];
     this.paths = [];
+    this.topLevelParentNodes = topLevelParentNodes;
   }
+
+  // TODO: maybe somehting like, when there are only 2 topLevelParentNodes, then the connection from the larger one to the smaller one
+  // can be ignored (that's the connection that is a straight line).
+  // such that (for the case of two edges both going from smaller topLevel to larger topLevel node) the opposite path still exists
+  // and the second path from the smaller node to the larger node can be chosen correctly
 
   findPath(start, target) {
     const openSet = new PriorityQueue();
@@ -32,7 +38,7 @@ export class aStar {
     gScore[JSON.stringify(start)] = 0;
     fScore[JSON.stringify(start)] = this.calculateDistance(start, target);
 
-    // TODO: check if they have same start and end node (just flipped) so opposite
+    // check if they have same start and end node (just flipped) so opposite
     // -> adjust tentativeGScore
     let existingPath = null;
     let oppositePathExists = false;
@@ -42,9 +48,10 @@ export class aStar {
         oppositePathExists = true;
       }
     });
-    console.log("existiingPath", existingPath);
-
-    console.log("adjacency: ", this.adjacencyList);
+    // if (oppositePathExists) {
+      console.log("existiingPath", existingPath);
+    // }
+    // console.log("adjacency: ", this.adjacencyList);
 
     while (!openSet.isEmpty()) {
       // console.log(JSON.parse(JSON.stringify(openSet.items)));
@@ -145,7 +152,7 @@ export class aStar {
   }
 
   isReflectedPoint(neighbour) {
-    return this.reflectedPoints.some(point => neighbour.x === point.x && neighbour.y === point.y)
+    return this.reflectedPoints.some((point) => neighbour.x === point.x && neighbour.y === point.y);
   }
 
   areEndPoints(point1, point2, pathArray) {

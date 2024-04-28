@@ -325,7 +325,7 @@ window.addEventListener("load", () => {
     });
 
     // 8. Perform pathfinding (graph search algorithm) on adjacency list
-    astar = new aStar(adjacencyList, nodeMidpoints, reflectedPoints, centroids);
+    astar = new aStar(adjacencyList, nodeMidpoints, reflectedPoints, centroids, topLevelParentNodes);
 
     const duplicateEdgesSet = findDuplicates(edgeConnections);
     console.log("duplicateEdges", duplicateEdgesSet);
@@ -930,7 +930,6 @@ window.addEventListener("load", () => {
         const targetNode = edge.targetNode;
         if (startNode.width < targetNode.width && startNode.height < targetNode.height) {
           // => startNode NEEDS to be the smaller node and targetNode the larger node
-          console.log("add additional points to the larger (target) node");
           const { x, y, width, height } = targetNode;
           const topLeft = { x, y };
           const topRight = { x: x + width, y };
@@ -938,16 +937,13 @@ window.addEventListener("load", () => {
           const bottomRight = { x: x + width, y: y + height };
 
           // add the 4 (or 2 right now) corners of the larger node to the additionalPoints array
-          console.log("additionalPoints right now: ", additionalPointsForEdgeCases);
           if (
             !isNodeInArray(topRight, additionalPointsForEdgeCases) &&
             !isNodeInArray(bottomRight, additionalPointsForEdgeCases)
           ) {
-            // if (!additionalPointsForEdgeCases.includes(topRight) && !additionalPointsForEdgeCases.includes(bottomRight)) {
             additionalPointsForEdgeCases.push(topRight, bottomRight);
             additionalPoints.push([x + width, y], [x + width, y + height]);
           }
-          console.log("additionalPoints right now: ", additionalPointsForEdgeCases);
         }
       }
     }
@@ -960,7 +956,7 @@ window.addEventListener("load", () => {
     //   // they cant be of the same size in this scenario
     //   // add the extra points to the larger node of the two
     // } else if (numberTopLevelNodes === 2 && sameSize) {
-    //   // Scenario: Fig. 5
+    //   // TODO: Scenario: Fig. 5
     // }
 
     const nodeMidpoints = nodeInput.split(";").map((entry) => {
@@ -970,8 +966,7 @@ window.addEventListener("load", () => {
       }
       return [x + width / 2, y + height / 2]; // get center/midpoint of the node (rectangle/square shape)
     });
-    const points = [...nodeMidpoints, ...additionalPoints];
-    console.log("pts inside func", points);
+    const points = [...nodeMidpoints, ...additionalPoints]; // points for triangulation
     return points;
   }
 
