@@ -43,15 +43,22 @@ export class aStar {
     let existingPath = null;
     let oppositePathExists = false;
     this.paths.forEach((path) => {
-      if (this.areEndPoints(start, target, path)) {
+      if (this.topLevelParentNodes.size === 2) {
+        // && start.width > target.width && start.height > target.height 
+        console.log("start: ", start, "target: ", target);
+        existingPath = path;
+        oppositePathExists = false;
+      }
+      else if (this.areEndPoints(start, target, path)) {
         existingPath = path;
         oppositePathExists = true;
       }
     });
-    // if (oppositePathExists) {
-      console.log("existiingPath", existingPath);
-    // }
-    // console.log("adjacency: ", this.adjacencyList);
+
+    if (this.topLevelParentNodes === 2) {
+      console.log("in graph search top level only");
+    }
+
 
     while (!openSet.isEmpty()) {
       // console.log(JSON.parse(JSON.stringify(openSet.items)));
@@ -127,6 +134,10 @@ export class aStar {
     this.centroidsOnPaths.push(...totalPath.slice(1, -1));
     this.paths.push(totalPath);
     return totalPath;
+  }
+
+  startLargerThanTarget(startNode, targetNode) {
+    return startNode.width > targetNode.width && startNode.height > targetNode.height;
   }
 
   // Function to check if a specific node is in the array

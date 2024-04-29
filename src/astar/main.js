@@ -339,10 +339,26 @@ window.addEventListener("load", () => {
         // weil die ja nicht einfach nur parallel sind, sondern auch noch an den nodes andocken müssen
         // und andere edges schon evenuell da sind
       }
-      // else {
-      // }
+     
+      
       // run astar.findPath() for each edge connection (user input)
       let path = astar.findPath(edge.startNode.midpoint, edge.targetNode.midpoint); // pass in the midpoint, as those represent nodes in the adjacency list (graph)
+
+      // if (topLevelParentNodes.size === 2 && startLargerThanTarget(edge.startNode, edge.targetNode)) {
+      //   console.log("EDGE: start", edge.startNode, " > target", edge.targetNode);
+      //   // TODO:
+      //   // then dont push the path that's a straight line, so the path from larger node to smaller node
+      //   // BUT push it later, so maybe save it in a temporary variable and then push it after the other paths have been drawn?
+
+      //   let edgeCasePath = new aStar(
+      //     adjacencyList,
+      //     nodeMidpoints,
+      //     reflectedPoints,
+      //     centroids,
+      //     topLevelParentNodes
+      //   ).findPath(edge.startNode.midpoint, edge.targetNode.midpoint);
+      // }
+
       paths.push(path);
     });
 
@@ -415,7 +431,6 @@ window.addEventListener("load", () => {
         ctx.beginPath();
         // calculate docking point for the first bezier curve, which goes out of the startNode of the path
         const startPos = intersectionCurveAndNode([path[0], path[1], path[2]]).startPos;
-        console.log("startPos", startPos);
         ctx.moveTo(startPos[0], startPos[1]);
         for (let i = 1; i < path.length - 1; i++) {
           // calculates the coordinates of the midpoint between the current point and the next point.
@@ -429,7 +444,7 @@ window.addEventListener("load", () => {
 
         // const positions = intersectionCurveAndNode([secondLastPoint, path[path.length - 1]]);
         const endPos = intersectionCurveAndNode([path[path.length - 2], path[path.length - 1]]).endPos;
-        console.log(path);
+        console.log("endPos", endPos);
         ctx.lineTo(endPos[0], endPos[1]); // connect last two points in the path with line that ends at intersection with last node
         ctx.stroke();
         drawArrowhead(ctx, path.slice(-3), endPos);
@@ -472,9 +487,6 @@ window.addEventListener("load", () => {
         };
 
         // new p5(sketch, "canvas-container"); // catmull rom spline
-
-        console.log("");
-        console.log("path", path);
 
         // Draw straight line segment for comparison; to visualize used control points
         // ctx.beginPath();
@@ -977,6 +989,14 @@ window.addEventListener("load", () => {
     ctx.strokeStyle = "blue";
     ctx.lineWidth = 2;
     ctx.stroke();
+  }
+
+  function startLargerThanTarget(startNode, targetNode) {
+    return startNode.width > targetNode.width && startNode.height > targetNode.height;
+  }
+
+  function startSmallerThanTarget(startNode, targetNode) {
+    return startNode.width < targetNode.width && startNode.height < targetNode.height;
   }
 
   // Function to parse user input and apply connections
