@@ -936,13 +936,14 @@ window.addEventListener("load", () => {
 
     console.log(checkConnections(edgeConnections));
     if (nodeInput.split(";").length === 2 || checkConnections(edgeConnections)) {
-      // or if there is only connections between two distinct nodes
+      // or if there is only connections between two nodes
+      // so check if from the given edge input connections there are only ones between the same nodes
+      // so either going from start to target or from target to start (but they are the same)
       topLevelParentNodes = createHierarchyMap();
+      console.log("top level nodes", topLevelParentNodes);
     }
 
-    // Folgendes wird behandelt als wären es nur 2 nodes: (der parent node und der andere kleinere node)
-    // bzw. wenn es 2 parent nodes gibt die connected werden sollen und keine edges zu den child nodes
-
+    // -> add the extra points to the larger node of the two, so I have enough points for triangulation
     const additionalPoints = [];
     if (topLevelParentNodes && topLevelParentNodes.size === 2) {
       // "both target and start node are top level nodes" -> is fulfilled as there are only two top level nodes
@@ -950,6 +951,7 @@ window.addEventListener("load", () => {
         const startNode = edge.startNode;
         const targetNode = edge.targetNode;
         if (startNode.width < targetNode.width && startNode.height < targetNode.height) {
+          // Scenario Fig. 3 & 4
           // => startNode NEEDS to be the smaller node and targetNode the larger node
           const { x, y, width, height } = targetNode;
           const topLeft = { x, y };
@@ -966,6 +968,7 @@ window.addEventListener("load", () => {
             additionalPoints.push([x + width, y], [x + width, y + height]);
           }
         } else if (startNode.width > targetNode.width && startNode.height > targetNode.height) {
+          // Scenario Fig. 3 & 4
           // => startNode NEEDS to be the larger node and targetNode the smaller node
           const { x, y, width, height } = startNode;
           const topLeft = { x, y };
@@ -981,20 +984,25 @@ window.addEventListener("load", () => {
             additionalPointsForEdgeCases.push(topRight, bottomRight);
             additionalPoints.push([x + width, y], [x + width, y + height]);
           }
+        } else {
+          // Scenario Fig. 5
+          // start and target nodes are of same size
+          // const { midpointX, midpointY } = getLineMidpoint(startNode.midpoint, targetNode.midpoint);
+          const offset = 75;
+          const { midpointX, midpointY } = getMidpointWithOffset(startNode.midpoint, targetNode.midpoint, offset);
+          console.log(midpointX, midpointY);
+          // TODO: calculate offset in x or y direction for the additional point
+
+          // additionalPoints.push([midpointX - 75, midpointY]);
+          // additionalPointsForEdgeCases.push({ x: midpointX - 75, y: midpointY });
+          additionalPoints.push([midpointX , midpointY]);
+          additionalPointsForEdgeCases.push({ x: midpointX , y: midpointY });
+          console.log("fig. 5");
         }
       }
     }
 
-    // UND es edges gibt zwischen diesen nodes
-    // -> add the extra points to the larger node of the two, so I have enough points for triangulation
-
-    // if (numberTopLevelNodes === 2 && !sameSize && edgesExistBeteenTopLevelNodes) {
-    //   // Scenario: Fig. 3 & 4
-    //   // they cant be of the same size in this scenario
-    //   // add the extra points to the larger node of the two
-    // } else if (numberTopLevelNodes === 2 && sameSize) {
-    //   // TODO: Scenario: Fig. 5
-    // }
+    console.log(additionalPoints);
 
     const nodeMidpoints = nodeInput.split(";").map((entry) => {
       let [x, y, width, height] = entry.split(",").map(Number);
@@ -1014,6 +1022,35 @@ window.addEventListener("load", () => {
     ctx.strokeStyle = "blue";
     ctx.lineWidth = 2;
     ctx.stroke();
+  }
+
+  function getMidpointWithOffset(point1, point2, offset) {
+    let midpointX = (point1.x + point2.x) / 2;
+    let midpointY = (point1.y + point2.y) / 2;
+
+    // Calculate the direction of the line
+    let dx = point2.x - point1.x;
+    let dy = point2.y - point1.y;
+
+    // Normalize the direction and rotate it by 90 degrees to get the perpendicular direction
+    let magnitude = Math.sqrt(dx * dx + dy * dy);
+    let directionX = dy / magnitude;
+    let directionY = -dx / magnitude;
+
+    // Scale the direction by the offset and add it to the midpoint
+    let offsetX = midpointX + directionX * offset;
+    let offsetY = midpointY + directionY * offset;
+
+    // return { x: offsetX, y: offsetY };
+    return { midpointX: offsetX, midpointY: offsetY };
+
+  }
+
+  function getLineMidpoint(point1, point2) {
+    let midpointX = (point1.x + point2.x) / 2;
+    let midpointY = (point1.y + point2.y) / 2;
+
+    return { midpointX: midpointX, midpointY: midpointY };
   }
 
   function startLargerThanTarget(startNode, targetNode) {
