@@ -269,7 +269,16 @@ window.addEventListener("load", () => {
       ctx2.fill();
     });
 
+    // TODO:
     // FUTURE WORK:
+    // Grad funktionieren paar edge cases noch nicht so gut. Meiner Meinung nach. Wegen meinem Algorithmus und der Delauney Triangualtion, welche
+    // einfach darauf ausgelegt den schnellstwen Weg von Midpoint zu Midoint zu finden.
+    // Funktionieren Szenarien wie Fig. 3 und Fig.4 (Statecharts paper 80s) noch nicht ganz wie gewünscht.
+    // Da das Ziel von dem Pathfinding algorithmus es ist den effizientesten und hübschesten Weg von Node-midpoint zu node-midpoint
+    // zu finden, sind edge-cases wo 2 gleiche edges zu einem Knoten gehen nicht gerade einfach zu erfüllen.
+    // Da das, dem Kern von dem Algorithmus widerspricht.
+    //
+    //  FUTURE WORK:
     // 4. TODO: Add additional points and edges for dual-grid-graph that are on the outside of the convex hull -> to make travelling around all nodes on the outside possible
     //    TODO: maybe add additonal points on the dual-grid-graph, that lie on the edges of the triangles (generated through delauney triangluation)
     //    => to have more control-points for the bezier splines
@@ -675,7 +684,28 @@ window.addEventListener("load", () => {
     const controlPoint = path[1];
 
     // Calculate the angle of the line segment formed by the last two points
-    const angle = Math.atan2(endPos[1] - controlPoint.y, endPos[0] - controlPoint.x);
+    let angle = Math.atan2(endPos[1] - controlPoint.y, endPos[0] - controlPoint.x);
+
+    let keys = Array.from(topLevelParentNodes.keys());
+
+
+    // this is for edge cases: Scenario: Fig. 3 and 4. 
+    // So when there is a connection from a smaller node to a larger node and there is only 2 top-level nodes.
+    if (topLevelParentNodes.size === 2) {
+      let differentSizeNodes = false;
+      for (let i = 0; i < keys.length - 1; i++) {
+        let currentKey = keys[i];
+        let nextKey = keys[i + 1];
+        if (currentKey.width !== nextKey.width && currentKey.height !== nextKey.height) {
+          differentSizeNodes = true;
+          // console.log("differentSizeNodes");
+        }
+      }
+      if (differentSizeNodes) {
+        if (angle > 0) angle += 0.1;
+        else angle -= 0.1;
+      }
+    }
 
     // Calculate the coordinates of the points of the arrowhead
     const arrowPoint1 = {
@@ -992,9 +1022,8 @@ window.addEventListener("load", () => {
           console.log("offset", offset);
           const { midpointX, midpointY } = getMidpointWithOffset(startNode.midpoint, targetNode.midpoint, offset);
           console.log(midpointX, midpointY);
-          // TODO: calculate offset in x or y direction for the additional point
-          additionalPoints.push([midpointX , midpointY]);
-          additionalPointsForEdgeCases.push({ x: midpointX , y: midpointY });
+          additionalPoints.push([midpointX, midpointY]);
+          additionalPointsForEdgeCases.push({ x: midpointX, y: midpointY });
           console.log("fig. 5");
         }
       }
@@ -1043,7 +1072,6 @@ window.addEventListener("load", () => {
 
     // return { x: offsetX, y: offsetY };
     return { midpointX: offsetX, midpointY: offsetY };
-
   }
 
   function startLargerThanTarget(startNode, targetNode) {
