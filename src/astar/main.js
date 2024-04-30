@@ -301,13 +301,9 @@ window.addEventListener("load", () => {
       if (keyBaseNode) {
         // to add an edge (undirected), I need to update the entries for the baseNode and the connectedNode
         adjacencyList.get(keyBaseNode).push(keyConnectedNode);
-        // .push({
-        //   node: keyConnectedNode,
-        //   weight: calculateDistance(keyBaseNode, keyConnectedNode),
-        // });
+
         // do inverse of line above to update the connectedNode also
         adjacencyList.get(keyConnectedNode).push(keyBaseNode);
-        // .push({ node: keyBaseNode, weight: calculateDistance(keyConnectedNode, keyBaseNode)});
       }
     });
 
@@ -324,7 +320,7 @@ window.addEventListener("load", () => {
       return euclideanDistA - euclideanDistB;
     });
 
-    if (topLevelParentNodes.size === 2) {
+    if (topLevelParentNodes && topLevelParentNodes.size === 2) {
       // For Scenario Fig. 3 and Fig. 4
       let index = edgeConnections.findIndex(
         (edge) => edge.startNode.width > edge.targetNode.width && edge.startNode.height > edge.targetNode.height
@@ -356,7 +352,7 @@ window.addEventListener("load", () => {
 
       // run astar.findPath() for each edge connection (user input)
       let path = astar.findPath(edge.startNode.midpoint, edge.targetNode.midpoint, edge.startNode, edge.targetNode); // pass in the midpoint, as those represent nodes in the adjacency list (graph)
-
+      console.log("path", path);
       paths.push(path);
     });
 
@@ -923,17 +919,32 @@ window.addEventListener("load", () => {
     });
   }
 
+  function checkConnections(edgeConnections) {
+    let nodes = new Set();
+
+    edgeConnections.forEach((edge) => {
+      nodes.add(JSON.stringify(edge.startNode));
+      nodes.add(JSON.stringify(edge.targetNode));
+    });
+
+    // Outputs true if there are only two distinct nodes involved in the connections, false otherwise
+    return nodes.size === 2;
+  }
+
   function processNodeInputForTriangulation(nodeInput) {
     // only have to do this for a connection from a smaller node to a larger node
 
-    topLevelParentNodes = createHierarchyMap();
-    console.log("top level nodes", topLevelParentNodes);
+    console.log(checkConnections(edgeConnections));
+    if (nodeInput.split(";").length === 2 || checkConnections(edgeConnections)) {
+      // or if there is only connections between two distinct nodes
+      topLevelParentNodes = createHierarchyMap();
+    }
 
     // Folgendes wird behandelt als wären es nur 2 nodes: (der parent node und der andere kleinere node)
     // bzw. wenn es 2 parent nodes gibt die connected werden sollen und keine edges zu den child nodes
 
     const additionalPoints = [];
-    if (topLevelParentNodes.size === 2) {
+    if (topLevelParentNodes && topLevelParentNodes.size === 2) {
       // "both target and start node are top level nodes" -> is fulfilled as there are only two top level nodes
       for (let edge of edgeConnections) {
         const startNode = edge.startNode;

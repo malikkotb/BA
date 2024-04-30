@@ -15,11 +15,6 @@ export class aStar {
     this.topLevelParentNodes = topLevelParentNodes;
   }
 
-  // TODO: maybe somehting like, when there are only 2 topLevelParentNodes, then the connection from the larger one to the smaller one
-  // can be ignored (that's the connection that is a straight line).
-  // such that (for the case of two edges both going from smaller topLevel to larger topLevel node) the opposite path still exists
-  // and the second path from the smaller node to the larger node can be chosen correctly
-
   findPath(start, target, startNodeDetails, targetNodeDetails) {
     const openSet = new PriorityQueue();
 
@@ -132,7 +127,7 @@ export class aStar {
   }
 
   startLargerThanTarget(startNode, targetNode) {
-    return this.topLevelParentNodes.size === 2 && startNode.width > targetNode.width && startNode.height > targetNode.height;
+    return this.topLevelParentNodes !== null && this.topLevelParentNodes.size === 2 && startNode.width > targetNode.width && startNode.height > targetNode.height;
   }
 
   // Function to check if a specific node is in the array
