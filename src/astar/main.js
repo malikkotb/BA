@@ -988,13 +988,11 @@ window.addEventListener("load", () => {
           // Scenario Fig. 5
           // start and target nodes are of same size
           // const { midpointX, midpointY } = getLineMidpoint(startNode.midpoint, targetNode.midpoint);
-          const offset = 75;
+          const offset = calculateDistance(startNode.midpoint, targetNode.midpoint) / 2;
+          console.log("offset", offset);
           const { midpointX, midpointY } = getMidpointWithOffset(startNode.midpoint, targetNode.midpoint, offset);
           console.log(midpointX, midpointY);
           // TODO: calculate offset in x or y direction for the additional point
-
-          // additionalPoints.push([midpointX - 75, midpointY]);
-          // additionalPointsForEdgeCases.push({ x: midpointX - 75, y: midpointY });
           additionalPoints.push([midpointX , midpointY]);
           additionalPointsForEdgeCases.push({ x: midpointX , y: midpointY });
           console.log("fig. 5");
@@ -1028,6 +1026,8 @@ window.addEventListener("load", () => {
     let midpointX = (point1.x + point2.x) / 2;
     let midpointY = (point1.y + point2.y) / 2;
 
+    console.log(midpointX, midpointY);
+
     // Calculate the direction of the line
     let dx = point2.x - point1.x;
     let dy = point2.y - point1.y;
@@ -1044,13 +1044,6 @@ window.addEventListener("load", () => {
     // return { x: offsetX, y: offsetY };
     return { midpointX: offsetX, midpointY: offsetY };
 
-  }
-
-  function getLineMidpoint(point1, point2) {
-    let midpointX = (point1.x + point2.x) / 2;
-    let midpointY = (point1.y + point2.y) / 2;
-
-    return { midpointX: midpointX, midpointY: midpointY };
   }
 
   function startLargerThanTarget(startNode, targetNode) {

@@ -29,16 +29,22 @@
     <textarea id="edgeInput">(175,175) (375,275); (375,275) (175,175); (375,275) (175,175)</textarea> -->
 
     <!-- Scenario: Fig. 4 -->
-    <!-- <textarea id="nodeInput">200,200,75,50; 200,350,75,50; 375,275,75,50; 175,175,125,250</textarea>
-    <textarea id="edgeInput">(175,175) (375,275); (375,275) (175,175); (375,275) (175,175)</textarea> -->
+    <textarea id="nodeInput">200,200,75,50; 200,350,75,50; 375,275,75,50; 175,175,125,250</textarea>
+    <textarea id="edgeInput">(175,175) (375,275); (375,275) (175,175); (375,275) (175,175)</textarea>
 
     <!-- Scenario: Fig. 5 -->
     <!-- <textarea id="nodeInput">200,200,75,50; 200,350,75,50</textarea>
     <textarea id="edgeInput">(200,200) (200,350)</textarea> -->
 
     <!-- Scenario: Fig. 5 + connections going back&forth between same size nodes -->
-    <textarea id="nodeInput">200,200,75,50; 200,350,75,50</textarea>
-    <textarea id="edgeInput">(200,200) (200,350); (200,350) (200,200)</textarea>
+    <!-- <textarea id="nodeInput">200,200,75,50; 200,350,75,50</textarea>
+    <textarea id="edgeInput">(200,200) (200,350); (200,350) (200,200)</textarea> -->
+
+    <!-- Scenario: Fig. 5 + connections going back&forth between same size nodes but at an angle -->
+    <!-- Das funktioniert aktuell einfach nicht. Weil wie die Delauney Triangulation gemacht wird, werden die Dreiecke anders gesetzt wenn der Winkel nicht gerade ist. -->
+    <!-- <textarea id="nodeInput">200,200,75,50; 300,350,75,50</textarea>
+    <textarea id="edgeInput">(200,200) (300,350); (300,350) (200,200)</textarea> -->
+
 
     <div style="display: flex; gap: 4px">
       <button id="updateButton" style="padding: 5px">Update Graph</button>
