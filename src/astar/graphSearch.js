@@ -20,7 +20,7 @@ export class aStar {
   // such that (for the case of two edges both going from smaller topLevel to larger topLevel node) the opposite path still exists
   // and the second path from the smaller node to the larger node can be chosen correctly
 
-  findPath(start, target) {
+  findPath(start, target, startNodeDetails, targetNodeDetails) {
     const openSet = new PriorityQueue();
 
     // priority is the fCost
@@ -43,22 +43,12 @@ export class aStar {
     let existingPath = null;
     let oppositePathExists = false;
     this.paths.forEach((path) => {
-      if (this.topLevelParentNodes.size === 2) {
-        // && start.width > target.width && start.height > target.height 
-        console.log("start: ", start, "target: ", target);
-        existingPath = path;
-        oppositePathExists = false;
-      }
-      else if (this.areEndPoints(start, target, path)) {
+      if (this.areEndPoints(start, target, path)) {
         existingPath = path;
         oppositePathExists = true;
       }
     });
-
-    if (this.topLevelParentNodes === 2) {
-      console.log("in graph search top level only");
-    }
-
+   
 
     while (!openSet.isEmpty()) {
       // console.log(JSON.parse(JSON.stringify(openSet.items)));
@@ -84,7 +74,8 @@ export class aStar {
         // especially with larger graphs and many connections
 
         const neighbourIsCentroidOfExisitngPath = this.isNodeInArray(neighbour, this.centroidsOnPaths);
-        if (neighbourIsCentroidOfExisitngPath) {
+        // !this.startLargerThanTarget(startNodeDetails, targetNodeDetails) is absolutely necessary for Scenario 3 & 4 to work
+        if (!this.startLargerThanTarget(startNodeDetails, targetNodeDetails) && neighbourIsCentroidOfExisitngPath) {
           tentativeGScore += 100;
         }
 
@@ -132,12 +123,16 @@ export class aStar {
       totalPath.unshift(current);
     }
     this.centroidsOnPaths.push(...totalPath.slice(1, -1));
+
+    //     if (this.topLevelParentNodes.size === 2 && startNodeDetails.width > targetNodeDetails.width && startNodeDetails.height > targetNodeDetails.height) {
+    console.log("totalPath: ", totalPath);
+    console.log("");
     this.paths.push(totalPath);
     return totalPath;
   }
 
   startLargerThanTarget(startNode, targetNode) {
-    return startNode.width > targetNode.width && startNode.height > targetNode.height;
+    return this.topLevelParentNodes.size === 2 && startNode.width > targetNode.width && startNode.height > targetNode.height;
   }
 
   // Function to check if a specific node is in the array

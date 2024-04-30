@@ -342,7 +342,7 @@ window.addEventListener("load", () => {
      
       
       // run astar.findPath() for each edge connection (user input)
-      let path = astar.findPath(edge.startNode.midpoint, edge.targetNode.midpoint); // pass in the midpoint, as those represent nodes in the adjacency list (graph)
+      let path = astar.findPath(edge.startNode.midpoint, edge.targetNode.midpoint, edge.startNode, edge.targetNode); // pass in the midpoint, as those represent nodes in the adjacency list (graph)
 
       // if (topLevelParentNodes.size === 2 && startLargerThanTarget(edge.startNode, edge.targetNode)) {
       //   console.log("EDGE: start", edge.startNode, " > target", edge.targetNode);
@@ -956,6 +956,23 @@ window.addEventListener("load", () => {
             additionalPointsForEdgeCases.push(topRight, bottomRight);
             additionalPoints.push([x + width, y], [x + width, y + height]);
           }
+        } else if (startNode.width > targetNode.width && startNode.height > targetNode.height) {
+          // => startNode NEEDS to be the larger node and targetNode the smaller node
+          const { x, y, width, height } = startNode;
+          const topLeft = { x, y };
+          const topRight = { x: x + width, y };
+          const bottomLeft = { x, y: y + height };
+          const bottomRight = { x: x + width, y: y + height };
+
+          // add the 4 (or 2 right now) corners of the larger node to the additionalPoints array
+          if (
+            !isNodeInArray(topRight, additionalPointsForEdgeCases) &&
+            !isNodeInArray(bottomRight, additionalPointsForEdgeCases)
+          ) {
+            additionalPointsForEdgeCases.push(topRight, bottomRight);
+            additionalPoints.push([x + width, y], [x + width, y + height]);
+          }
+
         }
       }
     }
