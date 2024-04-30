@@ -324,6 +324,19 @@ window.addEventListener("load", () => {
       return euclideanDistA - euclideanDistB;
     });
 
+    if (topLevelParentNodes.size === 2) {
+      // For Scenario Fig. 3 and Fig. 4
+      let index = edgeConnections.findIndex(
+        (edge) => edge.startNode.width > edge.targetNode.width && edge.startNode.height > edge.targetNode.height
+      );
+
+      if (index !== -1) {
+        let result = edgeConnections.splice(index, 1)[0];
+        edgeConnections.push(result);
+        // console.log("target connection: ", result); // Outputs the first edge where the startNode is larger in width and height than the targetNode
+      }
+    }
+
     // 8. Perform pathfinding (graph search algorithm) on adjacency list
     astar = new aStar(adjacencyList, nodeMidpoints, reflectedPoints, centroids, topLevelParentNodes);
 
@@ -331,33 +344,18 @@ window.addEventListener("load", () => {
     console.log("duplicateEdges", duplicateEdgesSet);
 
     edgeConnections.forEach((edge, index) => {
-      const connection = JSON.stringify(edge);
-      if (duplicateEdgesSet.has(connection)) {
-        // check if the same path exists twice -> draw 2 parallel edges and need to specify docking points for these edges
-        console.log("duplicate edge -> draw straight line from start to end", edge);
-        // TODO: muss mir was überlegen, wie ich die docking points für die parallelen edges spezifiziere
-        // weil die ja nicht einfach nur parallel sind, sondern auch noch an den nodes andocken müssen
-        // und andere edges schon evenuell da sind
-      }
-     
-      
+      // FIXME: following is a maybe feature, not priority
+      // const connection = JSON.stringify(edge);
+      // if (duplicateEdgesSet.has(connection)) {
+      //   // check if the same path exists twice -> draw 2 parallel edges and need to specify docking points for these edges
+      //   console.log("duplicate edge -> draw straight line from start to end", edge);
+      //   // TODO: muss mir was überlegen, wie ich die docking points für die parallelen edges spezifiziere
+      //   // weil die ja nicht einfach nur parallel sind, sondern auch noch an den nodes andocken müssen
+      //   // und andere edges schon evenuell da sind
+      // }
+
       // run astar.findPath() for each edge connection (user input)
       let path = astar.findPath(edge.startNode.midpoint, edge.targetNode.midpoint, edge.startNode, edge.targetNode); // pass in the midpoint, as those represent nodes in the adjacency list (graph)
-
-      // if (topLevelParentNodes.size === 2 && startLargerThanTarget(edge.startNode, edge.targetNode)) {
-      //   console.log("EDGE: start", edge.startNode, " > target", edge.targetNode);
-      //   // TODO:
-      //   // then dont push the path that's a straight line, so the path from larger node to smaller node
-      //   // BUT push it later, so maybe save it in a temporary variable and then push it after the other paths have been drawn?
-
-      //   let edgeCasePath = new aStar(
-      //     adjacencyList,
-      //     nodeMidpoints,
-      //     reflectedPoints,
-      //     centroids,
-      //     topLevelParentNodes
-      //   ).findPath(edge.startNode.midpoint, edge.targetNode.midpoint);
-      // }
 
       paths.push(path);
     });
@@ -972,7 +970,6 @@ window.addEventListener("load", () => {
             additionalPointsForEdgeCases.push(topRight, bottomRight);
             additionalPoints.push([x + width, y], [x + width, y + height]);
           }
-
         }
       }
     }
