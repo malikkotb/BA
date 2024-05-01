@@ -361,7 +361,6 @@ window.addEventListener("load", () => {
 
       // run astar.findPath() for each edge connection (user input)
       let path = astar.findPath(edge.startNode.midpoint, edge.targetNode.midpoint, edge.startNode, edge.targetNode); // pass in the midpoint, as those represent nodes in the adjacency list (graph)
-      console.log("path", path);
       paths.push(path);
     });
 
@@ -377,7 +376,7 @@ window.addEventListener("load", () => {
         //-> EXPLAIN THIS: I am using the original points of each path as the control points of the bezier curve
         // but then calculating intersection of the node and that potential bezier curve to get the start and end position of the new bezier curve
         // which goes from the intersection point of the node and the bezier curve to the intersection point of the node and the bezier curve
-        // to draw the shorter more aesthetically pleasing bezier curve
+        // to draw the shorter more aesthetically pleasing bezier curves
         const { startPos, endPos } = intersectionCurveAndNode(path);
         // scenario: "connect two nodes directly via quadratic bezier curve"
 
@@ -447,7 +446,6 @@ window.addEventListener("load", () => {
 
         // const positions = intersectionCurveAndNode([secondLastPoint, path[path.length - 1]]);
         const endPos = intersectionCurveAndNode([path[path.length - 2], path[path.length - 1]]).endPos;
-        console.log("endPos", endPos);
         ctx.lineTo(endPos[0], endPos[1]); // connect last two points in the path with line that ends at intersection with last node
         ctx.stroke();
         drawArrowhead(ctx, path.slice(-3), endPos);
@@ -533,7 +531,6 @@ window.addEventListener("load", () => {
           x: startNode.x,
           y: startNode.y,
         });
-        console.log("");
         // console.log("startNode", startNode);
 
         const sideStartNodes = [topSideStartNode, bottomSideStartNode, leftSideStartNode, rightSideStartNode];
@@ -545,7 +542,7 @@ window.addEventListener("load", () => {
           }
         });
 
-        console.log("startPos of bezier: ", startPos);
+        // console.log("startPos of bezier: ", startPos);
       }
 
       if (endNode) {
@@ -571,7 +568,7 @@ window.addEventListener("load", () => {
           }
         });
 
-        console.log("endPos of bezier: ", endPos);
+        // console.log("endPos of bezier: ", endPos);
       }
 
       // for connected bezier curves
@@ -607,17 +604,16 @@ window.addEventListener("load", () => {
 
       const sideEndNodes = [topSideEndNode, bottomSideEndNode, leftSideEndNode, rightSideEndNode];
 
-      console.log("line of curve", path[0], path[1]);
+      // console.log("line of curve", path[0], path[1]);
       sideEndNodes.forEach((node) => {
         // console.log("sideNode: ", node);
         const intersection = getLineLineIntersection(path[0], path[1], node.p1, node.p2);
         if (intersection) {
-          console.log(node);
           endPos = [intersection.x, intersection.y];
         }
       });
 
-      console.log("endPos of bezier: ", endPos);
+      // console.log("endPos of bezier: ", endPos);
 
       return { startPos: Object.values(path[0]), endPos: endPos };
     }

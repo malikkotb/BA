@@ -59,7 +59,6 @@ export class aStar {
 
         // check if a neighbour (THAT IS NOT THE TARGETNODE AND NOT THE STARTNODE) is a nodeMidpoint -> then set edge weight to that neighbour high; as we dont want to go through another node
         const neighbourIsMidpointAndNotTarget = this.isNeighbourMidpoint(neighbour, start, target, this.nodeMidoints);
-        console.log("node inside it",this.isNodeInsideBoundary(current, neighbour));
         if (neighbourIsMidpointAndNotTarget) {
           tentativeGScore += 1000;
         }
@@ -134,16 +133,6 @@ export class aStar {
   // Function to check if a specific node is in the array
   isNodeInArray(node, array) {
     return array.some((n) => n.x === node.x && n.y === node.y);
-  }
-
-  isNodeInsideBoundary(node1, node2) {
-    const topLeftInside = node1.x >= node2.x && node1.y >= node2.y;
-    const topRightInside = node1.x + node1.width <= node2.x + node2.width && node1.y >= node2.y;
-    const bottomLeftInside = node1.x >= node2.x && node1.y + node1.height <= node2.y + node2.height;
-    const bottomRightInside =
-      node1.x + node1.width <= node2.x + node2.width && node1.y + node1.height <= node2.y + node2.height;
-
-    return topLeftInside && topRightInside && bottomLeftInside && bottomRightInside;
   }
 
   isNeighbourMidpoint(neighbour, start, target, nodeMidpoints) {
