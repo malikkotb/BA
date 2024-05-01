@@ -686,12 +686,14 @@ window.addEventListener("load", () => {
     // Calculate the angle of the line segment formed by the last two points
     let angle = Math.atan2(endPos[1] - controlPoint.y, endPos[0] - controlPoint.x);
 
-    let keys = Array.from(topLevelParentNodes.keys());
+    let keys = null;
+    if (topLevelParentNodes !== null) {
+      keys = Array.from(topLevelParentNodes.keys());
+    }
 
-
-    // this is for edge cases: Scenario: Fig. 3 and 4. 
+    // this is for edge cases: Scenario: Fig. 3 and 4.
     // So when there is a connection from a smaller node to a larger node and there is only 2 top-level nodes.
-    if (topLevelParentNodes.size === 2) {
+    if (topLevelParentNodes !== null && topLevelParentNodes.size === 2) {
       let differentSizeNodes = false;
       for (let i = 0; i < keys.length - 1; i++) {
         let currentKey = keys[i];
