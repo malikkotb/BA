@@ -8,7 +8,6 @@ window.addEventListener("load", () => {
   // define what context we are working in
   /** @type {CanvasRenderingContext2D} */
   const ctx = canvas.getContext("2d");
-
   // customizable: canvas.height, canvas.width, gridHeight, gridWidth
   canvas.height = 1000;
   canvas.width = 1000;

@@ -86,7 +86,6 @@ export class aStar {
         if (oppositePathExists) {
           const centroidOnOppositPath = this.isNodeInArray(neighbour, existingPath);
           if (neighbourIsCentroidOfExisitngPath && centroidOnOppositPath) {
-            // console.log("we dont want this niehgbour...", neighbour);
             // increase the gScore of this neighbour, to make it not be chosen (as it is already part of the opposite path)
             gScore[JSON.stringify(neighbour)] = tentativeGScore - 100;
           }
@@ -107,7 +106,7 @@ export class aStar {
         }
       }
     }
-    console.log("No path found");
+    console.log("No path found", start, target);
     return null;
   }
 
