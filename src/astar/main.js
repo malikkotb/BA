@@ -2,7 +2,7 @@ import Delaunator from "https://cdn.skypack.dev/delaunator@5.0.0";
 import { Bezier } from "./bezier-js/bezier.js";
 import { Grid } from "./grid.js";
 import { aStar } from "./graphSearch.js";
-// import Delaunator from "delaunator";
+
 window.addEventListener("load", () => {
   const canvas = document.querySelector("#grid");
   // define what context we are working in
@@ -156,19 +156,7 @@ window.addEventListener("load", () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
 
-  // New approach OVERVIEW:
-  // Retrieve the data
-  //
-  // Represent data as nodes and centroids as a connected graph data structure, adjacency list (REPRESENT AS GRAPH)
-  //
-  // Find shortest path on that graph (with A*)
-  //
-  // Then perform Post processing
-  // start with the simple connections between 2 nodes, where only a quadratic bezier curve is needed
-  // and where the path only goes through one control-point/centroid
-  //
-  // and then after that works use a series of either quadratic or bezier curves (for obstacles aka other nodes in the path of the edge)
-  // to find the path going through multiple control-points/centroid
+  
 
   function findPathDual() {
     // Retrieve data to Define the connections between nodes (edges) based on rules:
