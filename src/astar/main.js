@@ -235,6 +235,8 @@ window.addEventListener("load", () => {
       });
     });
 
+
+
     // reflect centroids on convexEdges
     let reflectedPoints = [];
     pointsToReflect.forEach((point) => {
@@ -255,20 +257,6 @@ window.addEventListener("load", () => {
       ctx2.fillStyle = "purple";
       ctx2.fill();
     });
-
-    // TODO:
-    // FUTURE WORK:
-    // Grad funktionieren paar edge cases noch nicht so gut. Meiner Meinung nach. Wegen meinem Algorithmus und der Delauney Triangualtion, welche
-    // einfach darauf ausgelegt den schnellstwen Weg von Midpoint zu Midoint zu finden.
-    // Funktionieren Szenarien wie Fig. 3 und Fig.4 (Statecharts paper 80s) noch nicht ganz wie gewünscht.
-    // Da das Ziel von dem Pathfinding algorithmus es ist den effizientesten und hübschesten Weg von Node-midpoint zu node-midpoint
-    // zu finden, sind edge-cases wo 2 gleiche edges zu einem Knoten gehen nicht gerade einfach zu erfüllen.
-    // Da das, dem Kern von dem Algorithmus widerspricht.
-    //
-    //  FUTURE WORK:
-    // 4. TODO: Add additional points and edges for dual-grid-graph that are on the outside of the convex hull -> to make travelling around all nodes on the outside possible
-    //    TODO: maybe add additonal points on the dual-grid-graph, that lie on the edges of the triangles (generated through delauney triangluation)
-    //    => to have more control-points for the bezier splines
 
     // 5. Draw edges for visualization
     graphEdges.forEach((edge) => {
@@ -1057,14 +1045,6 @@ window.addEventListener("load", () => {
 
     // return { x: offsetX, y: offsetY };
     return { midpointX: offsetX, midpointY: offsetY };
-  }
-
-  function startLargerThanTarget(startNode, targetNode) {
-    return startNode.width > targetNode.width && startNode.height > targetNode.height;
-  }
-
-  function startSmallerThanTarget(startNode, targetNode) {
-    return startNode.width < targetNode.width && startNode.height < targetNode.height;
   }
 
   // Function to parse user input and apply connections

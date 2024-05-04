@@ -125,6 +125,7 @@ export class aStar {
     return totalPath;
   }
 
+  
   startLargerThanTarget(startNode, targetNode) {
     return this.topLevelParentNodes !== null && this.topLevelParentNodes.size === 2 && startNode.width > targetNode.width && startNode.height > targetNode.height;
   }
