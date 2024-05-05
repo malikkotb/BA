@@ -160,10 +160,6 @@ export class aStar {
     const firstPoint = pathArray[0];
     const lastPoint = pathArray[pathArray.length - 1];
     return (
-      // (point1.x === firstPoint.x &&
-      //   point1.y === firstPoint.y &&
-      //   point2.x === lastPoint.x &&
-      //   point2.y === lastPoint.y) ||
       point1.x === lastPoint.x && point1.y === lastPoint.y && point2.x === firstPoint.x && point2.y === firstPoint.y
     );
   }

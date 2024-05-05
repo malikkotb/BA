@@ -263,7 +263,7 @@ window.addEventListener("load", () => {
       drawLine(ctx2, edge[0], edge[1]);
     });
 
-    // 6. Represent the graph (nodes & edges) as an adjacency list
+    // 6. Represent the graph (the dual grid) (nodes & edges) as an adjacency list
 
     // implement an adjacency list as a set of key-value pairs
     // where the key is the node (base-node)
@@ -395,7 +395,7 @@ window.addEventListener("load", () => {
         // In this code, each point in the path array (except for the first and last) is used as a control point for a Bézier curve. The start point of each curve is the previous point in the array, and the end point is the midpoint between the control point and the next point in the array. This creates a series of curves that smoothly pass through each point in the path.
         Calculating the midpoints allows the curve to smoothly transition from one point to the next, as the end point of one curve is the start point of the next. This ensures that the curve doesn't have any sharp corners and instead forms a smooth, continuous line." */
 
-        // approach to make the path simpler when connecting two nodes inside a parent Node -> Scenario Fig. 2
+        // EDGE CASE: approach to make the path simpler when connecting two nodes inside a parent Node -> Scenario Fig. 2
         if (path.length === 5 && isMidpointAboveAndBelowPoints(path[2], path[1], path[3])) {
           // Remove middle points of path with indices 1, 2, and 3 and create a new element at that point
           const minY = Math.min(path[1].y, path[3].y);
