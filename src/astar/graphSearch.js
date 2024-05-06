@@ -170,4 +170,11 @@ export class aStar {
     const dy = node2.y - node1.y;
     return Math.floor(Math.sqrt(dx * dx + dy * dy));
   }
+
+  // Function to calculate manhattan distances between 2 nodes
+  calculateManhattanDistance(node1, node2) {
+    const dx = Math.abs(node2.x - node1.x);
+    const dy = Math.abs(node2.y - node1.y);
+    return dx + dy;
+  }
 }
