@@ -161,7 +161,7 @@ window.addEventListener("load", () => {
   function findPathDual() {
     // Retrieve data to Define the connections between nodes (edges) based on rules:
     // Rules:
-    // #1 nodeMidpoints are only connected to the nearest centroids (how maybe by checking the delauney triangles that go out of a nodeMidoint and determining them that way)
+    // #1 nodeMidpoints are only connected to the nearest centroids
     // #2 centroids are connected to nearest nodeMidpoints as well as other nearest centroids
     // #3 edges between centroids cannot cross other edges
 
@@ -204,7 +204,7 @@ window.addEventListener("load", () => {
     // 3. Reflect centroids between nodes on convex hull on the line connecting two nodes on convex hull
     // Reflect point along line: https://gist.github.com/balint42/b99934b2a6990a53e14b // method is from this source -> REFERENCE in Paper
     // use reflect method
-    // go over convex hull maybe ? as those are the edges and vertices I need to respect
+    // go over convex hull -> as those are the edges and vertices I need to respect
     // adding a node for each of the outer edges of the convex hull should in principal take care of the scenarios for the outside nodes
     // such that the scenario where you can go back and forth in between two close-by nodes is always possible
 

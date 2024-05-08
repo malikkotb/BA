@@ -1,0 +1,1 @@
+// Helper funtions regarding canvas api
