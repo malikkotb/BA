@@ -11,3 +11,11 @@ function startLargerThanTarget(startNode, targetNode) {
 function isNodeInArray(node, array) {
   return array.some((n) => n.x === node.x && n.y === node.y);
 }
+
+function pointExists(array, x, y) {
+  return array.some((point) => point.x === x && point.y === y);
+}
+
+function isReflectedPoint(neighbour) {
+  return this.reflectedPoints.some((point) => neighbour.x === point.x && neighbour.y === point.y);
+}
