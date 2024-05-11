@@ -34,7 +34,7 @@ export class aStar {
     fScore[JSON.stringify(start)] = this.calculateDistance(start, target);
 
     // check if they have same start and end node (just flipped) so opposite
-    // -> adjust tentativeGScore
+    // -> adjust temporaryGScore
     let existingPath = null;
     let oppositePathExists = false;
     this.paths.forEach((path) => {
@@ -55,12 +55,12 @@ export class aStar {
 
       for (let neighbour of this.adjacencyList.get(current)) {
         // this.calculateDistance(neighbour, current) represents the edge weight from neighbour to currnet
-        let tentativeGScore = gScore[JSON.stringify(current)] + this.calculateDistance(neighbour, current);
+        let temporaryGScore = gScore[JSON.stringify(current)] + this.calculateDistance(neighbour, current);
 
-        // check if a neighbour (THAT IS NOT THE TARGETNODE AND NOT THE STARTNODE) is a nodeMidpoint -> then set edge weight to that neighbour high; as we dont want to go through another node
+        // check if a neighbour (THAT IS NOT THE TARGETNODE AND NOT THE STARTNODE) is a nodeMidpoint -> then set gScore of that to that neighbour high (and consequently the edge weight will be high); as we dont want to go through another node
         const neighbourIsMidpointAndNotTarget = this.isNeighbourMidpoint(neighbour, start, target, this.nodeMidoints);
         if (neighbourIsMidpointAndNotTarget) {
-          tentativeGScore += 1000;
+          temporaryGScore += 1000;
         }
 
         // check if neighbour is a centroid that's already part of another path
@@ -71,23 +71,24 @@ export class aStar {
         const neighbourIsCentroidOfExisitngPath = this.isNodeInArray(neighbour, this.centroidsOnPaths);
         // !this.startLargerThanTarget(startNodeDetails, targetNodeDetails) is absolutely necessary for Scenario 3 & 4 to work
         if (!this.startLargerThanTarget(startNodeDetails, targetNodeDetails) && neighbourIsCentroidOfExisitngPath) {
-          tentativeGScore += 100;
+          temporaryGScore += 100;
         }
 
         // make the reflected point of the centroid be the neighbour that is chosen first.
         // => decrease priority of reflected point on path a little such that it is chosen before a centroid
         // Explaination: doing this such that the outer path (which is more aesthetic in most cases) is chosen first
+        // also for edge case scenarios such as in Scenario: Fig. 1 (Connection: Node A to Node B)
         const neighbourReflectedPoint = this.isReflectedPoint(neighbour);
         if (neighbourReflectedPoint) {
           // console.log("reflected neighbour: ", neighbour);
-          tentativeGScore -= 50;
+          temporaryGScore -= 50;
         }
 
         if (oppositePathExists) {
           const centroidOnOppositPath = this.isNodeInArray(neighbour, existingPath);
           if (neighbourIsCentroidOfExisitngPath && centroidOnOppositPath) {
-            // increase the gScore of this neighbour, to make it not be chosen (as it is already part of the opposite path)
-            gScore[JSON.stringify(neighbour)] = tentativeGScore - 100;
+            // adjust the gScore of this neighbour, to make it not be chosen (as it is already part of the opposite path)
+            gScore[JSON.stringify(neighbour)] = temporaryGScore - 100;
           }
           // else if (!centroidOnOppositPath && neighbourIsCentroidOfExisitngPath) {
           //   // console.log("neighbour:", neighbour, "gScore-neighbour: ", gScore[JSON.stringify(neighbour)]);
@@ -95,9 +96,9 @@ export class aStar {
           // }
         }
 
-        if (tentativeGScore < gScore[JSON.stringify(neighbour)]) {
+        if (temporaryGScore < gScore[JSON.stringify(neighbour)]) {
           cameFrom[JSON.stringify(neighbour)] = current;
-          gScore[JSON.stringify(neighbour)] = tentativeGScore;
+          gScore[JSON.stringify(neighbour)] = temporaryGScore;
           fScore[JSON.stringify(neighbour)] =
             gScore[JSON.stringify(neighbour)] + this.calculateDistance(neighbour, target);
           if (!openSet.items.some((item) => item.item.x === neighbour.x && item.item.y === neighbour.y)) {
