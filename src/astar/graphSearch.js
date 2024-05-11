@@ -118,7 +118,6 @@ export class aStar {
     }
     this.centroidsOnPaths.push(...totalPath.slice(1, -1));
 
-    //     if (this.topLevelParentNodes.size === 2 && startNodeDetails.width > targetNodeDetails.width && startNodeDetails.height > targetNodeDetails.height) {
     console.log("totalPath: ", totalPath);
     console.log("");
     this.paths.push(totalPath);
