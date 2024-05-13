@@ -156,8 +156,6 @@ window.addEventListener("load", () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
 
-  
-
   function findPathDual() {
     // Retrieve data to Define the connections between nodes (edges) based on rules:
     // Rules:
@@ -234,8 +232,6 @@ window.addEventListener("load", () => {
         }
       });
     });
-
-
 
     // reflect centroids on convexEdges
     let reflectedPoints = [];
@@ -357,6 +353,8 @@ window.addEventListener("load", () => {
 
         const startNode = getNode(path[0]);
         const targetNode = getNode(path[2]);
+
+        // EDGE CASE:
         if (startNode.width > targetNode.width && startNode.height > targetNode.height) {
           // Scenario: "larger node to smaller node" -> draw straight line to middle of the nodes
 
@@ -489,14 +487,15 @@ window.addEventListener("load", () => {
 
       // Explaination: use startNode and endNode & their respecive width & height
       // to calculate what angle the bezier is going out of (from the midpoint)
-      // => to know which side it of the node it is intersecting with
-      // and then use that side as the line to calculate intersection with
-      // the intersection represents the point where the bzezier curve should dock
+      // => to know which side of the node it is intersecting with
+      // and then use that side as the line to calculate intersection with.
+      
+      // The intersection point represents the point where the Bézier curve should dock
 
       // start-, control- and end- point of bezier curve
       const points = [path[0].x, path[0].y, path[1].x, path[1].y, path[2].x, path[2].y];
       if (startNode) {
-        // sides of startNode
+        // returns the coordinates for the sides of the startNode
         const {
           top: topSideStartNode,
           bottom: bottomSideStartNode,
@@ -506,22 +505,21 @@ window.addEventListener("load", () => {
           x: startNode.x,
           y: startNode.y,
         });
-        // console.log("startNode", startNode);
 
         const sideStartNodes = [topSideStartNode, bottomSideStartNode, leftSideStartNode, rightSideStartNode];
 
         sideStartNodes.forEach((node) => {
           const intersection = getIntersection(...points, node);
           if (intersection) {
+            // set start-Position for the new bezier curve, that touches the startNode
             startPos = [intersection.x, intersection.y];
           }
         });
 
-        // console.log("startPos of bezier: ", startPos);
       }
 
       if (endNode) {
-        // sides of endNode
+        // returns the coordinates for the sides of the endNode
         const {
           top: topSideEndNode,
           bottom: bottomSideEndNode,
@@ -532,20 +530,19 @@ window.addEventListener("load", () => {
           y: endNode.y,
         });
 
-        // console.log("endNode", endNode);
-
         const sideEndNodes = [topSideEndNode, bottomSideEndNode, leftSideEndNode, rightSideEndNode];
 
         sideEndNodes.forEach((node) => {
           const intersection = getIntersection(...points, node);
           if (intersection) {
+            // set end-Position for the new bezier curve, that touches the endNode
             endPos = [intersection.x, intersection.y];
           }
         });
 
-        // console.log("endPos of bezier: ", endPos);
       }
 
+      // For paths of length >3 / so for series of bezier curves
       // for connected bezier curves
       if (startNode === null && endNode === null) {
         return { startPos: Object.values(path[0]), endPos: Object.values(path[2]) };
@@ -596,7 +593,7 @@ window.addEventListener("load", () => {
 
   function getIntersection(x1, x2, c1, c2, y1, y2, line) {
     // x1, x2, c1, c2, y1, y2 = points of bezier curve
-    //TODO: reference in Paper: https://github.com/Pomax/bezierjs
+    //https://github.com/Pomax/bezierjs
     const intersectionPoints = [];
 
     let slantLine = line;
@@ -844,7 +841,6 @@ window.addEventListener("load", () => {
   // returns sides of a node: { top, bottom, left, right}
   function calculateNodeSides(width, height, topLeftCorner) {
     // Calculate coordinates of each side
-    var line = { p1: { x: 0, y: 175 }, p2: { x: 200, y: 25 } };
     const top = {
       p1: { x: topLeftCorner.x, y: topLeftCorner.y },
       p2: { x: topLeftCorner.x + width, y: topLeftCorner.y },
