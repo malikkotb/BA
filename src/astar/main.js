@@ -340,9 +340,7 @@ window.addEventListener("load", () => {
 
     paths.forEach((path, index) => {
       if (path.length <= 3) {
-        // TODO: check if same path exists twice from nodeA to nodeB && if exactly 1 path
-        // exists from nodeB to nodeA => them edges: A->B are beziers, edge B->A is straight line
-
+        
         // Calculate intersection point of bezier curve and node to get startPos and endPos of bezier curve
         //-> EXPLAIN THIS: I am using the original points of each path as the control points of the bezier curve
         // but then calculating intersection of the node and that potential bezier curve to get the start and end position of the new bezier curve
