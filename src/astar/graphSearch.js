@@ -65,9 +65,6 @@ export class aStar {
 
         // check if neighbour is a centroid that's already part of another path
         // to avoid crossing edges
-        // this is a desirable condition but not necessary as there will inevitably be some edge crossing
-        // especially with larger graphs and many connections
-
         const neighbourIsCentroidOfExisitngPath = this.isNodeInArray(neighbour, this.centroidsOnPaths);
         // !this.startLargerThanTarget(startNodeDetails, targetNodeDetails) is absolutely necessary for Scenario 3 & 4 to work
         if (!this.startLargerThanTarget(startNodeDetails, targetNodeDetails) && neighbourIsCentroidOfExisitngPath) {
