@@ -7,11 +7,17 @@
   </head>
   <body>
     <!-- grid canvas and script -->
-    <p>x,y coordinates represent the top left corner of the drawn node. Enter nodes: x,y,width,height; ..</p>
-    <p>Connect two nodes. Enter edges (x1, y1) (x2, y2); ..</p>
+    <div style="width: 80vw;">
+      <p>Enter nodes: x,y,width,height; ... (x,y coordinates represent the top left corner of a node)</p>
+    </div>
 
-    <!-- <textarea id="nodeInput" placeholder="Enter nodes: x,y,width,height; ...">100,100,100,100; 800,200,100,100; 600,400,100,100; 250,300,100,100; 400,0,100,100; 500,200,100,100; 150,500,100,100; 0,350,100,100; 650,50,100,100</textarea>
-    <textarea id="edgeInput" placeholder="Enter edges (x1, y1) (x2, y2); ...  ">(650, 50) (0, 350); (100, 100) (250,300); (250,300) (100, 100); (100,100) (400,0); (400,0) (100,100); (400,0) (250,300); (250,300) (400,0); (400,0) (650, 50); (650, 50) (400,0); (400,0) (500,200); (500, 200) (400,0)</textarea> -->
+    <textarea id="nodeInput" placeholder="Enter nodes: x,y,width,height; ...">
+100,100,100,100; 800,200,100,100; 600,400,100,100; 250,300,100,100; 400,0,100,100; 500,200,100,100; 150,500,100,100; 0,350,100,100; 650,50,100,100</textarea
+    >
+    <p>To connect two nodes, enter edges as: (x1, y1) (x2, y2); ..</p>
+    <textarea id="edgeInput" placeholder="Enter edges (x1, y1) (x2, y2); ...  ">
+(650, 50) (0, 350); (100, 100) (250,300); (250,300) (100, 100); (100,100) (400,0); (400,0) (100,100); (400,0) (250,300); (250,300) (400,0); (400,0) (650, 50); (650, 50) (400,0); (400,0) (500,200); (500, 200) (400,0)</textarea
+    >
 
     <!-- Secanrio: Fig. 1 -->
     <!-- <textarea id="nodeInput">200,175,75,50; 200,350,75,50; 400,262,75,50</textarea>
@@ -47,14 +53,14 @@
     <textarea id="edgeInput">(200,200) (200,350); (200,350) (200,200); (350,200) (350,350); (475,275) (350,350); (350,350) (475,275); (475,275) (350,200)</textarea> -->
 
     <!-- Scenario: Fig. 9 -->
-    <textarea id="nodeInput">225,225,75,50; 450,225,75,50; 150,375,75,100; 275,375,75,100; 400,375,75,100; 525,375,75,100</textarea>
-    <textarea id="edgeInput">(225,225) (450,225); (450,225) (225,225); (225,225) (525,375); (525,375) (400,375); (400,375) (275, 375); (275,375) (150,375); (150,375) (225,225)</textarea>
+    <!-- <textarea id="nodeInput">225,225,75,50; 450,225,75,50; 150,375,75,100; 275,375,75,100; 400,375,75,100; 525,375,75,100</textarea>
+    <textarea id="edgeInput">(225,225) (450,225); (450,225) (225,225); (225,225) (525,375); (525,375) (400,375); (400,375) (275, 375); (275,375) (150,375); (150,375) (225,225)</textarea> -->
 
-    <div style="display: flex; gap: 4px">
-      <button id="updateButton" style="padding: 5px">Update Graph</button>
-      <button id="triangleMeshBtn" style="padding: 5px">Show Triangle Mesh</button>
-      <button id="findPathBtn" style="padding: 5px">Find Path</button>
-      <button id="hideMeshBtn" style="padding: 5px">Hide Mesh</button>
+    <div style="display: flex; gap: 20px">
+      <button id="updateButton">Update Graph</button>
+      <button id="triangleMeshBtn">Show Triangle Mesh</button>
+      <button id="findPathBtn">Find Path</button>
+      <button id="hideMeshBtn">Hide Mesh</button>
     </div>
     <div class="canvas-container">
       <canvas id="grid" width="400" height="400" style="z-index: 1"></canvas>
@@ -62,6 +68,5 @@
     </div>
 
     <script type="module" src="src/astar/main.js"></script>
-
   </body>
 </html>

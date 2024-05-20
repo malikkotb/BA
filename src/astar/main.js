@@ -9,13 +9,27 @@ window.addEventListener("load", () => {
   /** @type {CanvasRenderingContext2D} */
   const ctx = canvas.getContext("2d");
   // customizable: canvas.height, canvas.width, gridHeight, gridWidth
-  canvas.height = 1000;
-  canvas.width = 1000;
+  canvas.height = 1400;
+  canvas.width = 1400;
 
-  const gridHeight = 20; // cells on y-axis
-  const gridWidth = 20; // cells on x-axis
+  const gridHeight = 28; // cells on y-axis
+  const gridWidth = 28; // cells on x-axis
 
   const cellDim = canvas.height / gridHeight;
+
+  // Define the size of the canvas
+  var canvasWidth = canvas.width;
+  var canvasHeight = canvas.height;
+
+  // Draw additional x-axis labels
+  for (var i = 100; i <= 1400; i += 100) {
+    ctx.fillText(i.toString(), i, 15);
+  }
+
+  // Draw additional y-axis labels
+  for (var i = 1400; i >= 0; i -= 100) {
+    ctx.fillText(i.toString(), 5, i);
+  }
 
   let nodeCoordinates = [];
   let edgeConnections = [];
@@ -38,8 +52,8 @@ window.addEventListener("load", () => {
   // Triangulation Canvas Layer
   const triangleCanvas = document.querySelector("#layer1");
   const ctx2 = triangleCanvas.getContext("2d");
-  triangleCanvas.height = 1000;
-  triangleCanvas.width = 1000;
+  triangleCanvas.height = 1400;
+  triangleCanvas.width = 1400;
 
   // draw triangle mesh
   document.getElementById("triangleMeshBtn").addEventListener("click", () => drawDelaunayTriangles(ctx2));
@@ -340,7 +354,6 @@ window.addEventListener("load", () => {
 
     paths.forEach((path, index) => {
       if (path.length <= 3) {
-        
         // Calculate intersection point of bezier curve and node to get startPos and endPos of bezier curve
         //-> EXPLAIN THIS: I am using the original points of each path as the control points of the bezier curve
         // but then calculating intersection of the node and that potential bezier curve to get the start and end position of the new bezier curve
@@ -487,7 +500,7 @@ window.addEventListener("load", () => {
       // to calculate what angle the bezier is going out of (from the midpoint)
       // => to know which side of the node it is intersecting with
       // and then use that side as the line to calculate intersection with.
-      
+
       // The intersection point represents the point where the Bézier curve should dock
 
       // start-, control- and end- point of bezier curve
@@ -513,7 +526,6 @@ window.addEventListener("load", () => {
             startPos = [intersection.x, intersection.y];
           }
         });
-
       }
 
       if (endNode) {
@@ -537,7 +549,6 @@ window.addEventListener("load", () => {
             endPos = [intersection.x, intersection.y];
           }
         });
-
       }
 
       // For paths of length >3 / so for series of bezier curves
