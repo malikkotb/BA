@@ -191,12 +191,7 @@ window.addEventListener("load", () => {
     });
 
     // 3. Reflect centroids between nodes on convex hull on the line connecting two nodes on convex hull
-    // Reflect point along line: https://gist.github.com/balint42/b99934b2a6990a53e14b // method is from this source -> REFERENCE in Paper
-    // use reflect method
-    // go over convex hull -> as those are the edges and vertices I need to respect
-    // adding a node for each of the outer edges of the convex hull should in principal take care of the scenarios for the outside nodes
-    // such that the scenario where you can go back and forth in between two close-by nodes is always possible
-
+    
     // get convex-hull edges
     let convexEdges = [];
     for (let i = 0; i < convexHull.length; i++) {
@@ -310,17 +305,7 @@ window.addEventListener("load", () => {
     const duplicateEdgesSet = findDuplicates(edgeConnections);
     console.log("duplicateEdges", duplicateEdgesSet);
 
-    edgeConnections.forEach((edge, index) => {
-      // FIXME: following is a maybe feature, not priority
-      // const connection = JSON.stringify(edge);
-      // if (duplicateEdgesSet.has(connection)) {
-      //   // check if the same path exists twice -> draw 2 parallel edges and need to specify docking points for these edges
-      //   console.log("duplicate edge -> draw straight line from start to end", edge);
-      //   // TODO: muss mir was überlegen, wie ich die docking points für die parallelen edges spezifiziere
-      //   // weil die ja nicht einfach nur parallel sind, sondern auch noch an den nodes andocken müssen
-      //   // und andere edges schon evenuell da sind
-      // }
-
+    edgeConnections.forEach((edge) => {
       // run astar.findPath() for each edge connection (user input)
       let path = astar.findPath(edge.startNode.midpoint, edge.targetNode.midpoint, edge.startNode, edge.targetNode); // pass in the midpoint, as those represent nodes in the adjacency list (graph)
       paths.push(path);
@@ -463,7 +448,7 @@ window.addEventListener("load", () => {
     });
   }
 
-  // calculate intersection point of bezier curve and node
+  // // calculate intersection point of bezier curve and node
   function intersectionCurveAndNode(path) {
     if (path.length === 3) {
       // TODO: find corresponding point in nodeCoordinates array to get width and height of them
@@ -917,7 +902,6 @@ window.addEventListener("load", () => {
   }
 
   function processNodeInputForTriangulation(nodeInput) {
-    // only have to do this for a connection from a smaller node to a larger node
 
     console.log(checkConnections(edgeConnections));
     if (nodeInput.split(";").length === 2 || checkConnections(edgeConnections)) {

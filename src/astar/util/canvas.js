@@ -1,0 +1,2 @@
+// Helper funtions regarding canvas 
+
