@@ -1,7 +1,21 @@
 import Delaunator from "https://cdn.skypack.dev/delaunator@5.0.0";
 import { Grid } from "./grid.js";
 import { aStar } from "./graphSearch.js";
-import { getMidpointWithOffset, isNodeInsideBoundary, compareNodes, isNodeInArray, isEdgeOnTriangle, getRandomColor, calculateCentroid, reflect, getIntersection } from "./utils.js";
+import {
+  getMidpointWithOffset,
+  isNodeInsideBoundary,
+  compareNodes,
+  isNodeInArray,
+  isEdgeOnTriangle,
+  getRandomColor,
+  calculateCentroid,
+  reflect,
+  getIntersection,
+  getLineLineIntersection,
+  findDuplicates,
+  calculateDistance,
+  calculateNodeSides
+} from "./utils.js";
 
 window.addEventListener("load", () => {
   const canvas = document.querySelector("#grid");
@@ -186,7 +200,7 @@ window.addEventListener("load", () => {
     });
 
     // 3. Reflect centroids between nodes on convex hull on the line connecting two nodes on convex hull
-    
+
     // get convex-hull edges
     let convexEdges = [];
     for (let i = 0; i < convexHull.length; i++) {
@@ -345,7 +359,7 @@ window.addEventListener("load", () => {
         }
       } else {
         // 1. aproach: This code creates a smooth path through a set of points using midpoints for smooth transitions and each point as a control point for quadratic Bézier curves, ending with a straight line to the last point.
-       
+
         // EDGE CASE: approach to make the path simpler when connecting two nodes inside a parent Node -> Scenario Fig. 2
         if (path.length === 5 && isMidpointAboveAndBelowPoints(path[2], path[1], path[3])) {
           // Remove middle points of path with indices 1, 2, and 3 and create a new element at that point
@@ -414,7 +428,6 @@ window.addEventListener("load", () => {
   // // calculate intersection point of bezier curve and node
   function intersectionCurveAndNode(path) {
     if (path.length === 3) {
-
       const startNode = getNode(path[0]);
       const endNode = getNode(path[2]);
 
@@ -525,32 +538,6 @@ window.addEventListener("load", () => {
     }
   }
 
-  
-
-  function getLineLineIntersection(line1Start, line1End, line2Start, line2End) {
-    const { x: x1, y: y1 } = line1Start;
-    const { x: x2, y: y2 } = line1End;
-    const { x: x3, y: y3 } = line2Start;
-    const { x: x4, y: y4 } = line2End;
-
-    const denominator = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
-
-    if (denominator === 0) {
-      return null; // The lines are parallel or coincident
-    }
-
-    const t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / denominator;
-    const u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / denominator;
-
-    if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
-      const intersectionX = x1 + t * (x2 - x1);
-      const intersectionY = y1 + t * (y2 - y1);
-      return { x: intersectionX, y: intersectionY };
-    }
-
-    return null; // The lines do not intersect within the line segments
-  }
-
   function isMidpointAboveAndBelowPoints(point, point1, point2) {
     const minY = Math.min(point1.y, point2.y);
     const maxY = Math.max(point1.y, point2.y);
@@ -629,21 +616,6 @@ window.addEventListener("load", () => {
     ctx.fill();
   }
 
-  function findDuplicates(array) {
-    const seen = new Set();
-    const duplicates = new Set();
-
-    for (let item of array) {
-      if (seen.has(JSON.stringify(item))) {
-        duplicates.add(JSON.stringify(item));
-      } else {
-        seen.add(JSON.stringify(item));
-      }
-    }
-
-    return duplicates;
-  }
-
   function getNode(point) {
     if (!point) return null;
     let midPoint = null;
@@ -692,38 +664,6 @@ window.addEventListener("load", () => {
     // return hierarchyMap;
   }
 
-  // returns sides of a node: { top, bottom, left, right}
-  function calculateNodeSides(width, height, topLeftCorner) {
-    // Calculate coordinates of each side
-    const top = {
-      p1: { x: topLeftCorner.x, y: topLeftCorner.y },
-      p2: { x: topLeftCorner.x + width, y: topLeftCorner.y },
-    };
-
-    const bottom = {
-      p1: { x: topLeftCorner.x, y: topLeftCorner.y + height },
-      p2: { x: topLeftCorner.x + width, y: topLeftCorner.y + height },
-    };
-
-    const left = {
-      p1: { x: topLeftCorner.x, y: topLeftCorner.y },
-      p2: { x: topLeftCorner.x, y: topLeftCorner.y + height },
-    };
-
-    const right = {
-      p1: { x: topLeftCorner.x + width, y: topLeftCorner.y },
-      p2: { x: topLeftCorner.x + width, y: topLeftCorner.y + height },
-    };
-    return { top, bottom, left, right };
-  }
-
-  // Function to calculate Euclidean distance between two nodes
-  function calculateDistance(node1, node2) {
-    const dx = node2.x - node1.x;
-    const dy = node2.y - node1.y;
-    return Math.floor(Math.sqrt(dx * dx + dy * dy));
-  }
-
   // Function to find neighboring triangles for each triangle
   function findNeighborsForMesh(mesh) {
     const neighbors = [];
@@ -761,10 +701,6 @@ window.addEventListener("load", () => {
 
   function processNodeInput(nodeInput) {
     nodeCoordinates = nodeInput.split(";").map((entry) => {
-      // x = x-axis coordinate of the rectangle's starting point, in pixels. (top left corner of node) 
-      // y = y-axis coordinate of the rectangle's starting point, in pixels. (top left corner of node) 
-      // width = rectangle's width. Positive values are to the right, and negative to the left. 
-      // height = rectangle's height. Positive values are down, and negative are up.
       let [x, y, width, height] = entry.split(",").map(Number);
       if (isNaN(x) || isNaN(y) || isNaN(width) || isNaN(height)) {
         throw new Error("Invalid node input");
@@ -788,7 +724,6 @@ window.addEventListener("load", () => {
   }
 
   function processNodeInputForTriangulation(nodeInput) {
-
     console.log(checkConnections(edgeConnections));
     if (nodeInput.split(";").length === 2 || checkConnections(edgeConnections)) {
       // or if there is only connections between two nodes
@@ -903,10 +838,7 @@ window.addEventListener("load", () => {
 
   // Function to draw the graph
   function redrawGraph(nodes) {
-    // ctx.clearRect(0, 0, canvas.width, canvas.height);
     nodes.forEach((node) => drawNode(node));
-
-    // edges.forEach((edge, index) => {}); // draw edges
   }
 
   function drawNode(node) {
@@ -917,7 +849,4 @@ window.addEventListener("load", () => {
     ctx.roundRect(x, y, width, height, [10]);
     ctx.stroke();
   }
-
- 
-
 });
