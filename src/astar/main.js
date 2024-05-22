@@ -1,8 +1,7 @@
 import Delaunator from "https://cdn.skypack.dev/delaunator@5.0.0";
-import { Bezier } from "./bezier-js/bezier.js";
 import { Grid } from "./grid.js";
 import { aStar } from "./graphSearch.js";
-import { getMidpointWithOffset, isNodeInsideBoundary, compareNodes, isNodeInArray, isEdgeOnTriangle, getRandomColor, calculateCentroid } from "./utils.js";
+import { getMidpointWithOffset, isNodeInsideBoundary, compareNodes, isNodeInArray, isEdgeOnTriangle, getRandomColor, calculateCentroid, reflect, getIntersection } from "./utils.js";
 
 window.addEventListener("load", () => {
   const canvas = document.querySelector("#grid");
@@ -142,6 +141,7 @@ window.addEventListener("load", () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
 
+  // Main function to draw edges using dual grid and pathfinding
   function findPathDual() {
     // Retrieve data to Define the connections between nodes (edges) based on rules:
     // Rules:
@@ -414,7 +414,7 @@ window.addEventListener("load", () => {
   // // calculate intersection point of bezier curve and node
   function intersectionCurveAndNode(path) {
     if (path.length === 3) {
-      // TODO: find corresponding point in nodeCoordinates array to get width and height of them
+
       const startNode = getNode(path[0]);
       const endNode = getNode(path[2]);
 
@@ -525,30 +525,7 @@ window.addEventListener("load", () => {
     }
   }
 
-  function getIntersection(x1, x2, c1, c2, y1, y2, line) {
-    // x1, x2, c1, c2, y1, y2 = points of bezier curve
-    //https://github.com/Pomax/bezierjs
-    const intersectionPoints = [];
-
-    let slantLine = line;
-    //add invisible slant to vertical lines
-    if (slantLine.p1.x === slantLine.p2.x && slantLine.p1.y !== slantLine.p2.y) {
-      slantLine.p1.x += 0.001; //  1e-8;
-    }
-
-    const bezierCurve = new Bezier(x1, x2, c1, c2, y1, y2);
-    const intersections = bezierCurve.lineIntersects(slantLine);
-    if (intersections.length > 0) {
-      for (let e = 0; e < intersections.length; e++) {
-        let n = intersections[e],
-          t = bezierCurve.get(n);
-        intersectionPoints.push(t);
-      }
-      // console.log("Intersection Points:", intersectionPoints);
-    }
-
-    return intersectionPoints[0];
-  }
+  
 
   function getLineLineIntersection(line1Start, line1End, line2Start, line2End) {
     const { x: x1, y: y1 } = line1Start;
@@ -713,29 +690,6 @@ window.addEventListener("load", () => {
 
     return topLevelNodes;
     // return hierarchyMap;
-  }
-
-  /**
-   * @brief Reflect point p along line through points p0 and p1
-   *
-   * @author Balint Morvai <balint@morvai.de>
-   * @license http://en.wikipedia.org/wiki/MIT_License MIT License
-   * @param p point to reflect
-   * @param p0 first point for reflection line
-   * @param p1 second point for reflection line
-   * @return object
-   */
-  function reflect(p, p0, p1) {
-    let dx, dy, a, b, x, y;
-
-    dx = p1.x - p0.x;
-    dy = p1.y - p0.y;
-    a = (dx * dx - dy * dy) / (dx * dx + dy * dy);
-    b = (2 * dx * dy) / (dx * dx + dy * dy);
-    x = Math.round(a * (p.x - p0.x) + b * (p.y - p0.y) + p0.x);
-    y = Math.round(b * (p.x - p0.x) - a * (p.y - p0.y) + p0.y);
-
-    return { x: x, y: y };
   }
 
   // returns sides of a node: { top, bottom, left, right}
