@@ -246,13 +246,6 @@ window.addEventListener("load", () => {
     });
 
     // 6. Represent the graph (the dual grid) (nodes & edges) as an adjacency list
-
-    // implement an adjacency list as a set of key-value pairs
-    // where the key is the node (base-node)
-    // and the value is an array represnting what other nodes the base-node is connected to
-    // I will use a Map() for this, because it has additional useful API methods
-    // and it behaves more like a dictionary or hashMap (found in other languages)
-
     const adjacencyList = new Map();
     [...nodeMidpoints, ...centroids, ...reflectedPoints, ...additionalPointsForEdgeCases].forEach((node) => {
       adjacencyList.set(node, []);
@@ -317,10 +310,6 @@ window.addEventListener("load", () => {
     paths.forEach((path, index) => {
       if (path.length <= 3) {
         // Calculate intersection point of bezier curve and node to get startPos and endPos of bezier curve
-        //-> EXPLAIN THIS: I am using the original points of each path as the control points of the bezier curve
-        // but then calculating intersection of the node and that potential bezier curve to get the start and end position of the new bezier curve
-        // which goes from the intersection point of the node and the bezier curve to the intersection point of the node and the bezier curve
-        // to draw the shorter more aesthetically pleasing bezier curves
         const { startPos, endPos } = intersectionCurveAndNode(path);
         // scenario: "connect two nodes directly via quadratic bezier curve"
 
@@ -361,11 +350,7 @@ window.addEventListener("load", () => {
         }
       } else {
         // 1. aproach: This code creates a smooth path through a set of points using midpoints for smooth transitions and each point as a control point for quadratic Bézier curves, ending with a straight line to the last point.
-        /* GPT: "The calculation of midpoints in the code you're referring to is used for drawing smooth curves through a series of points using quadratic Bézier curves.
-        // A quadratic Bézier curve requires three points: a start point, an end point, and a control point. The curve starts at the start point, ends at the end point, and is pulled towards the control point, creating a smooth curve.
-        // In this code, each point in the path array (except for the first and last) is used as a control point for a Bézier curve. The start point of each curve is the previous point in the array, and the end point is the midpoint between the control point and the next point in the array. This creates a series of curves that smoothly pass through each point in the path.
-        Calculating the midpoints allows the curve to smoothly transition from one point to the next, as the end point of one curve is the start point of the next. This ensures that the curve doesn't have any sharp corners and instead forms a smooth, continuous line." */
-
+       
         // EDGE CASE: approach to make the path simpler when connecting two nodes inside a parent Node -> Scenario Fig. 2
         if (path.length === 5 && isMidpointAboveAndBelowPoints(path[2], path[1], path[3])) {
           // Remove middle points of path with indices 1, 2, and 3 and create a new element at that point
@@ -397,13 +382,6 @@ window.addEventListener("load", () => {
         drawArrowhead(ctx, path.slice(-3), endPos);
 
         // 2. approach: Catmol-Rom Splines from p5.js
-        // Splines describe a transformation of control points
-        // Given some control points, you use a spline, to generate curves
-        // One can think of splines as curve generators, that make certain promises
-        // about continuity in the curve Joins, and how it treats the input control points
-        // Catmull-Rom splines are a type of spline that is very useful for computer graphics
-        // because they are easy to use and generate nice curves
-
         const sketch = (p) => {
           p.setup = () => {
             let cnv = p.createCanvas(1200, 1200);

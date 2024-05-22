@@ -2,8 +2,8 @@
 import Delaunator from "https://cdn.skypack.dev/delaunator@5.0.0";
 
 
-function drawDelaunayTriangles(ctx) {
-    nodeInput = document.getElementById("nodeInput").value;
+function drawDelaunayTriangles(ctx, nodeInput, nodeMidpoints) {
+    // nodeInput = document.getElementById("nodeInput").value;
     let points = processNodeInputForTriangulation(nodeInput);
     const delaunay = Delaunator.from(points);
     let triangles = delaunay.triangles;
