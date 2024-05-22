@@ -3,7 +3,7 @@ import { Grid } from "./grid.js";
 import { aStar } from "./graphSearch.js";
 import {
   getMidpointWithOffset,
-  isNodeInsideBoundary,
+  checkConnections,
   compareNodes,
   isNodeInArray,
   isEdgeOnTriangle,
@@ -18,6 +18,8 @@ import {
   isMidpointAboveAndBelowPoints,
   findNeighborsForMesh,
   hideMesh,
+  drawArrowhead,
+  drawArrowheadLine,
 } from "./utils.js";
 
 window.addEventListener("load", () => {
@@ -156,7 +158,6 @@ window.addEventListener("load", () => {
 
   // Main function to draw edges using dual grid and pathfinding
   function findPathDual() {
-  
     // 1. Connect nodeMidpoints to centroids:
     // triangle-Vertices are all nodeMidpoints, so I can connect the triangle vertices of a single trianlge to the centroid of that trianlge
     triangleMesh.forEach((triangle) => {
@@ -349,7 +350,7 @@ window.addEventListener("load", () => {
           ctx.moveTo(startPos[0], startPos[1]);
           ctx.quadraticCurveTo(path[1].x, path[1].y, endPos[0], endPos[1]);
           ctx.stroke();
-          drawArrowhead(ctx, path, endPos);
+          drawArrowhead(topLevelParentNodes, ctx, path, endPos);
         }
       } else {
         // 1. aproach: This code creates a smooth path through a set of points using midpoints for smooth transitions and each point as a control point for quadratic Bézier curves, ending with a straight line to the last point.
@@ -382,7 +383,7 @@ window.addEventListener("load", () => {
         const endPos = intersectionCurveAndNode([path[path.length - 2], path[path.length - 1]]).endPos;
         ctx.lineTo(endPos[0], endPos[1]); // connect last two points in the path with line that ends at intersection with last node
         ctx.stroke();
-        drawArrowhead(ctx, path.slice(-3), endPos);
+        drawArrowhead(topLevelParentNodes, ctx, path.slice(-3), endPos);
 
         // 2. approach: Catmol-Rom Splines from p5.js
         const sketch = (p) => {
@@ -532,77 +533,6 @@ window.addEventListener("load", () => {
     }
   }
 
-  function drawArrowhead(ctx, path, endPos, arrowLength = 10) {
-    // Assuming path is an array of points
-    const controlPoint = path[1];
-
-    // Calculate the angle of the line segment formed by the last two points
-    let angle = Math.atan2(endPos[1] - controlPoint.y, endPos[0] - controlPoint.x);
-
-    let keys = null;
-    if (topLevelParentNodes !== null) {
-      keys = Array.from(topLevelParentNodes.keys());
-    }
-
-    // this is for edge cases: Scenario: Fig. 3 and 4.
-    // So when there is a connection from a smaller node to a larger node and there is only 2 top-level nodes.
-    if (topLevelParentNodes !== null && topLevelParentNodes.size === 2) {
-      let differentSizeNodes = false;
-      for (let i = 0; i < keys.length - 1; i++) {
-        let currentKey = keys[i];
-        let nextKey = keys[i + 1];
-        if (currentKey.width !== nextKey.width && currentKey.height !== nextKey.height) {
-          differentSizeNodes = true;
-          // console.log("differentSizeNodes");
-        }
-      }
-      if (differentSizeNodes) {
-        if (angle > 0) angle += 0.1;
-        else angle -= 0.1;
-      }
-    }
-
-    // Calculate the coordinates of the points of the arrowhead
-    const arrowPoint1 = {
-      x: endPos[0] - arrowLength * Math.cos(angle - Math.PI / 6),
-      y: endPos[1] - arrowLength * Math.sin(angle - Math.PI / 6),
-    };
-    const arrowPoint2 = {
-      x: endPos[0] - arrowLength * Math.cos(angle + Math.PI / 6),
-      y: endPos[1] - arrowLength * Math.sin(angle + Math.PI / 6),
-    };
-
-    ctx.beginPath();
-    ctx.moveTo(endPos[0], endPos[1]);
-    ctx.lineTo(arrowPoint1.x, arrowPoint1.y);
-    ctx.lineTo(arrowPoint2.x, arrowPoint2.y);
-    ctx.closePath();
-    ctx.fillStyle = "black";
-    ctx.fill();
-  }
-
-  function drawArrowheadLine(ctx, fromX, fromY, toX, toY, size = 10) {
-    // Calculate angle of the line
-    const angle = Math.atan2(toY - fromY, toX - fromX);
-
-    // Calculate points for arrowhead
-    const p1x = toX - size * Math.cos(angle - Math.PI / 6);
-    const p1y = toY - size * Math.sin(angle - Math.PI / 6);
-    const p2x = toX - size * Math.cos(angle + Math.PI / 6);
-    const p2y = toY - size * Math.sin(angle + Math.PI / 6);
-
-    // Draw the arrowhead lines
-    ctx.beginPath();
-    ctx.moveTo(toX, toY);
-    ctx.lineTo(p1x, p1y);
-    ctx.lineTo(p2x, p2y);
-    ctx.closePath(); // Close the path to form a triangle
-
-    // Fill the arrowhead
-    ctx.fillStyle = "#000"; // Set arrowhead fill color
-    ctx.fill();
-  }
-
   function getNode(point) {
     if (!point) return null;
     let midPoint = null;
@@ -624,18 +554,6 @@ window.addEventListener("load", () => {
       nodeMidpoints.push(midpoint);
       return { x, y, width, height, midpoint: midpoint };
     });
-  }
-
-  function checkConnections(edgeConnections) {
-    let nodes = new Set();
-
-    edgeConnections.forEach((edge) => {
-      nodes.add(JSON.stringify(edge.startNode));
-      nodes.add(JSON.stringify(edge.targetNode));
-    });
-
-    // Outputs true if there are only two distinct nodes involved in the connections, false otherwise
-    return nodes.size === 2;
   }
 
   function processNodeInputForTriangulation(nodeInput) {
