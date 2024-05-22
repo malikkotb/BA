@@ -2,6 +2,7 @@ import Delaunator from "https://cdn.skypack.dev/delaunator@5.0.0";
 import { Bezier } from "./bezier-js/bezier.js";
 import { Grid } from "./grid.js";
 import { aStar } from "./graphSearch.js";
+import { getMidpointWithOffset, isNodeInsideBoundary, compareNodes, isNodeInArray, isEdgeOnTriangle, getRandomColor, calculateCentroid } from "./utils.js";
 
 window.addEventListener("load", () => {
   const canvas = document.querySelector("#grid");
@@ -14,12 +15,6 @@ window.addEventListener("load", () => {
 
   const gridHeight = 28; // cells on y-axis
   const gridWidth = 28; // cells on x-axis
-
-  const cellDim = canvas.height / gridHeight;
-
-  // Define the size of the canvas
-  var canvasWidth = canvas.width;
-  var canvasHeight = canvas.height;
 
   // Draw additional x-axis labels
   for (var i = 100; i <= 1400; i += 100) {
@@ -412,16 +407,6 @@ window.addEventListener("load", () => {
         };
 
         // new p5(sketch, "canvas-container"); // catmull rom spline
-
-        // Draw straight line segment for comparison; to visualize used control points
-        // ctx.beginPath();
-        // ctx.moveTo(path[0].x, path[0].y); // Move to the starting point
-        // for (let i = 1; i < path.length; i++) {
-        //   ctx.strokeStyle = "purple";
-        //   ctx.lineTo(path[i].x, path[i].y); // Draw a line to the ending point
-
-        //   ctx.stroke();
-        // }
       }
     });
   }
@@ -730,40 +715,6 @@ window.addEventListener("load", () => {
     // return hierarchyMap;
   }
 
-  //Needed to establish hierarchies
-  function isNodeInsideBoundary(node1, node2) {
-    const topLeftInside = node1.x >= node2.x && node1.y >= node2.y;
-    const topRightInside = node1.x + node1.width <= node2.x + node2.width && node1.y >= node2.y;
-    const bottomLeftInside = node1.x >= node2.x && node1.y + node1.height <= node2.y + node2.height;
-    const bottomRightInside =
-      node1.x + node1.width <= node2.x + node2.width && node1.y + node1.height <= node2.y + node2.height;
-
-    return topLeftInside && topRightInside && bottomLeftInside && bottomRightInside;
-  }
-
-  function compareNodes(node1, node2) {
-    return node1.x === node2.x && node1.y === node2.y;
-  }
-
-  function isNodeInArray(node, array) {
-    return array.some((n) => n.x === node.x && n.y === node.y);
-  }
-
-  function isEdgeOnTriangle(edge, triangle) {
-    for (let i = 0; i < 3; i++) {
-      const nextIndex = (i + 1) % 3;
-      const triangleEdge = [triangle[i], triangle[nextIndex]];
-      // Check if both nodes of the edge are equal to both nodes of the triangle edge
-      if (
-        (compareNodes(edge[0], triangleEdge[0]) && compareNodes(edge[1], triangleEdge[1])) ||
-        (compareNodes(edge[0], triangleEdge[1]) && compareNodes(edge[1], triangleEdge[0]))
-      ) {
-        return true; // Edge is also on the triangle
-      }
-    }
-    return false; // Edge is not on the triangle
-  }
-
   /**
    * @brief Reflect point p along line through points p0 and p1
    *
@@ -856,7 +807,10 @@ window.addEventListener("load", () => {
 
   function processNodeInput(nodeInput) {
     nodeCoordinates = nodeInput.split(";").map((entry) => {
-      // x = x-axis coordinate of the rectangle's starting point, in pixels. (top left corner of node) // y = y-axis coordinate of the rectangle's starting point, in pixels. (top left corner of node) // width = rectangle's width. Positive values are to the right, and negative to the left. // height = rectangle's height. Positive values are down, and negative are up.
+      // x = x-axis coordinate of the rectangle's starting point, in pixels. (top left corner of node) 
+      // y = y-axis coordinate of the rectangle's starting point, in pixels. (top left corner of node) 
+      // width = rectangle's width. Positive values are to the right, and negative to the left. 
+      // height = rectangle's height. Positive values are down, and negative are up.
       let [x, y, width, height] = entry.split(",").map(Number);
       if (isNaN(x) || isNaN(y) || isNaN(width) || isNaN(height)) {
         throw new Error("Invalid node input");
@@ -968,29 +922,6 @@ window.addEventListener("load", () => {
     ctx.stroke();
   }
 
-  function getMidpointWithOffset(point1, point2, offset) {
-    let midpointX = (point1.x + point2.x) / 2;
-    let midpointY = (point1.y + point2.y) / 2;
-
-    console.log(midpointX, midpointY);
-
-    // Calculate the direction of the line
-    let dx = point2.x - point1.x;
-    let dy = point2.y - point1.y;
-
-    // Normalize the direction and rotate it by 90 degrees to get the perpendicular direction
-    let magnitude = Math.sqrt(dx * dx + dy * dy);
-    let directionX = dy / magnitude;
-    let directionY = -dx / magnitude;
-
-    // Scale the direction by the offset and add it to the midpoint
-    let offsetX = midpointX + directionX * offset;
-    let offsetY = midpointY + directionY * offset;
-
-    // return { x: offsetX, y: offsetY };
-    return { midpointX: offsetX, midpointY: offsetY };
-  }
-
   // Function to parse user input and apply connections
   function applyUserConnections(nodes, edgeInput) {
     // Split the user input by semicolons to separate individual connections
@@ -1033,17 +964,6 @@ window.addEventListener("load", () => {
     ctx.stroke();
   }
 
-  function getRandomColor() {
-    const color = "#" + Math.floor(Math.random() * 16777215).toString(16); // 16777215 is equivalent to FFFFFF in hexadecimal
-    return color;
-  }
+ 
 
-  function calculateCentroid(x1, y1, x2, y2, x3, y3) {
-    const Cx = (x1 + x2 + x3) / 3;
-    const Cy = (y1 + y2 + y3) / 3;
-    // Example usage:
-    // const centroid = calculateCentroid(0, 0, 3, 0, 0, 4);
-    // console.log("Centroid:", centroid); // Output: { Cx: 1, Cy: 1.333 }
-    return { x: Cx, y: Cy };
-  }
 });
