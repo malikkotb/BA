@@ -64,31 +64,8 @@ window.addEventListener("load", () => {
   // get state and edge configuration from input
   document.getElementById("updateButton").addEventListener("click", updateGraph);
 
-  // call path finding meethod
+  // call path finding method
   document.getElementById("findPathBtn").addEventListener("click", findPathDual);
-
-  ///// popup button config
-  const popupBtn = document.getElementById("popupBtn");
-  const popup = document.getElementById("popup");
-  const closeBtn = document.getElementById("closeBtn");
-
-  // When the button is clicked, show the popup
-  popupBtn.addEventListener("click", function () {
-    popup.style.display = "block";
-  });
-
-  // When the close button is clicked, hide the popup
-  closeBtn.addEventListener("click", function () {
-    popup.style.display = "none";
-  });
-
-  // When the user clicks anywhere outside of the popup, close it
-  window.addEventListener("click", function (event) {
-    if (event.target === popup) {
-      popup.style.display = "none";
-    }
-  });
-  ///// end of popup button config
 
   function updateGraph() {
     nodeInput = document.getElementById("nodeInput").value;
