@@ -185,16 +185,104 @@ function calculateNodeSides(width, height, topLeftCorner) {
   return { top, bottom, left, right };
 }
 
+function isMidpointAboveAndBelowPoints(point, point1, point2) {
+  const minY = Math.min(point1.y, point2.y);
+  const maxY = Math.max(point1.y, point2.y);
+  const midpoint = (minY + maxY) / 2;
+  return point.y === midpoint && point1.x === point2.x;
+}
+
+// Function to check if two triangles are neighboring
+function areTrianglesNeighboring(triangleA, triangleB) {
+  // Iterate over each edge of triangleA
+  for (let i = 0; i < 3; i++) {
+    const edge = [triangleA.triangleVertices[i], triangleA.triangleVertices[(i + 1) % 3]]; // Get current edge
+    // Check if triangleB shares the same edge
+    if (
+      triangleB.triangleVertices.some((vertex) => edge[0].x === vertex.x && edge[0].y === vertex.y) &&
+      triangleB.triangleVertices.some((vertex) => edge[1].x === vertex.x && edge[1].y === vertex.y)
+    ) {
+      return true; // Found a common edge, triangles are neighbors
+    }
+  }
+  return false; // No common edge found
+}
+
+function hideMesh(ctx, canvas) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+// Function to find neighboring triangles for each triangle
+function findNeighborsForMesh(mesh) {
+  const neighbors = [];
+  const numTriangles = mesh.length;
+  // Iterate over each triangle
+  for (let i = 0; i < numTriangles; i++) {
+    const currentTriangle = mesh[i];
+    const currentTriangleNeighbors = [currentTriangle]; // Include the current triangle itself
+    // Check against every other triangle
+    for (let j = 0; j < numTriangles; j++) {
+      if (i !== j && areTrianglesNeighboring(currentTriangle, mesh[j])) {
+        currentTriangleNeighbors.push(mesh[j]); // Add neighboring triangle object
+      }
+    }
+    neighbors.push(currentTriangleNeighbors); // Add neighbors of current triangle to the list
+  }
+  return neighbors;
+}
+
+function createHierarchyMap(nodeCoordinates) {
+  const hierarchyMap = new Map();
+
+  // Iterate over each node
+  for (const node of nodeCoordinates) {
+    const parentNode = node;
+    const childNodes = [];
+
+    // Compare with every other node
+    for (const otherNode of nodeCoordinates) {
+      if (node !== otherNode) {
+        const isInside = isNodeInsideBoundary(otherNode, node);
+        if (isInside) {
+          childNodes.push(otherNode);
+        }
+      }
+    }
+
+    // Store the list of child nodes in the hierarchy map
+    hierarchyMap.set(parentNode, childNodes);
+  }
+
+  // loop through hierarchyMap and remove all child nodes to only have top level nodes (no parents) => filter top level nodes
+  const topLevelNodes = new Map(hierarchyMap);
+
+  for (const [parentNode, childNodes] of hierarchyMap) {
+    for (const childNode of childNodes) {
+      if (topLevelNodes.has(childNode)) {
+        topLevelNodes.delete(childNode);
+      }
+    }
+  }
+
+  return topLevelNodes;
+  // return hierarchyMap;
+}
+
 export {
-  calculateNodeSides,
+  createHierarchyMap,
+  findNeighborsForMesh, // delaunay
+  hideMesh, // delaunay
+  areTrianglesNeighboring, // delaunay
+  isMidpointAboveAndBelowPoints,
+  calculateNodeSides, // intersection
   calculateDistance,
   findDuplicates,
-  getLineLineIntersection,
-  getIntersection,
-  reflect,
-  calculateCentroid,
-  getRandomColor,
-  isEdgeOnTriangle,
+  getLineLineIntersection, // intersection
+  getIntersection, // intersection
+  reflect, // delaunay
+  calculateCentroid, // delaunay
+  getRandomColor, // delaunay
+  isEdgeOnTriangle, // delaunay
   getMidpointWithOffset,
   isNodeInsideBoundary,
   compareNodes,

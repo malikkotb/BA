@@ -14,7 +14,10 @@ import {
   getLineLineIntersection,
   findDuplicates,
   calculateDistance,
-  calculateNodeSides
+  calculateNodeSides,
+  isMidpointAboveAndBelowPoints,
+  findNeighborsForMesh,
+  hideMesh,
 } from "./utils.js";
 
 window.addEventListener("load", () => {
@@ -67,7 +70,7 @@ window.addEventListener("load", () => {
   document.getElementById("triangleMeshBtn").addEventListener("click", () => drawDelaunayTriangles(ctx2));
 
   // hide triangle mesh
-  document.getElementById("hideMeshBtn").addEventListener("click", () => hideMesh(ctx2));
+  document.getElementById("hideMeshBtn").addEventListener("click", () => hideMesh(ctx2, triangleCanvas));
 
   // get state and edge configuration from input
   document.getElementById("updateButton").addEventListener("click", updateGraph);
@@ -151,18 +154,9 @@ window.addEventListener("load", () => {
     ctx.stroke();
   }
 
-  function hideMesh(ctx) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  }
-
   // Main function to draw edges using dual grid and pathfinding
   function findPathDual() {
-    // Retrieve data to Define the connections between nodes (edges) based on rules:
-    // Rules:
-    // #1 nodeMidpoints are only connected to the nearest centroids
-    // #2 centroids are connected to nearest nodeMidpoints as well as other nearest centroids
-    // #3 edges between centroids cannot cross other edges
-
+  
     // 1. Connect nodeMidpoints to centroids:
     // triangle-Vertices are all nodeMidpoints, so I can connect the triangle vertices of a single trianlge to the centroid of that trianlge
     triangleMesh.forEach((triangle) => {
@@ -538,13 +532,6 @@ window.addEventListener("load", () => {
     }
   }
 
-  function isMidpointAboveAndBelowPoints(point, point1, point2) {
-    const minY = Math.min(point1.y, point2.y);
-    const maxY = Math.max(point1.y, point2.y);
-    const midpoint = (minY + maxY) / 2;
-    return point.y === midpoint && point1.x === point2.x;
-  }
-
   function drawArrowhead(ctx, path, endPos, arrowLength = 10) {
     // Assuming path is an array of points
     const controlPoint = path[1];
@@ -627,78 +614,6 @@ window.addEventListener("load", () => {
     return midPoint;
   }
 
-  function createHierarchyMap() {
-    const hierarchyMap = new Map();
-
-    // Iterate over each node
-    for (const node of nodeCoordinates) {
-      const parentNode = node;
-      const childNodes = [];
-
-      // Compare with every other node
-      for (const otherNode of nodeCoordinates) {
-        if (node !== otherNode) {
-          const isInside = isNodeInsideBoundary(otherNode, node);
-          if (isInside) {
-            childNodes.push(otherNode);
-          }
-        }
-      }
-
-      // Store the list of child nodes in the hierarchy map
-      hierarchyMap.set(parentNode, childNodes);
-    }
-
-    // loop through hierarchyMap and remove all child nodes to only have top level nodes (no parents) => filter top level nodes
-    const topLevelNodes = new Map(hierarchyMap);
-
-    for (const [parentNode, childNodes] of hierarchyMap) {
-      for (const childNode of childNodes) {
-        if (topLevelNodes.has(childNode)) {
-          topLevelNodes.delete(childNode);
-        }
-      }
-    }
-
-    return topLevelNodes;
-    // return hierarchyMap;
-  }
-
-  // Function to find neighboring triangles for each triangle
-  function findNeighborsForMesh(mesh) {
-    const neighbors = [];
-    const numTriangles = mesh.length;
-    // Iterate over each triangle
-    for (let i = 0; i < numTriangles; i++) {
-      const currentTriangle = mesh[i];
-      const currentTriangleNeighbors = [currentTriangle]; // Include the current triangle itself
-      // Check against every other triangle
-      for (let j = 0; j < numTriangles; j++) {
-        if (i !== j && areTrianglesNeighboring(currentTriangle, mesh[j])) {
-          currentTriangleNeighbors.push(mesh[j]); // Add neighboring triangle object
-        }
-      }
-      neighbors.push(currentTriangleNeighbors); // Add neighbors of current triangle to the list
-    }
-    return neighbors;
-  }
-
-  // Function to check if two triangles are neighboring
-  function areTrianglesNeighboring(triangleA, triangleB) {
-    // Iterate over each edge of triangleA
-    for (let i = 0; i < 3; i++) {
-      const edge = [triangleA.triangleVertices[i], triangleA.triangleVertices[(i + 1) % 3]]; // Get current edge
-      // Check if triangleB shares the same edge
-      if (
-        triangleB.triangleVertices.some((vertex) => edge[0].x === vertex.x && edge[0].y === vertex.y) &&
-        triangleB.triangleVertices.some((vertex) => edge[1].x === vertex.x && edge[1].y === vertex.y)
-      ) {
-        return true; // Found a common edge, triangles are neighbors
-      }
-    }
-    return false; // No common edge found
-  }
-
   function processNodeInput(nodeInput) {
     nodeCoordinates = nodeInput.split(";").map((entry) => {
       let [x, y, width, height] = entry.split(",").map(Number);
@@ -729,7 +644,7 @@ window.addEventListener("load", () => {
       // or if there is only connections between two nodes
       // so check if from the given edge input connections there are only ones between the same nodes
       // so either going from start to target or from target to start (but they are the same)
-      topLevelParentNodes = createHierarchyMap();
+      topLevelParentNodes = createHierarchyMap(nodeCoordinates);
       console.log("top level nodes", topLevelParentNodes);
     }
 
