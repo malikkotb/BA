@@ -2,22 +2,24 @@ import Delaunator from "https://cdn.skypack.dev/delaunator@5.0.0";
 import { Grid } from "./grid.js";
 import { aStar } from "./graphSearch.js";
 import {
-  getMidpointWithOffset,
   checkConnections,
-  compareNodes,
-  isNodeInArray,
-  isEdgeOnTriangle,
-  getRandomColor,
-  calculateCentroid,
+  findNeighborsForMesh,
+  hideMesh,
   reflect,
+  getRandomColor,
+  compareNodes,
+  calculateCentroid,
+  isEdgeOnTriangle,
+} from "./delaunay.js";
+import {
+  getMidpointWithOffset,
+  isNodeInArray,
   getIntersection,
   getLineLineIntersection,
   findDuplicates,
   calculateDistance,
   calculateNodeSides,
   isMidpointAboveAndBelowPoints,
-  findNeighborsForMesh,
-  hideMesh,
   drawArrowhead,
   drawArrowheadLine,
 } from "./utils.js";
