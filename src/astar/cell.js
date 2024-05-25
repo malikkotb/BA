@@ -1,4 +1,5 @@
 // Class for a Cell/Node/Tile
+// (first approach)
 
 // A cell can have two states: walkable or not-walkable (so an obstacle)
 
@@ -60,15 +61,6 @@ export class Cell {
 
     ctx.lineWidth = 1;
     ctx.strokeRect(xPosition, yPosition, cellWidth, cellHeight);
-
-    // render label
-    // if (state === "OPEN" || state === "CLOSED" || state === "FINISHED" || state === "END") {
-    //   ctx.fillStyle = "black";
-    //   ctx.font = "16px Arial"; // adjust font size and style as needed
-    //   ctx.textAlign = "center";
-    //   ctx.textBaseline = "middle";
-    //   ctx.fillText(label, xPosition + cellWidth / 2, yPosition + cellHeight / 2);
-    // }
   }
 
   clearCell(ctx, cellWidth, cellHeight) {
