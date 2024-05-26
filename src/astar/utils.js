@@ -249,6 +249,17 @@ function drawArrowheadLine(ctx, fromX, fromY, toX, toY, size = 10) {
   ctx.fill();
 }
 
+function getNode(point, nodeCoordinates) {
+    if (!point) return null;
+    let midPoint = null;
+    nodeCoordinates.some((node) => {
+      if (node.midpoint.x === point.x && node.midpoint.y === point.y) {
+        midPoint = node;
+      }
+    });
+    return midPoint;
+  }
+
 export {
   drawArrowheadLine, // edge (arrow) rendering
   drawArrowhead, // edge (arrow) rendering
