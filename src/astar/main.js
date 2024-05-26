@@ -535,7 +535,7 @@ window.addEventListener("load", () => {
     }
   }
 
-  function getNode(point) {
+  function getNode(point, nodeCoordinates) {
     if (!point) return null;
     let midPoint = null;
     nodeCoordinates.some((node) => {
