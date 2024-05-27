@@ -18,6 +18,7 @@ import {
   getLineLineIntersection,
   findDuplicates,
   calculateDistance,
+  createHierarchyMap,
   calculateNodeSides,
   isMidpointAboveAndBelowPoints,
   drawArrowhead,
@@ -535,7 +536,7 @@ window.addEventListener("load", () => {
     }
   }
 
-  function getNode(point, nodeCoordinates) {
+  function getNode(point) {
     if (!point) return null;
     let midPoint = null;
     nodeCoordinates.some((node) => {
