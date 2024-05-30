@@ -45,3 +45,29 @@ function getLineLineIntersection(line1Start, line1End, line2Start, line2End) {
   
     return null; // The lines do not intersect within the line segments
   }
+
+  function getIntersection(x1, x2, c1, c2, y1, y2, line) {
+    // x1, x2, c1, c2, y1, y2 = points of bezier curve
+    // https://github.com/Pomax/bezierjs
+    const intersectionPoints = [];
+  
+    let slantLine = line;
+    //add invisible slant to vertical lines
+    if (slantLine.p1.x === slantLine.p2.x && slantLine.p1.y !== slantLine.p2.y) {
+      slantLine.p1.x += 0.001; //  1e-8;
+    }
+  
+    const bezierCurve = new Bezier(x1, x2, c1, c2, y1, y2);
+    const intersections = bezierCurve.lineIntersects(slantLine);
+    if (intersections.length > 0) {
+      for (let e = 0; e < intersections.length; e++) {
+        let n = intersections[e],
+          t = bezierCurve.get(n);
+        intersectionPoints.push(t);
+      }
+      // console.log("Intersection Points:", intersectionPoints);
+    }
+  
+    return intersectionPoints[0];
+  }
+  
