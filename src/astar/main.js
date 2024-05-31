@@ -14,16 +14,16 @@ import {
 import {
   getMidpointWithOffset,
   isNodeInArray,
-  getIntersection,
-  getLineLineIntersection,
   findDuplicates,
   calculateDistance,
   createHierarchyMap,
-  calculateNodeSides,
   isMidpointAboveAndBelowPoints,
   drawArrowhead,
   drawArrowheadLine,
+  getNode,
 } from "./utils.js";
+
+import { calculateNodeSides, getLineLineIntersection, getIntersection } from "./intersection.js";
 
 window.addEventListener("load", () => {
   const canvas = document.querySelector("#grid");
